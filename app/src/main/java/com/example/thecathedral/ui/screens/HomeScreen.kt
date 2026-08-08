@@ -25,7 +25,13 @@ import com.example.thecathedral.model.Pillar
 import com.example.thecathedral.ui.theme.CathedralGold
 import com.example.thecathedral.ui.theme.MonasteryBlack
 import com.example.thecathedral.ui.theme.TheCathedralTheme
+import com.example.thecathedral.viewmodel.CathedralUiState
 import com.example.thecathedral.viewmodel.ScheduleViewModel
+
+import androidx.compose.material.icons.filled.AccountTree
+import com.example.thecathedral.ui.components.PillarProgressRing
+import com.example.thecathedral.ui.theme.AmbientDust
+import com.example.thecathedral.ui.theme.glassCard
 
 @Composable
 fun HomeScreen(
@@ -34,98 +40,149 @@ fun HomeScreen(
     onViewFullSchedule: () -> Unit = {},
     onFocusMode: () -> Unit = {},
     onJournal: () -> Unit = {},
-    onPhilosophy: () -> Unit = {}
+    onPhilosophy: () -> Unit = {},
+    onSkillTree: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    HomeScreenContent(
+        modifier = modifier,
+        uiState = uiState,
+        onViewFullSchedule = onViewFullSchedule,
+        onFocusMode = onFocusMode,
+        onJournal = onJournal,
+        onPhilosophy = onPhilosophy,
+        onSkillTree = onSkillTree,
+        onResetDay = { viewModel.clearAllProgress() }
+    )
+}
 
+@Composable
+fun HomeScreenContent(
+    modifier: Modifier = Modifier,
+    uiState: CathedralUiState,
+    onViewFullSchedule: () -> Unit = {},
+    onFocusMode: () -> Unit = {},
+    onJournal: () -> Unit = {},
+    onPhilosophy: () -> Unit = {},
+    onSkillTree: () -> Unit = {},
+    onResetDay: () -> Unit = {}
+) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = MonasteryBlack
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item { PurposeSection() }
+        Box(modifier = Modifier.fillMaxSize()) {
+            AmbientDust()
 
-            item {
-                val pillar = uiState.activePillar
-                if (pillar != null) {
-                    ActivePillarSection(pillar = pillar, isActive = true)
-                } else {
-                    uiState.nextPillar?.let {
-                        NextPillarSection(pillar = it)
-                    } ?: RestSection()
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item { PurposeSection() }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        PillarProgressRing(percentage = 0.5f, pillarName = "TECHNE", level = 1)
+                        PillarProgressRing(percentage = 0.3f, pillarName = "HISTORIA", level = 1)
+                        PillarProgressRing(percentage = 0.8f, pillarName = "GYMNOS", level = 2)
+                        PillarProgressRing(percentage = 0.2f, pillarName = "SOPHIA", level = 1)
+                    }
                 }
-            }
 
-            item {
-                ProgressSection(
-                    completed = uiState.completedCount,
-                    total = uiState.totalCount
-                )
-            }
+                item {
+                    val pillar = uiState.activePillar
+                    if (pillar != null) {
+                        ActivePillarSection(pillar = pillar, isActive = true)
+                    } else {
+                        uiState.nextPillar?.let {
+                            NextPillarSection(pillar = it)
+                        } ?: RestSection()
+                    }
+                }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    QuickActionButton(
-                        icon = Icons.Default.Timer,
-                        label = "FOCUS",
-                        onClick = onFocusMode,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickActionButton(
-                        icon = Icons.Default.Edit,
-                        label = "JOURNAL",
-                        onClick = onJournal,
-                        modifier = Modifier.weight(1f)
+                item {
+                    ProgressSection(
+                        completed = uiState.completedCount,
+                        total = uiState.totalCount
                     )
                 }
-            }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        QuickActionButton(
+                            icon = Icons.Default.Timer,
+                            label = "FOCUS",
+                            onClick = onFocusMode,
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickActionButton(
+                            icon = Icons.Default.Edit,
+                            label = "JOURNAL",
+                            onClick = onJournal,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        QuickActionButton(
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            label = "SCHEDULE",
+                            onClick = onViewFullSchedule,
+                            modifier = Modifier.weight(1f)
+                        )
+                        QuickActionButton(
+                            icon = Icons.Default.AutoStories,
+                            label = "PHILOSOPHY",
+                            onClick = onPhilosophy,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                item {
                     QuickActionButton(
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        label = "SCHEDULE",
-                        onClick = onViewFullSchedule,
-                        modifier = Modifier.weight(1f)
-                    )
-                    QuickActionButton(
-                        icon = Icons.Default.AutoStories,
-                        label = "PHILOSOPHY",
-                        onClick = onPhilosophy,
-                        modifier = Modifier.weight(1f)
+                        icon = Icons.Default.AccountTree,
+                        label = "SKILL TREE",
+                        onClick = onSkillTree,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-            }
 
-            item {
-                TextButton(
-                    onClick = { viewModel.clearAllProgress() },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text(
-                        "Reset Day",
-                        color = CathedralGold.copy(alpha = 0.5f),
-                        fontSize = 12.sp,
-                        letterSpacing = 1.sp
-                    )
+                item {
+                    TextButton(
+                        onClick = onResetDay,
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(
+                            "Reset Day",
+                            color = CathedralGold.copy(alpha = 0.5f),
+                            fontSize = 12.sp,
+                            letterSpacing = 1.sp
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+
 
 @Composable
 fun QuickActionButton(
@@ -187,13 +244,10 @@ fun PurposeSection() {
 
 @Composable
 fun ActivePillarSection(pillar: Pillar, isActive: Boolean) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = AssistChipDefaults.assistChipBorder(
-            borderColor = CathedralGold,
-            enabled = true
-        ),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard()
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -224,13 +278,10 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean) {
 
 @Composable
 fun NextPillarSection(pillar: Pillar) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = AssistChipDefaults.assistChipBorder(
-            borderColor = CathedralGold.copy(alpha = 0.4f),
-            enabled = true
-        ),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard()
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -261,13 +312,10 @@ fun NextPillarSection(pillar: Pillar) {
 
 @Composable
 fun RestSection() {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = AssistChipDefaults.assistChipBorder(
-            borderColor = CathedralGold.copy(alpha = 0.2f),
-            enabled = true
-        ),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard()
     ) {
         Column(
             modifier = Modifier.padding(24.dp),
@@ -321,19 +369,12 @@ fun ProgressSection(completed: Int, total: Int) {
 @Composable
 fun HomeScreenPreview() {
     TheCathedralTheme(darkTheme = true) {
-        Scaffold(containerColor = MonasteryBlack) { padding ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                item { PurposeSection() }
-                item { ActivePillarSection(pillar = ScheduleData.pillars.first(), isActive = true) }
-                item { ProgressSection(completed = 3, total = 15) }
-            }
-        }
+        HomeScreenContent(
+            uiState = CathedralUiState(
+                activePillar = ScheduleData.pillars.first(),
+                completedCount = 3,
+                totalCount = 15
+            )
+        )
     }
 }

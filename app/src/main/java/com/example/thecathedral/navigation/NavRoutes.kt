@@ -16,3 +16,6 @@ object JournalRoute
 
 @Serializable
 object PhilosophyRoute
+
+@Serializable
+object SkillTreeRoute
