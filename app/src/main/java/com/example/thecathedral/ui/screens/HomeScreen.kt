@@ -1,10 +1,11 @@
 package com.example.thecathedral.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,19 +17,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.thecathedral.data.ScheduleData
 import com.example.thecathedral.model.Pillar
-import com.example.thecathedral.model.PillarStatus
 import com.example.thecathedral.ui.theme.CathedralGold
 import com.example.thecathedral.ui.theme.MonasteryBlack
 import com.example.thecathedral.ui.theme.TheCathedralTheme
+import com.example.thecathedral.viewmodel.ScheduleViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    viewModel: ScheduleViewModel,
     onViewFullSchedule: () -> Unit = {}
 ) {
-    val pillars = ScheduleData.pillars
-    val completedCount = pillars.flatMap { it.alarms }.count { it.status == PillarStatus.COMPLETE }
-    val totalCount = pillars.flatMap { it.alarms }.size
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -42,22 +42,26 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // 1. Purpose Statement
+            item { PurposeSection() }
+
             item {
-                PurposeSection()
+                val pillar = uiState.activePillar
+                if (pillar != null) {
+                    ActivePillarSection(pillar = pillar, isActive = true)
+                } else {
+                    uiState.nextPillar?.let {
+                        NextPillarSection(pillar = it)
+                    } ?: RestSection()
+                }
             }
 
-            // 2. Current Active Pillar
             item {
-                ActivePillarSection(pillar = pillars.first()) // Mocking active for now
+                ProgressSection(
+                    completed = uiState.completedCount,
+                    total = uiState.totalCount
+                )
             }
 
-            // 3. Progress Section
-            item {
-                ProgressSection(completed = completedCount, total = totalCount)
-            }
-
-            // 4. Action Button
             item {
                 Button(
                     onClick = onViewFullSchedule,
@@ -71,6 +75,20 @@ fun HomeScreen(
                         "VIEW FULL SCHEDULE",
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp
+                    )
+                }
+            }
+
+            item {
+                TextButton(
+                    onClick = { viewModel.clearAllProgress() },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text(
+                        "Reset Day",
+                        color = CathedralGold.copy(alpha = 0.5f),
+                        fontSize = 12.sp,
+                        letterSpacing = 1.sp
                     )
                 }
             }
@@ -102,10 +120,13 @@ fun PurposeSection() {
 }
 
 @Composable
-fun ActivePillarSection(pillar: Pillar) {
+fun ActivePillarSection(pillar: Pillar, isActive: Boolean) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = AssistChipDefaults.assistChipBorder(borderColor = CathedralGold, enabled = true),
+        border = AssistChipDefaults.assistChipBorder(
+            borderColor = CathedralGold,
+            enabled = true
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -113,7 +134,7 @@ fun ActivePillarSection(pillar: Pillar) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "CURRENT PILLAR",
+                text = if (isActive) "CURRENT PILLAR" else "UPCOMING PILLAR",
                 style = MaterialTheme.typography.labelSmall,
                 color = CathedralGold.copy(alpha = 0.7f)
             )
@@ -130,6 +151,81 @@ fun ActivePillarSection(pillar: Pillar) {
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Monospace
+            )
+        }
+    }
+}
+
+@Composable
+fun NextPillarSection(pillar: Pillar) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = AssistChipDefaults.assistChipBorder(
+            borderColor = CathedralGold.copy(alpha = 0.4f),
+            enabled = true
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "NEXT PILLAR",
+                style = MaterialTheme.typography.labelSmall,
+                color = CathedralGold.copy(alpha = 0.5f)
+            )
+            Text(
+                text = pillar.name,
+                style = MaterialTheme.typography.headlineSmall,
+                color = CathedralGold.copy(alpha = 0.8f),
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = pillar.timeRange,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                fontFamily = FontFamily.Monospace
+            )
+        }
+    }
+}
+
+@Composable
+fun RestSection() {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = AssistChipDefaults.assistChipBorder(
+            borderColor = CathedralGold.copy(alpha = 0.2f),
+            enabled = true
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "THE SANCTUARY",
+                style = MaterialTheme.typography.labelSmall,
+                color = CathedralGold.copy(alpha = 0.5f)
+            )
+            Text(
+                text = "Rest. The day is done.",
+                style = MaterialTheme.typography.headlineSmall,
+                color = CathedralGold.copy(alpha = 0.6f),
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = ScheduleData.MANTRA,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center,
+                fontFamily = FontFamily.Serif
             )
         }
     }
@@ -159,6 +255,19 @@ fun ProgressSection(completed: Int, total: Int) {
 @Composable
 fun HomeScreenPreview() {
     TheCathedralTheme(darkTheme = true) {
-        HomeScreen()
+        Scaffold(containerColor = MonasteryBlack) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                item { PurposeSection() }
+                item { ActivePillarSection(pillar = ScheduleData.pillars.first(), isActive = true) }
+                item { ProgressSection(completed = 3, total = 15) }
+            }
+        }
     }
 }
