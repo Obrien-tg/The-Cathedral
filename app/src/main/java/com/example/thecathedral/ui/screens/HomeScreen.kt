@@ -2,6 +2,11 @@ package com.example.thecathedral.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,7 +31,10 @@ import com.example.thecathedral.viewmodel.ScheduleViewModel
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: ScheduleViewModel,
-    onViewFullSchedule: () -> Unit = {}
+    onViewFullSchedule: () -> Unit = {},
+    onFocusMode: () -> Unit = {},
+    onJournal: () -> Unit = {},
+    onPhilosophy: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -40,7 +48,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item { PurposeSection() }
 
@@ -63,18 +71,41 @@ fun HomeScreen(
             }
 
             item {
-                Button(
-                    onClick = onViewFullSchedule,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CathedralGold,
-                        contentColor = MonasteryBlack
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        "VIEW FULL SCHEDULE",
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                    QuickActionButton(
+                        icon = Icons.Default.Timer,
+                        label = "FOCUS",
+                        onClick = onFocusMode,
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.Edit,
+                        label = "JOURNAL",
+                        onClick = onJournal,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    QuickActionButton(
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        label = "SCHEDULE",
+                        onClick = onViewFullSchedule,
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.AutoStories,
+                        label = "PHILOSOPHY",
+                        onClick = onPhilosophy,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -92,6 +123,41 @@ fun HomeScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun QuickActionButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.height(64.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = CathedralGold
+        ),
+        border = ButtonDefaults.outlinedButtonBorder.copy(
+            brush = androidx.compose.ui.graphics.SolidColor(CathedralGold.copy(alpha = 0.3f))
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = CathedralGold,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
         }
     }
 }

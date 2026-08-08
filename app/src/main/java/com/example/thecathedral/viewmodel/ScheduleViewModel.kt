@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.thecathedral.data.ScheduleData
 import com.example.thecathedral.data.ScheduleRepository
 import com.example.thecathedral.model.Alarm
+import com.example.thecathedral.model.JournalEntry
 import com.example.thecathedral.model.Pillar
 import com.example.thecathedral.model.PillarStatus
 import com.example.thecathedral.util.computeStatus
 import com.example.thecathedral.util.isActiveAt
-import com.example.thecathedral.util.parseTimeRange
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,7 +20,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 data class CathedralUiState(
     val currentTime: LocalTime = LocalTime.now(),
@@ -29,7 +31,10 @@ data class CathedralUiState(
     val nextPillar: Pillar? = null,
     val completedCount: Int = 0,
     val totalCount: Int = 0,
-    val progress: Float = 0f
+    val progress: Float = 0f,
+    val journalEntries: List<JournalEntry> = emptyList(),
+    val activeSourceIndex: Int = 0,
+    val activeSourcePage: Int = 0
 )
 
 class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel() {
@@ -38,6 +43,9 @@ class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel(
     val currentTime: StateFlow<LocalTime> = _currentTime.asStateFlow()
 
     private val _completedAlarmIds = MutableStateFlow<Set<String>>(emptySet())
+    private val _journalEntries = MutableStateFlow<List<JournalEntry>>(emptyList())
+    private val _activeSourceIndex = MutableStateFlow(0)
+    private val _activeSourcePage = MutableStateFlow(0)
 
     init {
         viewModelScope.launch {
@@ -45,7 +53,21 @@ class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel(
                 _completedAlarmIds.value = ids
             }
         }
-
+        viewModelScope.launch {
+            repository.journalEntries.collect { entries ->
+                _journalEntries.value = entries
+            }
+        }
+        viewModelScope.launch {
+            repository.activeSourceIndex.collect { idx ->
+                _activeSourceIndex.value = idx
+            }
+        }
+        viewModelScope.launch {
+            repository.activeSourcePage.collect { page ->
+                _activeSourcePage.value = page
+            }
+        }
         viewModelScope.launch {
             while (isActive) {
                 _currentTime.value = LocalTime.now()
@@ -56,15 +78,21 @@ class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel(
 
     val uiState: StateFlow<CathedralUiState> = combine(
         _currentTime,
-        _completedAlarmIds
-    ) { time, completedIds ->
+        _completedAlarmIds,
+        _journalEntries,
+        _activeSourceIndex,
+        _activeSourcePage
+    ) { time, completedIds, entries, sourceIdx, sourcePage ->
         val allAlarms = ScheduleData.pillars.flatMap { it.alarms }
         val total = allAlarms.size
         val completedCount = allAlarms.count { it.id in completedIds }
 
         val activePillar = ScheduleData.pillars.find { it.isActiveAt(time) }
         val nextPillar = ScheduleData.pillars.find { pillar ->
-            val (start, _) = pillar.parseTimeRange() ?: return@find false
+            val regex = """(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})""".toRegex()
+            val match = regex.find(pillar.timeRange) ?: return@find false
+            val (h1, m1, _, _) = match.destructured
+            val start = LocalTime.of(h1.toInt(), m1.toInt())
             start.isAfter(time)
         }
 
@@ -75,7 +103,10 @@ class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel(
             nextPillar = nextPillar,
             completedCount = completedCount,
             totalCount = total,
-            progress = if (total > 0) completedCount.toFloat() / total else 0f
+            progress = if (total > 0) completedCount.toFloat() / total else 0f,
+            journalEntries = entries,
+            activeSourceIndex = sourceIdx,
+            activeSourcePage = sourcePage
         )
     }.stateIn(
         scope = viewModelScope,
@@ -96,6 +127,29 @@ class ScheduleViewModel(private val repository: ScheduleRepository) : ViewModel(
     fun getAlarmStatus(alarm: Alarm): PillarStatus {
         val completed = alarm.id in _completedAlarmIds.value
         return alarm.computeStatus(completed, _currentTime.value)
+    }
+
+    fun saveJournalEntry(entry: JournalEntry) {
+        viewModelScope.launch {
+            repository.saveJournalEntry(entry)
+        }
+    }
+
+    fun getTodayEntry(): JournalEntry? {
+        val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        return _journalEntries.value.find { it.date == today }
+    }
+
+    fun setActiveSource(index: Int) {
+        viewModelScope.launch {
+            repository.setActiveSource(index)
+        }
+    }
+
+    fun setActiveSourcePage(page: Int) {
+        viewModelScope.launch {
+            repository.setActiveSourcePage(page)
+        }
     }
 
     fun clearAllProgress() {
