@@ -41,7 +41,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PhilosophyScreen(
     viewModel: ScheduleViewModel,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onWeeklyReview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val activeIndex = uiState.activeSourceIndex
@@ -209,6 +210,15 @@ fun PhilosophyScreen(
                     title = "The Weekly Review",
                     description = "Every Sunday, ask: 'Am I closer to the complete man than I was 7 days ago?' Then adjust one thing."
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = onWeeklyReview,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CathedralGold),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CathedralGold.copy(alpha = 0.3f))
+                ) {
+                    Text("START REVIEW", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                }
             }
 
             SacredCard(title = "PRIMARY SOURCE CURRICULUM") {

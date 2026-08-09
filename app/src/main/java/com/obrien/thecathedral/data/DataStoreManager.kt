@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.obrien.thecathedral.model.JournalEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -20,13 +19,45 @@ class DataStoreManager(private val context: Context) {
     companion object {
         val COMPLETED_ALARMS = stringSetPreferencesKey("completed_alarms")
         val LAST_RESET_DATE = stringPreferencesKey("last_reset_date")
-        val JOURNAL_ENTRIES = stringSetPreferencesKey("journal_entries")
         val ACTIVE_SOURCE_INDEX = intPreferencesKey("active_source_index")
         val ACTIVE_SOURCE_PAGE = intPreferencesKey("active_source_page")
         val WAKE_TIME = stringPreferencesKey("wake_time")
         val HISTORICAL_COMPLETIONS = stringPreferencesKey("historical_completions")
         val TOTAL_FOCUS_SESSIONS = intPreferencesKey("total_focus_sessions")
         val COMPLETION_HISTORY = stringPreferencesKey("completion_history")
+        val NOTIFICATION_LEAD_TIME = intPreferencesKey("notification_lead_time")
+        val THEME = stringPreferencesKey("theme")
+        val FONT_SIZE = stringPreferencesKey("font_size")
+    }
+
+    val notificationLeadTime: Flow<Int> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[NOTIFICATION_LEAD_TIME] ?: 5 }
+
+    val theme: Flow<String> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[THEME] ?: "dark" }
+
+    val fontSize: Flow<String> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[FONT_SIZE] ?: "medium" }
+
+    suspend fun setNotificationLeadTime(minutes: Int) {
+        try {
+            context.dataStore.edit { it[NOTIFICATION_LEAD_TIME] = minutes }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    suspend fun setTheme(theme: String) {
+        try {
+            context.dataStore.edit { it[THEME] = theme }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    suspend fun setFontSize(size: String) {
+        try {
+            context.dataStore.edit { it[FONT_SIZE] = size }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     val wakeTime: Flow<String?> = context.dataStore.data
@@ -35,21 +66,14 @@ class DataStoreManager(private val context: Context) {
 
     val completedAlarms: Flow<Set<String>> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
-        .map { it[COMPLETED_ALARMS] ?: emptySet() }
+        .map { prefs ->
+            prefs[COMPLETED_ALARMS] ?: emptySet()
+        }
 
     val lastResetDate: Flow<String> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
-        .map { it[LAST_RESET_DATE] ?: "" }
-
-    val journalEntries: Flow<List<JournalEntry>> = context.dataStore.data
-        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { prefs ->
-            try {
-                val strings = prefs[JOURNAL_ENTRIES] ?: emptySet()
-                strings.map { Json.decodeFromString<JournalEntry>(it) }.sortedBy { it.date }
-            } catch (_: Exception) {
-                emptyList()
-            }
+            prefs[LAST_RESET_DATE] ?: ""
         }
 
     val activeSourceIndex: Flow<Int> = context.dataStore.data
@@ -196,26 +220,6 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun saveJournalEntry(entry: JournalEntry) {
-        try {
-            context.dataStore.edit { prefs ->
-                val current = prefs[JOURNAL_ENTRIES] ?: emptySet()
-                val entryJson = Json.encodeToString(entry)
-                val filtered = current.filter {
-                    try {
-                        val existing = Json.decodeFromString<JournalEntry>(it)
-                        existing.date != entry.date
-                    } catch (_: Exception) {
-                        false
-                    }
-                }
-                prefs[JOURNAL_ENTRIES] = filtered.toSet() + entryJson
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
     suspend fun setActiveSource(index: Int) {
         try {
             context.dataStore.edit { it[ACTIVE_SOURCE_INDEX] = index }
@@ -244,7 +248,6 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { prefs ->
                 prefs[COMPLETED_ALARMS] = emptySet()
-                prefs[JOURNAL_ENTRIES] = emptySet()
                 prefs[ACTIVE_SOURCE_INDEX] = 0
                 prefs[ACTIVE_SOURCE_PAGE] = 0
                 // We deliberately do NOT clear historicalCompletions or focus sessions.

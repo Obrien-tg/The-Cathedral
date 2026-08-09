@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".receiver.AlarmReceiver" android:exported="false" />
+        <receiver android:name=".notifications.PillarReceiver" android:exported="false" />
 
         <service
             android:name=".service.ForgeService"

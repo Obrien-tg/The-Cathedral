@@ -44,6 +44,8 @@ fun JournalScreen(
     var gymnoso by remember { mutableStateOf(todayEntry?.gymnosoCompleted ?: false) }
     var sophia by remember { mutableStateOf(todayEntry?.sophiaCompleted ?: false) }
     var freeText by remember { mutableStateOf(todayEntry?.freeText ?: "") }
+    var learning by remember { mutableStateOf(todayEntry?.learning ?: "") }
+    var improvement by remember { mutableStateOf(todayEntry?.improvement ?: "") }
 
     LaunchedEffect(todayEntry) {
         todayEntry?.let {
@@ -52,6 +54,8 @@ fun JournalScreen(
             gymnoso = it.gymnosoCompleted
             sophia = it.sophiaCompleted
             freeText = it.freeText
+            learning = it.learning
+            improvement = it.improvement
         }
     }
 
@@ -134,45 +138,39 @@ fun JournalScreen(
                 letterSpacing = 2.sp
             )
 
-            OutlinedTextField(
+            JournalField(
                 value = freeText,
                 onValueChange = { freeText = it },
-                placeholder = {
-                    Text(
-                        "What did you build today? What did you learn? What will you do better tomorrow?",
-                        color = Parchment.copy(alpha = 0.3f),
-                        fontFamily = FontFamily.Serif
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 120.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = CathedralGold,
-                    unfocusedBorderColor = CathedralGold.copy(alpha = 0.3f),
-                    focusedTextColor = Parchment,
-                    unfocusedTextColor = Parchment,
-                    focusedContainerColor = MonasteryBlack,
-                    unfocusedContainerColor = MonasteryBlack
-                ),
-                shape = RoundedCornerShape(8.dp),
-                textStyle = LocalTextStyle.current.copy(
-                    fontFamily = FontFamily.Serif,
-                    lineHeight = 22.sp
-                )
+                label = "What did you build today?",
+                placeholder = "Describe your labour..."
+            )
+
+            JournalField(
+                value = learning,
+                onValueChange = { learning = it },
+                label = "What did you learn?",
+                placeholder = "A truth discovered or reinforced..."
+            )
+
+            JournalField(
+                value = improvement,
+                onValueChange = { improvement = it },
+                label = "How will you be better tomorrow?",
+                placeholder = "The specific correction..."
             )
 
             Button(
                 onClick = {
                     viewModel.saveJournalEntry(
                         JournalEntry(
-                            id = todayStr,
                             date = todayStr,
                             techneCompleted = techne,
                             historiaCompleted = historia,
                             gymnosoCompleted = gymnoso,
                             sophiaCompleted = sophia,
                             freeText = freeText,
+                            learning = learning,
+                            improvement = improvement,
                             timestamp = System.currentTimeMillis()
                         )
                     )
@@ -214,6 +212,49 @@ fun JournalScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun JournalField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = CathedralGold.copy(alpha = 0.6f)
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = {
+                Text(
+                    placeholder,
+                    color = Parchment.copy(alpha = 0.3f),
+                    fontFamily = FontFamily.Serif
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 80.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = CathedralGold,
+                unfocusedBorderColor = CathedralGold.copy(alpha = 0.3f),
+                focusedTextColor = Parchment,
+                unfocusedTextColor = Parchment,
+                focusedContainerColor = MonasteryBlack,
+                unfocusedContainerColor = MonasteryBlack
+            ),
+            shape = RoundedCornerShape(8.dp),
+            textStyle = LocalTextStyle.current.copy(
+                fontFamily = FontFamily.Serif,
+                lineHeight = 22.sp
+            )
+        )
     }
 }
 
@@ -300,10 +341,13 @@ fun HistoryCard(entry: JournalEntry) {
                     fontWeight = FontWeight.Bold
                 )
             }
-            if (entry.freeText.isNotBlank()) {
-                Spacer(modifier = Modifier.height(4.dp))
+            if (entry.freeText.isNotBlank() || entry.learning.isNotBlank() || entry.improvement.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val summary = listOf(entry.freeText, entry.learning, entry.improvement)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" • ")
                 Text(
-                    text = entry.freeText.take(80) + if (entry.freeText.length > 80) "…" else "",
+                    text = summary.take(120) + if (summary.length > 120) "…" else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = Parchment.copy(alpha = 0.5f),
                     fontFamily = FontFamily.Serif,

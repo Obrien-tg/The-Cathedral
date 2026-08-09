@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.obrien.thecathedral.data.ScheduleData
-import com.obrien.thecathedral.receiver.AlarmReceiver
+import com.obrien.thecathedral.notifications.PillarReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.LocalDate
@@ -51,7 +51,7 @@ class AlarmScheduler @Inject constructor(
             trigger = trigger.plusDays(1)
         }
 
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
+        val intent = Intent(context, PillarReceiver::class.java).apply {
             putExtra("alarm_id", id)
             putExtra("ritual_title", title)
             putExtra("ritual_message", "Ritual begins: $title")

@@ -45,7 +45,8 @@ fun HomeScreen(
     onFocusMode: () -> Unit = {},
     onJournal: () -> Unit = {},
     onPhilosophy: () -> Unit = {},
-    onSkillTree: () -> Unit = {}
+    onSkillTree: () -> Unit = {},
+    onWeeklyReview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -57,6 +58,7 @@ fun HomeScreen(
         onJournal = onJournal,
         onPhilosophy = onPhilosophy,
         onSkillTree = onSkillTree,
+        onWeeklyReview = onWeeklyReview,
         onResetDay = { viewModel.clearAllProgress() }
     )
 }
@@ -70,6 +72,7 @@ fun HomeScreenContent(
     onJournal: () -> Unit = {},
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
+    onWeeklyReview: () -> Unit = {},
     onResetDay: () -> Unit = {}
 ) {
     Scaffold(
@@ -108,6 +111,24 @@ fun HomeScreenContent(
                         PillarProgressRing(percentage = 0.3f, pillarName = "HISTORIA", level = 1, modifier = Modifier.weight(1f))
                         PillarProgressRing(percentage = 0.8f, pillarName = "GYMNOS", level = 2, modifier = Modifier.weight(1f))
                         PillarProgressRing(percentage = 0.2f, pillarName = "SOPHIA", level = 1, modifier = Modifier.weight(1f))
+                    }
+                }
+
+                item {
+                    val isSunday = java.time.LocalDate.now().dayOfWeek == java.time.DayOfWeek.SUNDAY
+                    if (isSunday) {
+                        Button(
+                            onClick = onWeeklyReview,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = CathedralGold,
+                                contentColor = MonasteryBlack
+                            )
+                        ) {
+                            Icon(Icons.Default.AutoStories, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("COMMENCE WEEKLY REVIEW", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        }
                     }
                 }
 

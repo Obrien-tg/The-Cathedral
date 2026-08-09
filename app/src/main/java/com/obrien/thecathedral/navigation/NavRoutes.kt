@@ -19,3 +19,6 @@ object PhilosophyRoute
 
 @Serializable
 object SkillTreeRoute
+
+@Serializable
+object WeeklyReviewRoute

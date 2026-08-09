@@ -1,8 +1,10 @@
 package com.obrien.thecathedral.di
 
 import android.content.Context
+import androidx.room.Room
 import com.obrien.thecathedral.data.DataStoreManager
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.thecathedral.data.JournalDao
+import com.obrien.thecathedral.data.JournalDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +22,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideScheduleRepository(dataStore: DataStoreManager): ScheduleRepository =
-        ScheduleRepository(dataStore)
+    fun provideJournalDatabase(@ApplicationContext context: Context): JournalDatabase =
+        Room.databaseBuilder(
+            context,
+            JournalDatabase::class.java,
+            "journal_database"
+        ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    fun provideJournalDao(db: JournalDatabase): JournalDao = db.journalDao()
 }

@@ -16,7 +16,8 @@ private val DarkColorScheme = darkColorScheme(
     onBackground = Parchment,
     onSurface = Parchment,
     surfaceVariant = MutedStone,
-    onSurfaceVariant = MonasteryBlack
+    onSurfaceVariant = MonasteryBlack,
+    surfaceTint = CathedralGold
 )
 
 private val LightColorScheme = lightColorScheme(

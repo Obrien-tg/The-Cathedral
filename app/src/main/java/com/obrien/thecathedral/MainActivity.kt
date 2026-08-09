@@ -85,7 +85,8 @@ class MainActivity : ComponentActivity() {
                             onFocusMode = { navController.navigate(FocusModeRoute) },
                             onJournal = { navController.navigate(JournalRoute) },
                             onPhilosophy = { navController.navigate(PhilosophyRoute) },
-                            onSkillTree = { navController.navigate(SkillTreeRoute) }
+                            onSkillTree = { navController.navigate(SkillTreeRoute) },
+                            onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
                         )
                     }
                     composable<ScheduleRoute> {
@@ -109,7 +110,8 @@ class MainActivity : ComponentActivity() {
                     composable<PhilosophyRoute> {
                         PhilosophyScreen(
                             viewModel = viewModel,
-                            onBack = { navController.popBackStack() }
+                            onBack = { navController.popBackStack() },
+                            onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
                         )
                     }
                     composable<SkillTreeRoute> {
@@ -136,6 +138,12 @@ class MainActivity : ComponentActivity() {
                                 )
                             },
                             edges = SkillTreeData.edges.map { SkillEdge(it.from, it.to) }
+                        )
+                    }
+                    composable<WeeklyReviewRoute> {
+                        WeeklyReviewScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
                         )
                     }
                 }

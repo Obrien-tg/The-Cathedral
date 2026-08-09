@@ -8,6 +8,7 @@ import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.DailyCounsel
 import com.obrien.thecathedral.model.DailyCounselData
 import com.obrien.thecathedral.model.JournalEntry
+import com.obrien.thecathedral.model.WeeklyReview
 import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
 import com.obrien.thecathedral.model.SkillProgress
@@ -46,7 +47,8 @@ data class CathedralUiState(
     val historicalCompletions: Map<String, Int> = emptyMap(),
     val totalFocusSessions: Int = 0,
     val completionHistory: Map<String, Int> = emptyMap(),
-    val todayCounsel: DailyCounsel = DailyCounselData.today()
+    val todayCounsel: DailyCounsel = DailyCounselData.today(),
+    val weeklyReviews: List<WeeklyReview> = emptyList()
 )
 
 @HiltViewModel
@@ -66,6 +68,7 @@ class ScheduleViewModel @Inject constructor(
     private val _historicalCompletions = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val _totalFocusSessions = MutableStateFlow(0)
     private val _completionHistory = MutableStateFlow<Map<String, Int>>(emptyMap())
+    private val _weeklyReviews = MutableStateFlow<List<WeeklyReview>>(emptyList())
 
     // Focus Timer State
     private val _focusTimeRemaining = MutableStateFlow(25 * 60)
@@ -152,6 +155,11 @@ class ScheduleViewModel @Inject constructor(
                     _completionHistory.value = it
                 }
             }
+            launch {
+                repository.weeklyReviews.collect {
+                    _weeklyReviews.value = it
+                }
+            }
         }
 
         // Clock ticker (every minute)
@@ -166,8 +174,9 @@ class ScheduleViewModel @Inject constructor(
     val uiState: StateFlow<CathedralUiState> = combine(
         combine(_currentTime, _completedAlarmIds, _journalEntries) { t, c, j -> Triple(t, c, j) },
         combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) },
-        combine(_historicalCompletions, _totalFocusSessions, _completionHistory) { h, f, ch -> Triple(h, f, ch) }
-    ) { part1, part2, part3 ->
+        combine(_historicalCompletions, _totalFocusSessions, _completionHistory) { h, f, ch -> Triple(h, f, ch) },
+        _weeklyReviews
+    ) { part1, part2, part3, weeklyReviews ->
         val (time, completedIds, entries) = part1
         val (sourceIdx, sourcePage, wake) = part2
         val (historical, focusSessions, historyMap) = part3
@@ -210,7 +219,8 @@ class ScheduleViewModel @Inject constructor(
             historicalCompletions = historical,
             totalFocusSessions = focusSessions,
             completionHistory = historyMap,
-            todayCounsel = DailyCounselData.today()
+            todayCounsel = DailyCounselData.today(),
+            weeklyReviews = weeklyReviews
         )
     }.stateIn(
         scope = viewModelScope,
@@ -314,6 +324,12 @@ class ScheduleViewModel @Inject constructor(
     fun clearAllProgress() {
         viewModelScope.launch {
             repository.clearAllProgress()
+        }
+    }
+
+    fun saveWeeklyReview(review: WeeklyReview) {
+        viewModelScope.launch {
+            repository.saveWeeklyReview(review)
         }
     }
 

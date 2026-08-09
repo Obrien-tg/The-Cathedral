@@ -1,6 +1,7 @@
 package com.obrien.thecathedral.data
 
 import com.obrien.thecathedral.model.JournalEntry
+import com.obrien.thecathedral.model.WeeklyReview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -8,16 +9,21 @@ import javax.inject.Singleton
 
 @Singleton
 class ScheduleRepository @Inject constructor(
-    private val dataStoreManager: DataStoreManager
+    private val dataStoreManager: DataStoreManager,
+    private val journalDao: JournalDao
 ) {
     val completedAlarms: Flow<Set<String>> = dataStoreManager.completedAlarms
-    val journalEntries: Flow<List<JournalEntry>> = dataStoreManager.journalEntries
+    val journalEntries: Flow<List<JournalEntry>> = journalDao.getAllEntriesFlow()
+    val weeklyReviews: Flow<List<WeeklyReview>> = journalDao.getAllWeeklyReviewsFlow()
     val activeSourceIndex: Flow<Int> = dataStoreManager.activeSourceIndex
     val activeSourcePage: Flow<Int> = dataStoreManager.activeSourcePage
     val wakeTime: Flow<String?> = dataStoreManager.wakeTime
     val historicalCompletions: Flow<Map<String, Int>> = dataStoreManager.historicalCompletions
     val totalFocusSessions: Flow<Int> = dataStoreManager.totalFocusSessions
     val completionHistory: Flow<Map<String, Int>> = dataStoreManager.completionHistory
+    val notificationLeadTime: Flow<Int> = dataStoreManager.notificationLeadTime
+    val theme: Flow<String> = dataStoreManager.theme
+    val fontSize: Flow<String> = dataStoreManager.fontSize
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)
@@ -30,9 +36,24 @@ class ScheduleRepository @Inject constructor(
         dataStoreManager.incrementHistoricalCompletion(alarmId)
     suspend fun incrementFocusSessions() = dataStoreManager.incrementFocusSessions()
 
-    suspend fun saveJournalEntry(entry: JournalEntry) = dataStoreManager.saveJournalEntry(entry)
+    suspend fun saveJournalEntry(entry: JournalEntry) {
+        journalDao.insert(entry)
+    }
+
+    suspend fun saveWeeklyReview(review: WeeklyReview) {
+        journalDao.insertWeeklyReview(review)
+    }
+
+    suspend fun getEntryByDate(date: String): JournalEntry? = journalDao.getEntryByDate(date)
+
     suspend fun setActiveSource(index: Int) = dataStoreManager.setActiveSource(index)
     suspend fun setActiveSourcePage(page: Int) = dataStoreManager.setActiveSourcePage(page)
     suspend fun setWakeTime(time: String) = dataStoreManager.setWakeTime(time)
-    suspend fun clearAllProgress() = dataStoreManager.clearAllProgress()
+    
+    suspend fun clearAllProgress() {
+        dataStoreManager.clearAllProgress()
+        // Should we clear Room too? User said daily reset should only clear alarm completions.
+        // clearAllProgress is for the manual "Reset Day" button.
+        // I'll keep Room journal entries as they are an "Archive".
+    }
 }
