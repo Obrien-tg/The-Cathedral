@@ -15,48 +15,23 @@ class ScheduleRepository @Inject constructor(
     val activeSourceIndex: Flow<Int> = dataStoreManager.activeSourceIndex
     val activeSourcePage: Flow<Int> = dataStoreManager.activeSourcePage
     val wakeTime: Flow<String?> = dataStoreManager.wakeTime
+    val historicalCompletions: Flow<Map<String, Int>> = dataStoreManager.historicalCompletions
+    val totalFocusSessions: Flow<Int> = dataStoreManager.totalFocusSessions
 
-    suspend fun getLastResetDate(): String {
-        return dataStoreManager.lastResetDate.first()
-    }
+    suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
+    suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)
+    suspend fun clearAlarmCompletionsOnly() = dataStoreManager.clearAlarmCompletionsOnly()
+    suspend fun checkDailyReset() = dataStoreManager.resetDailyIfNecessary()
 
-    suspend fun setLastResetDate(date: String) {
-        dataStoreManager.setLastResetDate(date)
-    }
+    suspend fun markComplete(id: String) = dataStoreManager.markComplete(id)
+    suspend fun markIncomplete(id: String) = dataStoreManager.markIncomplete(id)
+    suspend fun incrementHistoricalCompletion(alarmId: String) =
+        dataStoreManager.incrementHistoricalCompletion(alarmId)
+    suspend fun incrementFocusSessions() = dataStoreManager.incrementFocusSessions()
 
-    suspend fun clearAlarmCompletionsOnly() {
-        dataStoreManager.clearAlarmCompletionsOnly()
-    }
-
-    suspend fun checkDailyReset() {
-        dataStoreManager.resetDailyIfNecessary()
-    }
-
-    suspend fun markComplete(id: String) {
-        dataStoreManager.markComplete(id)
-    }
-
-    suspend fun markIncomplete(id: String) {
-        dataStoreManager.markIncomplete(id)
-    }
-
-    suspend fun saveJournalEntry(entry: JournalEntry) {
-        dataStoreManager.saveJournalEntry(entry)
-    }
-
-    suspend fun setActiveSource(index: Int) {
-        dataStoreManager.setActiveSource(index)
-    }
-
-    suspend fun setActiveSourcePage(page: Int) {
-        dataStoreManager.setActiveSourcePage(page)
-    }
-
-    suspend fun setWakeTime(time: String) {
-        dataStoreManager.setWakeTime(time)
-    }
-
-    suspend fun clearAllProgress() {
-        dataStoreManager.clearAllProgress()
-    }
+    suspend fun saveJournalEntry(entry: JournalEntry) = dataStoreManager.saveJournalEntry(entry)
+    suspend fun setActiveSource(index: Int) = dataStoreManager.setActiveSource(index)
+    suspend fun setActiveSourcePage(page: Int) = dataStoreManager.setActiveSourcePage(page)
+    suspend fun setWakeTime(time: String) = dataStoreManager.setWakeTime(time)
+    suspend fun clearAllProgress() = dataStoreManager.clearAllProgress()
 }

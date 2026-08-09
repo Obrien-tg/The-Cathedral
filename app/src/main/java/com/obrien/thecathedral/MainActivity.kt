@@ -1,6 +1,10 @@
 package com.obrien.thecathedral
 
+import android.app.AlarmManager
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,7 +15,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.obrien.thecathedral.model.SkillEdge as DataSkillEdge
 import com.obrien.thecathedral.model.SkillTreeData
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
@@ -35,6 +38,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this)
+
+        // Request exact alarm permission for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+                } catch (_: Exception) { }
+            }
+        }
 
         setContent {
             TheCathedralTheme {

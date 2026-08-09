@@ -24,54 +24,56 @@ class DataStoreManager(private val context: Context) {
         val ACTIVE_SOURCE_INDEX = intPreferencesKey("active_source_index")
         val ACTIVE_SOURCE_PAGE = intPreferencesKey("active_source_page")
         val WAKE_TIME = stringPreferencesKey("wake_time")
+        val HISTORICAL_COMPLETIONS = stringPreferencesKey("historical_completions")
+        val TOTAL_FOCUS_SESSIONS = intPreferencesKey("total_focus_sessions")
     }
 
     val wakeTime: Flow<String?> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[WAKE_TIME] }
 
     val completedAlarms: Flow<Set<String>> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
-        .map { prefs ->
-            prefs[COMPLETED_ALARMS] ?: emptySet()
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[COMPLETED_ALARMS] ?: emptySet() }
 
     val lastResetDate: Flow<String> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
-        .map { prefs ->
-            prefs[LAST_RESET_DATE] ?: ""
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[LAST_RESET_DATE] ?: "" }
 
     val journalEntries: Flow<List<JournalEntry>> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { prefs ->
             try {
                 val strings = prefs[JOURNAL_ENTRIES] ?: emptySet()
                 strings.map { Json.decodeFromString<JournalEntry>(it) }.sortedBy { it.date }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 emptyList()
             }
         }
 
     val activeSourceIndex: Flow<Int> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[ACTIVE_SOURCE_INDEX] ?: 0 }
 
     val activeSourcePage: Flow<Int> = context.dataStore.data
-        .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences()) else throw exception
-        }
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[ACTIVE_SOURCE_PAGE] ?: 0 }
+
+    // Lifetime record of every ritual completed — the true measure of ascent
+    val historicalCompletions: Flow<Map<String, Int>> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs ->
+            val json = prefs[HISTORICAL_COMPLETIONS] ?: "{}"
+            try {
+                Json.decodeFromString<Map<String, Int>>(json)
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        }
+
+    val totalFocusSessions: Flow<Int> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[TOTAL_FOCUS_SESSIONS] ?: 0 }
 
     suspend fun markComplete(id: String) {
         try {
@@ -95,11 +97,37 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun setLastResetDate(date: String) {
+    suspend fun incrementHistoricalCompletion(alarmId: String) {
         try {
             context.dataStore.edit { prefs ->
-                prefs[LAST_RESET_DATE] = date
+                val current = try {
+                    Json.decodeFromString<Map<String, Int>>(prefs[HISTORICAL_COMPLETIONS] ?: "{}")
+                } catch (_: Exception) {
+                    emptyMap()
+                }
+                val updated = current.toMutableMap()
+                updated[alarmId] = (updated[alarmId] ?: 0) + 1
+                prefs[HISTORICAL_COMPLETIONS] = Json.encodeToString(updated)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun incrementFocusSessions() {
+        try {
+            context.dataStore.edit { prefs ->
+                val current = prefs[TOTAL_FOCUS_SESSIONS] ?: 0
+                prefs[TOTAL_FOCUS_SESSIONS] = current + 1
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun setLastResetDate(date: String) {
+        try {
+            context.dataStore.edit { it[LAST_RESET_DATE] = date }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -107,9 +135,7 @@ class DataStoreManager(private val context: Context) {
 
     suspend fun clearAlarmCompletionsOnly() {
         try {
-            context.dataStore.edit { prefs ->
-                prefs.remove(COMPLETED_ALARMS)
-            }
+            context.dataStore.edit { it.remove(COMPLETED_ALARMS) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -139,7 +165,7 @@ class DataStoreManager(private val context: Context) {
                     try {
                         val existing = Json.decodeFromString<JournalEntry>(it)
                         existing.date != entry.date
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         false
                     }
                 }
@@ -181,6 +207,8 @@ class DataStoreManager(private val context: Context) {
                 prefs[JOURNAL_ENTRIES] = emptySet()
                 prefs[ACTIVE_SOURCE_INDEX] = 0
                 prefs[ACTIVE_SOURCE_PAGE] = 0
+                // We deliberately do NOT clear historicalCompletions or focus sessions.
+                // The record of a man’s labour is not to be erased lightly.
             }
         } catch (e: Exception) {
             e.printStackTrace()

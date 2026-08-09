@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -40,7 +39,9 @@ data class CathedralUiState(
     val activeSourcePage: Int = 0,
     val pillars: List<Pillar> = emptyList(),
     val wakeTime: LocalTime = LocalTime.of(7, 0),
-    val skillProgress: List<SkillProgress> = emptyList()
+    val skillProgress: List<SkillProgress> = emptyList(),
+    val historicalCompletions: Map<String, Int> = emptyMap(),
+    val totalFocusSessions: Int = 0
 )
 
 @HiltViewModel
@@ -56,6 +57,8 @@ class ScheduleViewModel @Inject constructor(
     private val _activeSourceIndex = MutableStateFlow(0)
     private val _activeSourcePage = MutableStateFlow(0)
     private val _wakeTime = MutableStateFlow(LocalTime.of(7, 0))
+    private val _historicalCompletions = MutableStateFlow<Map<String, Int>>(emptyMap())
+    private val _totalFocusSessions = MutableStateFlow(0)
 
     // Focus Timer State
     private val _focusTimeRemaining = MutableStateFlow(25 * 60)
@@ -103,6 +106,17 @@ class ScheduleViewModel @Inject constructor(
                     }
                 }
             }
+            launch {
+                repository.historicalCompletions.collect { 
+                    _historicalCompletions.value = it 
+                }
+            }
+            launch {
+                repository.totalFocusSessions.collect { 
+                    _totalFocusSessions.value = it 
+                    _focusSessionCount.value = it 
+                }
+            }
         }
 
         // Focus Timer Ticker
@@ -127,14 +141,15 @@ class ScheduleViewModel @Inject constructor(
     val uiState: StateFlow<CathedralUiState> = combine(
         combine(_currentTime, _completedAlarmIds, _journalEntries) { t, c, j -> Triple(t, c, j) },
         combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) },
-        _focusSessionCount
-    ) { part1, part2, focusSessions ->
+        combine(_historicalCompletions, _totalFocusSessions) { h, f -> Pair(h, f) }
+    ) { part1, part2, part3 ->
         val (time, completedIds, entries) = part1
         val (sourceIdx, sourcePage, wake) = part2
-
+        val (historical, focusSessions) = part3
+        
         val baseWakeTime = LocalTime.of(7, 0)
         val offset = Duration.between(baseWakeTime, wake)
-
+        
         val shiftedPillars = ScheduleData.pillars.map { pillar ->
             val shiftedAlarms = pillar.alarms.map { alarm ->
                 alarm.copy(time = alarm.time.plus(offset))
@@ -151,7 +166,7 @@ class ScheduleViewModel @Inject constructor(
             pillar.alarms.firstOrNull()?.time?.isAfter(time) == true
         }
 
-        val skillProgress = computeSkillProgress(completedIds, focusSessions, entries)
+        val skillProgress = computeSkillProgress(historical, focusSessions, entries)
 
         CathedralUiState(
             currentTime = time,
@@ -166,7 +181,9 @@ class ScheduleViewModel @Inject constructor(
             activeSourcePage = sourcePage,
             pillars = shiftedPillars,
             wakeTime = wake,
-            skillProgress = skillProgress
+            skillProgress = skillProgress,
+            historicalCompletions = historical,
+            totalFocusSessions = focusSessions
         )
     }.stateIn(
         scope = viewModelScope,
@@ -175,22 +192,22 @@ class ScheduleViewModel @Inject constructor(
     )
 
     private fun computeSkillProgress(
-        completedAlarmIds: Set<String>,
+        historical: Map<String, Int>,
         focusSessions: Int,
         journalEntries: List<JournalEntry>
     ): List<SkillProgress> {
         val journalDays = journalEntries.map { it.date }.toSet().size
 
-        // First pass – calculate raw progress for each node
+        // First pass – calculate raw progress for each node based on lifetime record
         val raw = SkillTreeData.nodes.associate { node ->
             val alarmHits = when (node.pillar) {
-                "AWAKENING" -> if ("ignition" in completedAlarmIds) 1 else 0
+                "AWAKENING" -> historical["ignition"] ?: 0
                 "TECHNE" -> listOf("deep_work_1", "deep_work_2", "commit")
-                    .count { it in completedAlarmIds }
+                    .sumOf { historical[it] ?: 0 }
                 "HISTORIA" -> listOf("primary_source", "peripatetic")
-                    .count { it in completedAlarmIds }
-                "GYMNOS" -> if ("physical" in completedAlarmIds) 1 else 0
-                "SOPHIA" -> if ("digital_sunset" in completedAlarmIds) 1 else 0
+                    .sumOf { historical[it] ?: 0 }
+                "GYMNOS" -> historical["physical"] ?: 0
+                "SOPHIA" -> historical["digital_sunset"] ?: 0
                 else -> 0
             }
 
@@ -232,6 +249,7 @@ class ScheduleViewModel @Inject constructor(
                 repository.markIncomplete(alarmId)
             } else {
                 repository.markComplete(alarmId)
+                repository.incrementHistoricalCompletion(alarmId)
             }
         }
     }
@@ -296,7 +314,9 @@ class ScheduleViewModel @Inject constructor(
             _focusTimeRemaining.value--
         } else {
             _focusIsRunning.value = false
-            _focusSessionCount.value++
+            viewModelScope.launch {
+                repository.incrementFocusSessions()
+            }
         }
     }
 }
