@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -111,18 +110,6 @@ fun SplashScreen(
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif,
                 lineHeight = 26.sp
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "For Dimpho. My Polaris.",
-                style = MaterialTheme.typography.titleMedium,
-                color = CathedralGold.copy(alpha = 0.7f),
-                fontStyle = FontStyle.Italic,
-                fontFamily = FontFamily.Serif,
-                letterSpacing = 2.sp,
-                textAlign = TextAlign.Center
             )
         }
     }
