@@ -18,6 +18,7 @@ class DataStoreManager(private val context: Context) {
 
     companion object {
         val COMPLETED_ALARMS = stringSetPreferencesKey("completed_alarms")
+        val SKIPPED_ALARMS = stringSetPreferencesKey("skipped_alarms")
         val LAST_RESET_DATE = stringPreferencesKey("last_reset_date")
         val ACTIVE_SOURCE_INDEX = intPreferencesKey("active_source_index")
         val ACTIVE_SOURCE_PAGE = intPreferencesKey("active_source_page")
@@ -28,6 +29,17 @@ class DataStoreManager(private val context: Context) {
         val NOTIFICATION_LEAD_TIME = intPreferencesKey("notification_lead_time")
         val THEME = stringPreferencesKey("theme")
         val FONT_SIZE = stringPreferencesKey("font_size")
+        val LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE = stringPreferencesKey("last_accountability_acknowledge_date")
+    }
+
+    val lastAccountabilityAcknowledgeDate: Flow<String> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] ?: "" }
+
+    suspend fun acknowledgeAccountability() {
+        try {
+            context.dataStore.edit { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] = LocalDate.now().toString() }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     val notificationLeadTime: Flow<Int> = context.dataStore.data
@@ -69,6 +81,10 @@ class DataStoreManager(private val context: Context) {
         .map { prefs ->
             prefs[COMPLETED_ALARMS] ?: emptySet()
         }
+
+    val skippedAlarms: Flow<Set<String>> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[SKIPPED_ALARMS] ?: emptySet() }
 
     val lastResetDate: Flow<String> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
@@ -161,6 +177,24 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    suspend fun markSkipped(id: String) {
+        try {
+            context.dataStore.edit { prefs ->
+                val current = prefs[SKIPPED_ALARMS] ?: emptySet()
+                prefs[SKIPPED_ALARMS] = current + id
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    suspend fun markUnskipped(id: String) {
+        try {
+            context.dataStore.edit { prefs ->
+                val current = prefs[SKIPPED_ALARMS] ?: emptySet()
+                prefs[SKIPPED_ALARMS] = current - id
+            }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
     suspend fun incrementHistoricalCompletion(alarmId: String) {
         try {
             context.dataStore.edit { prefs ->
@@ -212,6 +246,7 @@ class DataStoreManager(private val context: Context) {
                 val lastReset = prefs[LAST_RESET_DATE]
                 if (lastReset != today) {
                     prefs[COMPLETED_ALARMS] = emptySet()
+                    prefs[SKIPPED_ALARMS] = emptySet()
                     prefs[LAST_RESET_DATE] = today
                 }
             }

@@ -22,3 +22,6 @@ object SkillTreeRoute
 
 @Serializable
 object WeeklyReviewRoute
+
+@Serializable
+object SettingsRoute

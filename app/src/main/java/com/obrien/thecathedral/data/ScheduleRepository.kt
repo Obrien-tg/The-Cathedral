@@ -13,6 +13,7 @@ class ScheduleRepository @Inject constructor(
     private val journalDao: JournalDao
 ) {
     val completedAlarms: Flow<Set<String>> = dataStoreManager.completedAlarms
+    val skippedAlarms: Flow<Set<String>> = dataStoreManager.skippedAlarms
     val journalEntries: Flow<List<JournalEntry>> = journalDao.getAllEntriesFlow()
     val weeklyReviews: Flow<List<WeeklyReview>> = journalDao.getAllWeeklyReviewsFlow()
     val activeSourceIndex: Flow<Int> = dataStoreManager.activeSourceIndex
@@ -24,6 +25,7 @@ class ScheduleRepository @Inject constructor(
     val notificationLeadTime: Flow<Int> = dataStoreManager.notificationLeadTime
     val theme: Flow<String> = dataStoreManager.theme
     val fontSize: Flow<String> = dataStoreManager.fontSize
+    val lastAccountabilityAcknowledgeDate: Flow<String> = dataStoreManager.lastAccountabilityAcknowledgeDate
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)
@@ -32,6 +34,8 @@ class ScheduleRepository @Inject constructor(
 
     suspend fun markComplete(id: String) = dataStoreManager.markComplete(id)
     suspend fun markIncomplete(id: String) = dataStoreManager.markIncomplete(id)
+    suspend fun markSkipped(id: String) = dataStoreManager.markSkipped(id)
+    suspend fun markUnskipped(id: String) = dataStoreManager.markUnskipped(id)
     suspend fun incrementHistoricalCompletion(alarmId: String) =
         dataStoreManager.incrementHistoricalCompletion(alarmId)
     suspend fun incrementFocusSessions() = dataStoreManager.incrementFocusSessions()
@@ -49,6 +53,11 @@ class ScheduleRepository @Inject constructor(
     suspend fun setActiveSource(index: Int) = dataStoreManager.setActiveSource(index)
     suspend fun setActiveSourcePage(page: Int) = dataStoreManager.setActiveSourcePage(page)
     suspend fun setWakeTime(time: String) = dataStoreManager.setWakeTime(time)
+
+    suspend fun setNotificationLeadTime(minutes: Int) = dataStoreManager.setNotificationLeadTime(minutes)
+    suspend fun setTheme(theme: String) = dataStoreManager.setTheme(theme)
+    suspend fun setFontSize(size: String) = dataStoreManager.setFontSize(size)
+    suspend fun acknowledgeAccountability() = dataStoreManager.acknowledgeAccountability()
     
     suspend fun clearAllProgress() {
         dataStoreManager.clearAllProgress()

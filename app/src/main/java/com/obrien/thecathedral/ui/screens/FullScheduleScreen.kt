@@ -175,6 +175,7 @@ fun AlarmDetail(
 ) {
     val status = viewModel.getAlarmStatus(alarm)
     val isCompleted = status == PillarStatus.COMPLETE
+    val isSkipped = status == PillarStatus.SKIPPED
 
     var showBlessing by remember { mutableStateOf(false) }
 
@@ -199,6 +200,7 @@ fun AlarmDetail(
 
     val statusColor = when (status) {
         PillarStatus.COMPLETE -> RitualSuccess
+        PillarStatus.SKIPPED -> Color.Gray.copy(alpha = 0.6f)
         PillarStatus.MISSED -> RitualMiss
         PillarStatus.ACTIVE -> CathedralGold
         PillarStatus.PENDING -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
@@ -218,7 +220,9 @@ fun AlarmDetail(
             )
         }
 
-        Column {
+        Column(
+            modifier = Modifier.alpha(if (isSkipped) 0.5f else 1f)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -232,25 +236,41 @@ fun AlarmDetail(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${alarm.time} — ${alarm.name}",
+                        text = "${alarm.time} — ${alarm.name}${if (isSkipped) " (SKIPPED)" else ""}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = statusColor,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
 
-                IconButton(
-                    onClick = { viewModel.toggleAlarm(alarm.id) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isCompleted)
-                            Icons.Filled.CheckCircle
-                        else
-                            Icons.Outlined.RadioButtonUnchecked,
-                        contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
-                        tint = if (isCompleted) RitualSuccess else CathedralGold.copy(alpha = 0.4f)
-                    )
+                Row {
+                    if (!isCompleted) {
+                        TextButton(
+                            onClick = { viewModel.toggleSkip(alarm.id) },
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Text(
+                                text = if (isSkipped) "RESTORE" else "SKIP",
+                                fontSize = 10.sp,
+                                color = CathedralGold.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    
+                    IconButton(
+                        onClick = { if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isCompleted)
+                                Icons.Filled.CheckCircle
+                            else
+                                Icons.Outlined.RadioButtonUnchecked,
+                            contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
+                            tint = if (isCompleted) RitualSuccess else CathedralGold.copy(alpha = 0.4f)
+                        )
+                    }
                 }
             }
 
@@ -258,7 +278,7 @@ fun AlarmDetail(
                 Text(
                     text = "• $task",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isCompleted)
+                    color = if (isCompleted || isSkipped)
                         MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
                     else
                         MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),

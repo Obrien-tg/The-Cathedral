@@ -22,5 +22,6 @@ enum class PillarStatus {
     PENDING,
     ACTIVE,
     COMPLETE,
-    MISSED
+    MISSED,
+    SKIPPED
 }

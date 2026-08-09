@@ -7,6 +7,7 @@ import com.obrien.thecathedral.data.ScheduleRepository
 import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.DailyCounsel
 import com.obrien.thecathedral.model.DailyCounselData
+import com.obrien.thecathedral.model.ExportData
 import com.obrien.thecathedral.model.JournalEntry
 import com.obrien.thecathedral.model.WeeklyReview
 import com.obrien.thecathedral.model.Pillar
@@ -26,13 +27,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
 
 data class CathedralUiState(
     val currentTime: LocalTime = LocalTime.now(),
     val completedAlarmIds: Set<String> = emptySet(),
+    val skippedAlarmIds: Set<String> = emptySet(),
     val activePillar: Pillar? = null,
     val nextPillar: Pillar? = null,
     val completedCount: Int = 0,
@@ -48,7 +53,18 @@ data class CathedralUiState(
     val totalFocusSessions: Int = 0,
     val completionHistory: Map<String, Int> = emptyMap(),
     val todayCounsel: DailyCounsel = DailyCounselData.today(),
-    val weeklyReviews: List<WeeklyReview> = emptyList()
+    val weeklyReviews: List<WeeklyReview> = emptyList(),
+    val notificationLeadTime: Int = 5,
+    val theme: String = "dark",
+    val fontSize: String = "medium",
+    val showAccountabilityDialog: Boolean = false
+)
+
+private data class CombinedPart1(
+    val time: LocalTime,
+    val completedIds: Set<String>,
+    val journalEntries: List<JournalEntry>,
+    val skippedIds: Set<String>
 )
 
 @HiltViewModel
@@ -61,10 +77,15 @@ class ScheduleViewModel @Inject constructor(
     val currentTime: StateFlow<LocalTime> = _currentTime.asStateFlow()
 
     private val _completedAlarmIds = MutableStateFlow<Set<String>>(emptySet())
+    private val _skippedAlarmIds = MutableStateFlow<Set<String>>(emptySet())
     private val _journalEntries = MutableStateFlow<List<JournalEntry>>(emptyList())
     private val _activeSourceIndex = MutableStateFlow(0)
     private val _activeSourcePage = MutableStateFlow(0)
     private val _wakeTime = MutableStateFlow(LocalTime.of(7, 0))
+    private val _notificationLeadTime = MutableStateFlow(5)
+    private val _themePreference = MutableStateFlow("dark")
+    private val _fontSizePreference = MutableStateFlow("medium")
+    private val _lastAccountabilityAcknowledgeDate = MutableStateFlow("")
     private val _historicalCompletions = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val _totalFocusSessions = MutableStateFlow(0)
     private val _completionHistory = MutableStateFlow<Map<String, Int>>(emptyMap())
@@ -114,6 +135,11 @@ class ScheduleViewModel @Inject constructor(
                 }
             }
             launch {
+                repository.skippedAlarms.collect { ids ->
+                    _skippedAlarmIds.value = ids
+                }
+            }
+            launch {
                 repository.journalEntries.collect { entries ->
                     _journalEntries.value = entries
                 }
@@ -138,6 +164,18 @@ class ScheduleViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+            launch {
+                repository.notificationLeadTime.collect { _notificationLeadTime.value = it }
+            }
+            launch {
+                repository.theme.collect { _themePreference.value = it }
+            }
+            launch {
+                repository.fontSize.collect { _fontSizePreference.value = it }
+            }
+            launch {
+                repository.lastAccountabilityAcknowledgeDate.collect { _lastAccountabilityAcknowledgeDate.value = it }
             }
             launch {
                 repository.historicalCompletions.collect { 
@@ -172,14 +210,23 @@ class ScheduleViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<CathedralUiState> = combine(
-        combine(_currentTime, _completedAlarmIds, _journalEntries) { t, c, j -> Triple(t, c, j) },
+        combine(_currentTime, _completedAlarmIds, _journalEntries, _skippedAlarmIds) { t, c, j, s -> 
+            CombinedPart1(t, c, j, s)
+        },
         combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) },
         combine(_historicalCompletions, _totalFocusSessions, _completionHistory) { h, f, ch -> Triple(h, f, ch) },
-        _weeklyReviews
-    ) { part1, part2, part3, weeklyReviews ->
-        val (time, completedIds, entries) = part1
+        combine(_weeklyReviews, _notificationLeadTime, _themePreference, _fontSizePreference, _lastAccountabilityAcknowledgeDate) { wr, nl, th, fs, ad -> 
+            Pair(wr, listOf(nl.toString(), th, fs, ad))
+        }
+    ) { part1, part2, part3, part4 ->
+        val (time, completedIds, entries, skippedIds) = part1
         val (sourceIdx, sourcePage, wake) = part2
         val (historical, focusSessions, historyMap) = part3
+        val (weeklyReviews, settingsList) = part4
+        val leadTime = settingsList[0].toInt()
+        val theme = settingsList[1]
+        val fontSize = settingsList[2]
+        val lastAcknowledge = settingsList[3]
         
         val baseWakeTime = LocalTime.of(7, 0)
         val offset = Duration.between(baseWakeTime, wake)
@@ -202,9 +249,18 @@ class ScheduleViewModel @Inject constructor(
 
         val skillProgress = computeSkillProgress(historical, focusSessions, entries)
 
+        // 2-Day Rule logic (Bug #3 in high-impact list)
+        val today = LocalDate.now().toString()
+        val yesterday = LocalDate.now().minusDays(1).toString()
+        val dayBefore = LocalDate.now().minusDays(2).toString()
+        val missedYesterday = (historyMap[yesterday] ?: 0) == 0
+        val missedDayBefore = (historyMap[dayBefore] ?: 0) == 0
+        val showAccountability = missedYesterday && missedDayBefore && lastAcknowledge != today
+
         CathedralUiState(
             currentTime = time,
             completedAlarmIds = completedIds,
+            skippedAlarmIds = skippedIds,
             activePillar = activePillar,
             nextPillar = nextPillar,
             completedCount = completedCount,
@@ -220,7 +276,11 @@ class ScheduleViewModel @Inject constructor(
             totalFocusSessions = focusSessions,
             completionHistory = historyMap,
             todayCounsel = DailyCounselData.today(),
-            weeklyReviews = weeklyReviews
+            weeklyReviews = weeklyReviews,
+            notificationLeadTime = leadTime,
+            theme = theme,
+            fontSize = fontSize,
+            showAccountabilityDialog = showAccountability
         )
     }.stateIn(
         scope = viewModelScope,
@@ -291,9 +351,20 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
+    fun toggleSkip(alarmId: String) {
+        viewModelScope.launch {
+            if (alarmId in _skippedAlarmIds.value) {
+                repository.markUnskipped(alarmId)
+            } else {
+                repository.markSkipped(alarmId)
+            }
+        }
+    }
+
     fun getAlarmStatus(alarm: Alarm): PillarStatus {
         val completed = alarm.id in _completedAlarmIds.value
-        return alarm.computeStatus(completed, _currentTime.value)
+        val skipped = alarm.id in _skippedAlarmIds.value
+        return alarm.computeStatus(completed, skipped, _currentTime.value)
     }
 
     fun saveJournalEntry(entry: JournalEntry) {
@@ -321,10 +392,46 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
+    fun setNotificationLeadTime(minutes: Int) {
+        viewModelScope.launch {
+            repository.setNotificationLeadTime(minutes)
+        }
+    }
+
+    fun setTheme(theme: String) {
+        viewModelScope.launch {
+            repository.setTheme(theme)
+        }
+    }
+
+    fun setFontSize(size: String) {
+        viewModelScope.launch {
+            repository.setFontSize(size)
+        }
+    }
+
+    fun dismissAccountabilityDialog() {
+        viewModelScope.launch {
+            repository.acknowledgeAccountability()
+        }
+    }
+
     fun clearAllProgress() {
         viewModelScope.launch {
             repository.clearAllProgress()
         }
+    }
+
+    fun getExportData(): String {
+        val state = uiState.value
+        val data = ExportData(
+            wakeTime = state.wakeTime.toString(),
+            historicalCompletions = state.historicalCompletions,
+            totalFocusSessions = state.totalFocusSessions,
+            journalEntries = state.journalEntries,
+            weeklyReviews = state.weeklyReviews
+        )
+        return Json { prettyPrint = true }.encodeToString(data)
     }
 
     fun saveWeeklyReview(review: WeeklyReview) {

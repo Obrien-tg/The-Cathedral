@@ -7,6 +7,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,7 +47,8 @@ fun HomeScreen(
     onJournal: () -> Unit = {},
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
-    onWeeklyReview: () -> Unit = {}
+    onWeeklyReview: () -> Unit = {},
+    onSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -59,10 +61,13 @@ fun HomeScreen(
         onPhilosophy = onPhilosophy,
         onSkillTree = onSkillTree,
         onWeeklyReview = onWeeklyReview,
+        onSettings = onSettings,
+        onDismissAccountability = { viewModel.dismissAccountabilityDialog() },
         onResetDay = { viewModel.clearAllProgress() }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
@@ -73,11 +78,70 @@ fun HomeScreenContent(
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
+    onSettings: () -> Unit = {},
+    onDismissAccountability: () -> Unit = {},
     onResetDay: () -> Unit = {}
 ) {
+    if (uiState.showAccountabilityDialog) {
+        AlertDialog(
+            onDismissRequest = onDismissAccountability,
+            title = {
+                Text(
+                    "THE BROKEN CONTRACT",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = CathedralGold
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "Two days have passed without discipline. The walls of your Cathedral are weakening.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = """"${ScheduleData.PURPOSE_STATEMENT}"""",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = CathedralGold.copy(alpha = 0.7f),
+                        fontStyle = FontStyle.Italic
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Are you still committed to the path?",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onDismissAccountability) {
+                    Text("I AM COMMITTED", color = CathedralGold)
+                }
+            },
+            containerColor = MonasteryBlack
+        )
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = MonasteryBlack
+        containerColor = MonasteryBlack,
+        topBar = {
+            TopAppBar(
+                title = {},
+                actions = {
+                    IconButton(onClick = onSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = CathedralGold.copy(alpha = 0.6f)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
+        }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()

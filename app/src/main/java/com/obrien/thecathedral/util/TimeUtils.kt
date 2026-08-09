@@ -23,11 +23,13 @@ fun Pillar.parseTimeRange(): Pair<LocalTime, LocalTime>? {
 
 fun Alarm.computeStatus(
     completed: Boolean,
+    skipped: Boolean,
     currentTime: LocalTime,
     activeWindowMinutes: Long = 15
 ): PillarStatus {
     return when {
         completed -> PillarStatus.COMPLETE
+        skipped -> PillarStatus.SKIPPED
         currentTime.isAfter(time.plusMinutes(activeWindowMinutes)) -> PillarStatus.MISSED
         !currentTime.isBefore(time) && currentTime.isBefore(time.plusMinutes(activeWindowMinutes)) -> PillarStatus.ACTIVE
         else -> PillarStatus.PENDING

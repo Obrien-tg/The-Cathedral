@@ -91,7 +91,8 @@ class MainActivity : ComponentActivity() {
                                 onJournal = { navController.navigate(JournalRoute) },
                                 onPhilosophy = { navController.navigate(PhilosophyRoute) },
                                 onSkillTree = { navController.navigate(SkillTreeRoute) },
-                                onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
+                                onWeeklyReview = { navController.navigate(WeeklyReviewRoute) },
+                                onSettings = { navController.navigate(SettingsRoute) }
                             )
                         }
                         composable<ScheduleRoute> {
@@ -147,6 +148,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<WeeklyReviewRoute> {
                             WeeklyReviewScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable<SettingsRoute> {
+                            SettingsScreen(
                                 viewModel = viewModel,
                                 onBack = { navController.popBackStack() }
                             )
