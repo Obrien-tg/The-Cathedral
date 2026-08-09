@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +33,7 @@ import androidx.compose.material.icons.filled.AccountTree
 import com.obrien.thecathedral.ui.components.PillarProgressRing
 import com.obrien.thecathedral.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.components.FidelityHeatmap
+import com.obrien.thecathedral.model.DailyCounsel
 import com.obrien.thecathedral.ui.theme.AmbientDust
 import com.obrien.thecathedral.ui.theme.glassCard
 
@@ -95,6 +97,8 @@ fun HomeScreenContent(
             ) {
                 item { PurposeSection() }
 
+                item { DailyCounselCard(counsel = uiState.todayCounsel) }
+
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -110,10 +114,20 @@ fun HomeScreenContent(
                 item {
                     val pillar = uiState.activePillar
                     if (pillar != null) {
-                        ActivePillarSection(pillar = pillar, isActive = true)
+                        ActivePillarSection(
+                            pillar = pillar, 
+                            isActive = true,
+                            morningPrompt = uiState.todayCounsel.morningPrompt,
+                            eveningPrompt = uiState.todayCounsel.eveningPrompt
+                        )
                     } else {
                         uiState.nextPillar?.let {
-                            NextPillarSection(pillar = it)
+                            ActivePillarSection(
+                                pillar = it, 
+                                isActive = false,
+                                morningPrompt = uiState.todayCounsel.morningPrompt,
+                                eveningPrompt = uiState.todayCounsel.eveningPrompt
+                            )
                         } ?: RestSection()
                     }
                 }
@@ -261,7 +275,7 @@ fun PurposeSection() {
 }
 
 @Composable
-fun ActivePillarSection(pillar: Pillar, isActive: Boolean) {
+fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String? = null, eveningPrompt: String? = null) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -290,6 +304,28 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean) {
                 color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Monospace
             )
+            
+            val prompt = if (pillar.id == "awakening") morningPrompt else if (pillar.id == "sanctuary") eveningPrompt else null
+            if (prompt != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = CathedralGold.copy(alpha = 0.2f), thickness = 0.5.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "CONTEMPLATION",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CathedralGold.copy(alpha = 0.5f),
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = prompt,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    fontStyle = FontStyle.Italic,
+                    fontFamily = FontFamily.Serif
+                )
+            }
         }
     }
 }
@@ -380,6 +416,44 @@ fun ProgressSection(completed: Int, total: Int) {
             color = CathedralGold,
             trackColor = CathedralGold.copy(alpha = 0.1f)
         )
+    }
+}
+
+@Composable
+fun DailyCounselCard(counsel: DailyCounsel) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .glassCard()
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "DAILY COUNSEL — ${counsel.theme.uppercase()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = CathedralGold.copy(alpha = 0.6f),
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = """"${counsel.quote}"""",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center,
+                fontFamily = FontFamily.Serif,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 24.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "— ${counsel.author}, ${counsel.source}",
+                style = MaterialTheme.typography.labelSmall,
+                color = CathedralGold.copy(alpha = 0.5f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.obrien.thecathedral.data.ScheduleData
 import com.obrien.thecathedral.data.ScheduleRepository
 import com.obrien.thecathedral.model.Alarm
+import com.obrien.thecathedral.model.DailyCounsel
+import com.obrien.thecathedral.model.DailyCounselData
 import com.obrien.thecathedral.model.JournalEntry
 import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
@@ -43,7 +45,8 @@ data class CathedralUiState(
     val skillProgress: List<SkillProgress> = emptyList(),
     val historicalCompletions: Map<String, Int> = emptyMap(),
     val totalFocusSessions: Int = 0,
-    val completionHistory: Map<String, Int> = emptyMap()
+    val completionHistory: Map<String, Int> = emptyMap(),
+    val todayCounsel: DailyCounsel = DailyCounselData.today()
 )
 
 @HiltViewModel
@@ -206,7 +209,8 @@ class ScheduleViewModel @Inject constructor(
             skillProgress = skillProgress,
             historicalCompletions = historical,
             totalFocusSessions = focusSessions,
-            completionHistory = historyMap
+            completionHistory = historyMap,
+            todayCounsel = DailyCounselData.today()
         )
     }.stateIn(
         scope = viewModelScope,
