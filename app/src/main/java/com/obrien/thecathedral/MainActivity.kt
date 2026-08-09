@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.obrien.thecathedral.model.SkillEdge as DataSkillEdge
+import com.obrien.thecathedral.model.SkillTreeData
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
 import com.obrien.thecathedral.ui.skilltree.*
@@ -32,12 +35,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this)
-        alarmScheduler.scheduleRitualAlarms()
 
         setContent {
             TheCathedralTheme {
                 val navController = rememberNavController()
                 val viewModel: ScheduleViewModel = hiltViewModel()
+                val uiState by viewModel.uiState.collectAsState()
+                
+                // Reschedule alarms whenever wake time changes
+                LaunchedEffect(uiState.wakeTime) {
+                    alarmScheduler.scheduleRitualAlarms(uiState.wakeTime)
+                }
 
                 NavHost(
                     navController = navController,
@@ -78,19 +86,29 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable<SkillTreeRoute> {
+                        val progressMap = uiState.skillProgress.associateBy { it.nodeId }
+
                         SkillTreeGraph(
-                            nodes = listOf(
-                                SkillNode("1", "Ignition", Offset(0.5f, 0.2f), unlocked = true, completed = true, pillar = "AWAKENING"),
-                                SkillNode("2", "Deep Work I", Offset(0.3f, 0.4f), unlocked = true, completed = false, pillar = "TECHNE"),
-                                SkillNode("3", "The Archive", Offset(0.7f, 0.4f), unlocked = true, completed = false, pillar = "HISTORIA"),
-                                SkillNode("4", "Physical Fortitude", Offset(0.5f, 0.6f), unlocked = false, completed = false, pillar = "GYMNOS")
-                            ),
-                            edges = listOf(
-                                SkillEdge("1", "2"),
-                                SkillEdge("1", "3"),
-                                SkillEdge("2", "4"),
-                                SkillEdge("3", "4")
-                            )
+                            nodes = SkillTreeData.nodes.map { node ->
+                                val prog = progressMap[node.id]
+                                SkillNode(
+                                    id = node.id,
+                                    name = node.title,
+                                    position = when (node.id) {
+                                        "1" -> Offset(0.5f, 0.15f)
+                                        "2" -> Offset(0.25f, 0.4f)
+                                        "3" -> Offset(0.75f, 0.4f)
+                                        "4" -> Offset(0.5f, 0.65f)
+                                        "5" -> Offset(0.5f, 0.85f)
+                                        else -> Offset(0.5f, 0.5f)
+                                    },
+                                    unlocked = prog?.unlocked ?: false,
+                                    completed = prog?.completed ?: false,
+                                    pillar = node.pillar,
+                                    progress = prog?.progress ?: 0f
+                                )
+                            },
+                            edges = SkillTreeData.edges.map { SkillEdge(it.from, it.to) }
                         )
                     }
                 }

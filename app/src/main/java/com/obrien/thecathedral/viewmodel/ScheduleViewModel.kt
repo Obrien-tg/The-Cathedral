@@ -8,6 +8,8 @@ import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.JournalEntry
 import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
+import com.obrien.thecathedral.model.SkillProgress
+import com.obrien.thecathedral.model.SkillTreeData
 import com.obrien.thecathedral.util.computeStatus
 import com.obrien.thecathedral.util.isActiveAt
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +39,8 @@ data class CathedralUiState(
     val activeSourceIndex: Int = 0,
     val activeSourcePage: Int = 0,
     val pillars: List<Pillar> = emptyList(),
-    val wakeTime: LocalTime = LocalTime.of(7, 0)
+    val wakeTime: LocalTime = LocalTime.of(7, 0),
+    val skillProgress: List<SkillProgress> = emptyList()
 )
 
 @HiltViewModel
@@ -54,7 +57,7 @@ class ScheduleViewModel @Inject constructor(
     private val _activeSourcePage = MutableStateFlow(0)
     private val _wakeTime = MutableStateFlow(LocalTime.of(7, 0))
 
-    // Focus Timer State (Bug #3)
+    // Focus Timer State
     private val _focusTimeRemaining = MutableStateFlow(25 * 60)
     val focusTimeRemaining: StateFlow<Int> = _focusTimeRemaining.asStateFlow()
 
@@ -66,13 +69,8 @@ class ScheduleViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // Daily reset check (Bug #1)
-            val today = LocalDate.now().toString()
-            val lastReset = repository.getLastResetDate()
-            if (lastReset != today) {
-                repository.clearAlarmCompletionsOnly()
-                repository.setLastResetDate(today)
-            }
+            // Daily reset
+            repository.checkDailyReset()
 
             launch {
                 repository.completedAlarms.collect { ids ->
@@ -94,9 +92,20 @@ class ScheduleViewModel @Inject constructor(
                     _activeSourcePage.value = page
                 }
             }
+            launch {
+                repository.wakeTime.collect { timeStr ->
+                    if (timeStr != null) {
+                        try {
+                            _wakeTime.value = LocalTime.parse(timeStr)
+                        } catch (_: Exception) {
+                            _wakeTime.value = LocalTime.of(7, 0)
+                        }
+                    }
+                }
+            }
         }
 
-        // Focus Timer Ticker (Bug #3)
+        // Focus Timer Ticker
         viewModelScope.launch {
             while (isActive) {
                 delay(1000L)
@@ -106,6 +115,7 @@ class ScheduleViewModel @Inject constructor(
             }
         }
 
+        // Clock ticker (every minute)
         viewModelScope.launch {
             while (isActive) {
                 _currentTime.value = LocalTime.now()
@@ -116,14 +126,15 @@ class ScheduleViewModel @Inject constructor(
 
     val uiState: StateFlow<CathedralUiState> = combine(
         combine(_currentTime, _completedAlarmIds, _journalEntries) { t, c, j -> Triple(t, c, j) },
-        combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) }
-    ) { part1, part2 ->
+        combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) },
+        _focusSessionCount
+    ) { part1, part2, focusSessions ->
         val (time, completedIds, entries) = part1
         val (sourceIdx, sourcePage, wake) = part2
-        
+
         val baseWakeTime = LocalTime.of(7, 0)
         val offset = Duration.between(baseWakeTime, wake)
-        
+
         val shiftedPillars = ScheduleData.pillars.map { pillar ->
             val shiftedAlarms = pillar.alarms.map { alarm ->
                 alarm.copy(time = alarm.time.plus(offset))
@@ -140,6 +151,8 @@ class ScheduleViewModel @Inject constructor(
             pillar.alarms.firstOrNull()?.time?.isAfter(time) == true
         }
 
+        val skillProgress = computeSkillProgress(completedIds, focusSessions, entries)
+
         CathedralUiState(
             currentTime = time,
             completedAlarmIds = completedIds,
@@ -152,13 +165,66 @@ class ScheduleViewModel @Inject constructor(
             activeSourceIndex = sourceIdx,
             activeSourcePage = sourcePage,
             pillars = shiftedPillars,
-            wakeTime = wake
+            wakeTime = wake,
+            skillProgress = skillProgress
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = CathedralUiState()
     )
+
+    private fun computeSkillProgress(
+        completedAlarmIds: Set<String>,
+        focusSessions: Int,
+        journalEntries: List<JournalEntry>
+    ): List<SkillProgress> {
+        val journalDays = journalEntries.map { it.date }.toSet().size
+
+        // First pass – calculate raw progress for each node
+        val raw = SkillTreeData.nodes.associate { node ->
+            val alarmHits = when (node.pillar) {
+                "AWAKENING" -> if ("ignition" in completedAlarmIds) 1 else 0
+                "TECHNE" -> listOf("deep_work_1", "deep_work_2", "commit")
+                    .count { it in completedAlarmIds }
+                "HISTORIA" -> listOf("primary_source", "peripatetic")
+                    .count { it in completedAlarmIds }
+                "GYMNOS" -> if ("physical" in completedAlarmIds) 1 else 0
+                "SOPHIA" -> if ("digital_sunset" in completedAlarmIds) 1 else 0
+                else -> 0
+            }
+
+            val completionRatio = (alarmHits.toFloat() / node.requiredCompletions.coerceAtLeast(1))
+                .coerceAtMost(1f)
+            val focusRatio = if (node.requiredFocusSessions > 0) {
+                (focusSessions.toFloat() / node.requiredFocusSessions).coerceAtMost(1f)
+            } else 1f
+            val journalRatio = if (node.requiredJournalDays > 0) {
+                (journalDays.toFloat() / node.requiredJournalDays).coerceAtMost(1f)
+            } else 1f
+
+            val overall = minOf(completionRatio, focusRatio, journalRatio)
+            node.id to overall
+        }
+
+        // Second pass – determine unlock status (all parents must be completed)
+        return SkillTreeData.nodes.map { node ->
+            val progress = raw[node.id] ?: 0f
+            val completed = progress >= 1f
+
+            val parents = SkillTreeData.edges.filter { it.to == node.id }.map { it.from }
+            val unlocked = parents.isEmpty() || parents.all { parentId ->
+                (raw[parentId] ?: 0f) >= 1f
+            }
+
+            SkillProgress(
+                nodeId = node.id,
+                unlocked = unlocked,
+                completed = completed,
+                progress = progress
+            )
+        }
+    }
 
     fun toggleAlarm(alarmId: String) {
         viewModelScope.launch {
@@ -195,6 +261,9 @@ class ScheduleViewModel @Inject constructor(
 
     fun setWakeTime(time: LocalTime) {
         _wakeTime.value = time
+        viewModelScope.launch {
+            repository.setWakeTime(time.toString())
+        }
     }
 
     fun clearAllProgress() {
@@ -203,7 +272,7 @@ class ScheduleViewModel @Inject constructor(
         }
     }
 
-    // Focus Timer Actions (Bug #3)
+    // Focus Timer Actions
     fun startFocusTimer() {
         _focusIsRunning.value = true
     }

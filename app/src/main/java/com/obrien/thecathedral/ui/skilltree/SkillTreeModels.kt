@@ -8,7 +8,8 @@ data class SkillNode(
     val position: Offset, // Normalized coordinates (0.0 to 1.0)
     val unlocked: Boolean = false,
     val completed: Boolean = false,
-    val pillar: String // TECHNE, HISTORIA, etc.
+    val pillar: String, // AWAKENING, TECHNE, etc.
+    val progress: Float = 0f
 )
 
 data class SkillEdge(

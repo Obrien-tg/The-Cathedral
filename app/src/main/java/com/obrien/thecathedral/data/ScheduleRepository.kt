@@ -14,6 +14,7 @@ class ScheduleRepository @Inject constructor(
     val journalEntries: Flow<List<JournalEntry>> = dataStoreManager.journalEntries
     val activeSourceIndex: Flow<Int> = dataStoreManager.activeSourceIndex
     val activeSourcePage: Flow<Int> = dataStoreManager.activeSourcePage
+    val wakeTime: Flow<String?> = dataStoreManager.wakeTime
 
     suspend fun getLastResetDate(): String {
         return dataStoreManager.lastResetDate.first()
@@ -49,6 +50,10 @@ class ScheduleRepository @Inject constructor(
 
     suspend fun setActiveSourcePage(page: Int) {
         dataStoreManager.setActiveSourcePage(page)
+    }
+
+    suspend fun setWakeTime(time: String) {
+        dataStoreManager.setWakeTime(time)
     }
 
     suspend fun clearAllProgress() {
