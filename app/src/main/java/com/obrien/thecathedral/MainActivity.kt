@@ -24,6 +24,8 @@ import com.obrien.thecathedral.util.AlarmScheduler
 import com.obrien.thecathedral.util.NotificationHelper
 import com.obrien.thecathedral.viewmodel.ScheduleViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -32,12 +34,24 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean -> }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this)
+
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
 
         // Request exact alarm permission for Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

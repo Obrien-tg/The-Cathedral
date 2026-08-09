@@ -26,6 +26,7 @@ class DataStoreManager(private val context: Context) {
         val WAKE_TIME = stringPreferencesKey("wake_time")
         val HISTORICAL_COMPLETIONS = stringPreferencesKey("historical_completions")
         val TOTAL_FOCUS_SESSIONS = intPreferencesKey("total_focus_sessions")
+        val COMPLETION_HISTORY = stringPreferencesKey("completion_history")
     }
 
     val wakeTime: Flow<String?> = context.dataStore.data
@@ -75,11 +76,36 @@ class DataStoreManager(private val context: Context) {
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[TOTAL_FOCUS_SESSIONS] ?: 0 }
 
+    // Map of date string to number of rituals completed that day
+    val completionHistory: Flow<Map<String, Int>> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs ->
+            val json = prefs[COMPLETION_HISTORY] ?: "{}"
+            try {
+                Json.decodeFromString<Map<String, Int>>(json)
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        }
+
     suspend fun markComplete(id: String) {
         try {
+            val today = LocalDate.now().toString()
             context.dataStore.edit { prefs ->
                 val current = prefs[COMPLETED_ALARMS] ?: emptySet()
-                prefs[COMPLETED_ALARMS] = current + id
+                if (id !in current) {
+                    prefs[COMPLETED_ALARMS] = current + id
+                    
+                    // Update daily completion count for heatmap
+                    val historyJson = prefs[COMPLETION_HISTORY] ?: "{}"
+                    val history = try {
+                        Json.decodeFromString<Map<String, Int>>(historyJson).toMutableMap()
+                    } catch (_: Exception) {
+                        mutableMapOf()
+                    }
+                    history[today] = (history[today] ?: 0) + 1
+                    prefs[COMPLETION_HISTORY] = Json.encodeToString(history)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -88,9 +114,23 @@ class DataStoreManager(private val context: Context) {
 
     suspend fun markIncomplete(id: String) {
         try {
+            val today = LocalDate.now().toString()
             context.dataStore.edit { prefs ->
                 val current = prefs[COMPLETED_ALARMS] ?: emptySet()
-                prefs[COMPLETED_ALARMS] = current - id
+                if (id in current) {
+                    prefs[COMPLETED_ALARMS] = current - id
+                    
+                    // Decrement daily completion count
+                    val historyJson = prefs[COMPLETION_HISTORY] ?: "{}"
+                    val history = try {
+                        Json.decodeFromString<Map<String, Int>>(historyJson).toMutableMap()
+                    } catch (_: Exception) {
+                        mutableMapOf()
+                    }
+                    val count = (history[today] ?: 0) - 1
+                    if (count <= 0) history.remove(today) else history[today] = count
+                    prefs[COMPLETION_HISTORY] = Json.encodeToString(history)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

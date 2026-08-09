@@ -31,6 +31,7 @@ import com.obrien.thecathedral.viewmodel.ScheduleViewModel
 import androidx.compose.material.icons.filled.AccountTree
 import com.obrien.thecathedral.ui.components.PillarProgressRing
 import com.obrien.thecathedral.ui.components.SunflowerParticle
+import com.obrien.thecathedral.ui.components.FidelityHeatmap
 import com.obrien.thecathedral.ui.theme.AmbientDust
 import com.obrien.thecathedral.ui.theme.glassCard
 
@@ -121,6 +122,14 @@ fun HomeScreenContent(
                     ProgressSection(
                         completed = uiState.completedCount,
                         total = uiState.totalCount
+                    )
+                }
+
+                item {
+                    FidelityHeatmap(
+                        completionHistory = uiState.completionHistory,
+                        totalRituals = uiState.totalCount,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 

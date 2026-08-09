@@ -17,6 +17,7 @@ class ScheduleRepository @Inject constructor(
     val wakeTime: Flow<String?> = dataStoreManager.wakeTime
     val historicalCompletions: Flow<Map<String, Int>> = dataStoreManager.historicalCompletions
     val totalFocusSessions: Flow<Int> = dataStoreManager.totalFocusSessions
+    val completionHistory: Flow<Map<String, Int>> = dataStoreManager.completionHistory
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)

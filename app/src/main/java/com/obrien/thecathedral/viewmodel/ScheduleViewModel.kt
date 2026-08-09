@@ -10,6 +10,7 @@ import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
 import com.obrien.thecathedral.model.SkillProgress
 import com.obrien.thecathedral.model.SkillTreeData
+import com.obrien.thecathedral.service.ForgeService
 import com.obrien.thecathedral.util.computeStatus
 import com.obrien.thecathedral.util.isActiveAt
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,12 +42,14 @@ data class CathedralUiState(
     val wakeTime: LocalTime = LocalTime.of(7, 0),
     val skillProgress: List<SkillProgress> = emptyList(),
     val historicalCompletions: Map<String, Int> = emptyMap(),
-    val totalFocusSessions: Int = 0
+    val totalFocusSessions: Int = 0,
+    val completionHistory: Map<String, Int> = emptyMap()
 )
 
 @HiltViewModel
 class ScheduleViewModel @Inject constructor(
-    private val repository: ScheduleRepository
+    private val repository: ScheduleRepository,
+    private val application: android.app.Application
 ) : ViewModel() {
 
     private val _currentTime = MutableStateFlow(LocalTime.now())
@@ -59,6 +62,7 @@ class ScheduleViewModel @Inject constructor(
     private val _wakeTime = MutableStateFlow(LocalTime.of(7, 0))
     private val _historicalCompletions = MutableStateFlow<Map<String, Int>>(emptyMap())
     private val _totalFocusSessions = MutableStateFlow(0)
+    private val _completionHistory = MutableStateFlow<Map<String, Int>>(emptyMap())
 
     // Focus Timer State
     private val _focusTimeRemaining = MutableStateFlow(25 * 60)
@@ -70,7 +74,30 @@ class ScheduleViewModel @Inject constructor(
     private val _focusSessionCount = MutableStateFlow(0)
     val focusSessionCount: StateFlow<Int> = _focusSessionCount.asStateFlow()
 
+    private var forgeService: ForgeService? = null
+    private val serviceConnection = object : android.content.ServiceConnection {
+        override fun onServiceConnected(name: android.content.ComponentName?, service: android.os.IBinder?) {
+            val binder = service as ForgeService.ForgeBinder
+            forgeService = binder.getService()
+            
+            // Link service flows to ViewModel state
+            viewModelScope.launch {
+                forgeService?.timeRemaining?.collect { _focusTimeRemaining.value = it }
+            }
+            viewModelScope.launch {
+                forgeService?.isRunning?.collect { _focusIsRunning.value = it }
+            }
+        }
+
+        override fun onServiceDisconnected(name: android.content.ComponentName?) {
+            forgeService = null
+        }
+    }
+
     init {
+        val intent = android.content.Intent(application, ForgeService::class.java)
+        application.bindService(intent, serviceConnection, android.content.Context.BIND_AUTO_CREATE)
+        
         viewModelScope.launch {
             // Daily reset
             repository.checkDailyReset()
@@ -117,14 +144,9 @@ class ScheduleViewModel @Inject constructor(
                     _focusSessionCount.value = it 
                 }
             }
-        }
-
-        // Focus Timer Ticker
-        viewModelScope.launch {
-            while (isActive) {
-                delay(1000L)
-                if (_focusIsRunning.value && _focusTimeRemaining.value > 0) {
-                    tickFocusTimer()
+            launch {
+                repository.completionHistory.collect {
+                    _completionHistory.value = it
                 }
             }
         }
@@ -141,11 +163,11 @@ class ScheduleViewModel @Inject constructor(
     val uiState: StateFlow<CathedralUiState> = combine(
         combine(_currentTime, _completedAlarmIds, _journalEntries) { t, c, j -> Triple(t, c, j) },
         combine(_activeSourceIndex, _activeSourcePage, _wakeTime) { idx, page, wake -> Triple(idx, page, wake) },
-        combine(_historicalCompletions, _totalFocusSessions) { h, f -> Pair(h, f) }
+        combine(_historicalCompletions, _totalFocusSessions, _completionHistory) { h, f, ch -> Triple(h, f, ch) }
     ) { part1, part2, part3 ->
         val (time, completedIds, entries) = part1
         val (sourceIdx, sourcePage, wake) = part2
-        val (historical, focusSessions) = part3
+        val (historical, focusSessions, historyMap) = part3
         
         val baseWakeTime = LocalTime.of(7, 0)
         val offset = Duration.between(baseWakeTime, wake)
@@ -183,7 +205,8 @@ class ScheduleViewModel @Inject constructor(
             wakeTime = wake,
             skillProgress = skillProgress,
             historicalCompletions = historical,
-            totalFocusSessions = focusSessions
+            totalFocusSessions = focusSessions,
+            completionHistory = historyMap
         )
     }.stateIn(
         scope = viewModelScope,
@@ -292,31 +315,41 @@ class ScheduleViewModel @Inject constructor(
 
     // Focus Timer Actions
     fun startFocusTimer() {
-        _focusIsRunning.value = true
+        val intent = android.content.Intent(application, ForgeService::class.java).apply {
+            action = ForgeService.ACTION_START
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            application.startForegroundService(intent)
+        } else {
+            application.startService(intent)
+        }
     }
 
     fun pauseFocusTimer() {
-        _focusIsRunning.value = false
+        val intent = android.content.Intent(application, ForgeService::class.java).apply {
+            action = ForgeService.ACTION_PAUSE
+        }
+        application.startService(intent)
     }
 
     fun resetFocusTimer() {
-        _focusIsRunning.value = false
-        _focusTimeRemaining.value = 25 * 60
+        val intent = android.content.Intent(application, ForgeService::class.java).apply {
+            action = ForgeService.ACTION_RESET
+        }
+        application.startService(intent)
     }
 
     fun setFocusBreak() {
-        _focusIsRunning.value = false
-        _focusTimeRemaining.value = 5 * 60
+        val intent = android.content.Intent(application, ForgeService::class.java).apply {
+            action = ForgeService.ACTION_SET_BREAK
+        }
+        application.startService(intent)
     }
 
-    private fun tickFocusTimer() {
-        if (_focusTimeRemaining.value > 0) {
-            _focusTimeRemaining.value--
-        } else {
-            _focusIsRunning.value = false
-            viewModelScope.launch {
-                repository.incrementFocusSessions()
-            }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        try {
+            application.unbindService(serviceConnection)
+        } catch (_: Exception) { }
     }
 }
