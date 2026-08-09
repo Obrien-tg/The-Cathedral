@@ -40,11 +40,11 @@ fun PillarProgressRing(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(8.dp)
+        modifier = modifier.padding(4.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Canvas(modifier = Modifier.size(72.dp)) {
-                val strokeWidth = 8.dp.toPx()
+            Canvas(modifier = Modifier.size(60.dp)) {
+                val strokeWidth = 6.dp.toPx()
                 val radius = (size.minDimension - strokeWidth) / 2
                 
                 // Background Track

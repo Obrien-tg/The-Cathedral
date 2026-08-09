@@ -88,7 +88,7 @@ fun HomeScreenContent(
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
@@ -97,12 +97,12 @@ fun HomeScreenContent(
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        PillarProgressRing(percentage = 0.5f, pillarName = "TECHNE", level = 1)
-                        PillarProgressRing(percentage = 0.3f, pillarName = "HISTORIA", level = 1)
-                        PillarProgressRing(percentage = 0.8f, pillarName = "GYMNOS", level = 2)
-                        PillarProgressRing(percentage = 0.2f, pillarName = "SOPHIA", level = 1)
+                        PillarProgressRing(percentage = 0.5f, pillarName = "TECHNE", level = 1, modifier = Modifier.weight(1f))
+                        PillarProgressRing(percentage = 0.3f, pillarName = "HISTORIA", level = 1, modifier = Modifier.weight(1f))
+                        PillarProgressRing(percentage = 0.8f, pillarName = "GYMNOS", level = 2, modifier = Modifier.weight(1f))
+                        PillarProgressRing(percentage = 0.2f, pillarName = "SOPHIA", level = 1, modifier = Modifier.weight(1f))
                     }
                 }
 
