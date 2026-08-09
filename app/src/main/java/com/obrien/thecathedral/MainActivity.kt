@@ -65,86 +65,92 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TheCathedralTheme {
-                val navController = rememberNavController()
-                val viewModel: ScheduleViewModel = hiltViewModel()
-                val uiState by viewModel.uiState.collectAsState()
-                
-                // Reschedule alarms whenever wake time changes
-                LaunchedEffect(uiState.wakeTime) {
-                    alarmScheduler.scheduleRitualAlarms(uiState.wakeTime)
-                }
+                var showSplash by remember { mutableStateOf(true) }
 
-                NavHost(
-                    navController = navController,
-                    startDestination = HomeRoute
-                ) {
-                    composable<HomeRoute> {
-                        HomeScreen(
-                            viewModel = viewModel,
-                            onViewFullSchedule = { navController.navigate(ScheduleRoute) },
-                            onFocusMode = { navController.navigate(FocusModeRoute) },
-                            onJournal = { navController.navigate(JournalRoute) },
-                            onPhilosophy = { navController.navigate(PhilosophyRoute) },
-                            onSkillTree = { navController.navigate(SkillTreeRoute) },
-                            onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
-                        )
+                if (showSplash) {
+                    SplashScreen(onSplashFinished = { showSplash = false })
+                } else {
+                    val navController = rememberNavController()
+                    val viewModel: ScheduleViewModel = hiltViewModel()
+                    val uiState by viewModel.uiState.collectAsState()
+                    
+                    // Reschedule alarms whenever wake time changes
+                    LaunchedEffect(uiState.wakeTime) {
+                        alarmScheduler.scheduleRitualAlarms(uiState.wakeTime)
                     }
-                    composable<ScheduleRoute> {
-                        FullScheduleScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable<FocusModeRoute> {
-                        FocusModeScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable<JournalRoute> {
-                        JournalScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
-                    composable<PhilosophyRoute> {
-                        PhilosophyScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() },
-                            onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
-                        )
-                    }
-                    composable<SkillTreeRoute> {
-                        val progressMap = uiState.skillProgress.associateBy { it.nodeId }
 
-                        SkillTreeGraph(
-                            nodes = SkillTreeData.nodes.map { node ->
-                                val prog = progressMap[node.id]
-                                SkillNode(
-                                    id = node.id,
-                                    name = node.title,
-                                    position = when (node.id) {
-                                        "1" -> Offset(0.5f, 0.15f)
-                                        "2" -> Offset(0.25f, 0.4f)
-                                        "3" -> Offset(0.75f, 0.4f)
-                                        "4" -> Offset(0.5f, 0.65f)
-                                        "5" -> Offset(0.5f, 0.85f)
-                                        else -> Offset(0.5f, 0.5f)
-                                    },
-                                    unlocked = prog?.unlocked ?: false,
-                                    completed = prog?.completed ?: false,
-                                    pillar = node.pillar,
-                                    progress = prog?.progress ?: 0f
-                                )
-                            },
-                            edges = SkillTreeData.edges.map { SkillEdge(it.from, it.to) }
-                        )
-                    }
-                    composable<WeeklyReviewRoute> {
-                        WeeklyReviewScreen(
-                            viewModel = viewModel,
-                            onBack = { navController.popBackStack() }
-                        )
+                    NavHost(
+                        navController = navController,
+                        startDestination = HomeRoute
+                    ) {
+                        composable<HomeRoute> {
+                            HomeScreen(
+                                viewModel = viewModel,
+                                onViewFullSchedule = { navController.navigate(ScheduleRoute) },
+                                onFocusMode = { navController.navigate(FocusModeRoute) },
+                                onJournal = { navController.navigate(JournalRoute) },
+                                onPhilosophy = { navController.navigate(PhilosophyRoute) },
+                                onSkillTree = { navController.navigate(SkillTreeRoute) },
+                                onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
+                            )
+                        }
+                        composable<ScheduleRoute> {
+                            FullScheduleScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable<FocusModeRoute> {
+                            FocusModeScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable<JournalRoute> {
+                            JournalScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable<PhilosophyRoute> {
+                            PhilosophyScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() },
+                                onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
+                            )
+                        }
+                        composable<SkillTreeRoute> {
+                            val progressMap = uiState.skillProgress.associateBy { it.nodeId }
+
+                            SkillTreeGraph(
+                                nodes = SkillTreeData.nodes.map { node ->
+                                    val prog = progressMap[node.id]
+                                    SkillNode(
+                                        id = node.id,
+                                        name = node.title,
+                                        position = when (node.id) {
+                                            "1" -> Offset(0.5f, 0.15f)
+                                            "2" -> Offset(0.25f, 0.4f)
+                                            "3" -> Offset(0.75f, 0.4f)
+                                            "4" -> Offset(0.5f, 0.65f)
+                                            "5" -> Offset(0.5f, 0.85f)
+                                            else -> Offset(0.5f, 0.5f)
+                                        },
+                                        unlocked = prog?.unlocked ?: false,
+                                        completed = prog?.completed ?: false,
+                                        pillar = node.pillar,
+                                        progress = prog?.progress ?: 0f
+                                    )
+                                },
+                                edges = SkillTreeData.edges.map { SkillEdge(it.from, it.to) }
+                            )
+                        }
+                        composable<WeeklyReviewRoute> {
+                            WeeklyReviewScreen(
+                                viewModel = viewModel,
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
                     }
                 }
             }
