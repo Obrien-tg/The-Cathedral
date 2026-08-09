@@ -29,7 +29,7 @@ fun SunflowerParticle(
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
             animation = tween(8000, easing = LinearEasing),
-            repeatMode = RepeatType.Restart
+            repeatMode = RepeatMode.Restart
         ),
         label = "rotation"
     )
@@ -39,7 +39,7 @@ fun SunflowerParticle(
         targetValue = if (drift) 15f else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(3000, easing = SineEaseInOut),
-            repeatMode = RepeatType.Reverse
+            repeatMode = RepeatMode.Reverse
         ),
         label = "drift"
     )

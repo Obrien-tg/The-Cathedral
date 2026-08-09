@@ -15,6 +15,18 @@ class ScheduleRepository @Inject constructor(
     val activeSourceIndex: Flow<Int> = dataStoreManager.activeSourceIndex
     val activeSourcePage: Flow<Int> = dataStoreManager.activeSourcePage
 
+    suspend fun getLastResetDate(): String {
+        return dataStoreManager.lastResetDate.first()
+    }
+
+    suspend fun setLastResetDate(date: String) {
+        dataStoreManager.setLastResetDate(date)
+    }
+
+    suspend fun clearAlarmCompletionsOnly() {
+        dataStoreManager.clearAlarmCompletionsOnly()
+    }
+
     suspend fun checkDailyReset() {
         dataStoreManager.resetDailyIfNecessary()
     }

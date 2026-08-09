@@ -1,6 +1,9 @@
 package com.obrien.thecathedral.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +21,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -28,12 +33,14 @@ import com.obrien.thecathedral.data.ScheduleData
 import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
+import com.obrien.thecathedral.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.RitualSuccess
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
 import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,19 +75,30 @@ fun FullScheduleScreen(
         },
         containerColor = MonasteryBlack
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
-        ) {
-            items(ScheduleData.pillars) { pillar ->
-                PillarItem(
-                    pillar = pillar,
-                    viewModel = viewModel
-                )
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Subtle sunflower in corner (Bug #4)
+            SunflowerParticle(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 24.dp, end = 20.dp),
+                size = 16f,
+                drift = false
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp)
+            ) {
+                items(ScheduleData.pillars) { pillar ->
+                    PillarItem(
+                        pillar = pillar,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
@@ -140,7 +158,9 @@ fun PillarItem(
                             alarm = alarm,
                             viewModel = viewModel
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        if (alarm != pillar.alarms.last()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
                     }
                 }
             }
@@ -156,6 +176,27 @@ fun AlarmDetail(
     val status = viewModel.getAlarmStatus(alarm)
     val isCompleted = status == PillarStatus.COMPLETE
 
+    var showBlessing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isCompleted) {
+        if (isCompleted) {
+            showBlessing = true
+            delay(600)
+            showBlessing = false
+        }
+    }
+
+    val blessingScale by animateFloatAsState(
+        targetValue = if (showBlessing) 1.5f else 0f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy),
+        label = "scale"
+    )
+    val blessingAlpha by animateFloatAsState(
+        targetValue = if (showBlessing) 0.8f else 0f,
+        animationSpec = spring(),
+        label = "alpha"
+    )
+
     val statusColor = when (status) {
         PillarStatus.COMPLETE -> RitualSuccess
         PillarStatus.MISSED -> RitualMiss
@@ -163,52 +204,67 @@ fun AlarmDetail(
         PillarStatus.PENDING -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
     }
 
-    Column {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
+    Box(contentAlignment = Alignment.Center) {
+        // Blessing Burst (Bug #4)
+        if (showBlessing || blessingAlpha > 0f) {
+            SunflowerParticle(
                 modifier = Modifier
-                    .size(8.dp)
-                    .background(statusColor, RoundedCornerShape(4.dp))
+                    .size(48.dp)
+                    .scale(blessingScale)
+                    .alpha(blessingAlpha),
+                size = 40f,
+                drift = false,
+                color = RitualSuccess
             )
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${alarm.time} — ${alarm.name}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = statusColor,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            IconButton(
-                onClick = { viewModel.toggleAlarm(alarm.id) },
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    imageVector = if (isCompleted)
-                        Icons.Filled.CheckCircle
-                    else
-                        Icons.Outlined.RadioButtonUnchecked,
-                    contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
-                    tint = if (isCompleted) RitualSuccess else CathedralGold.copy(alpha = 0.4f)
-                )
-            }
         }
 
-        alarm.tasks.forEach { task ->
-            Text(
-                text = "• $task",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isCompleted)
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
-                else
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                modifier = Modifier.padding(start = 16.dp, top = 2.dp)
-            )
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(statusColor, RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${alarm.time} — ${alarm.name}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = statusColor,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                IconButton(
+                    onClick = { viewModel.toggleAlarm(alarm.id) },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isCompleted)
+                            Icons.Filled.CheckCircle
+                        else
+                            Icons.Outlined.RadioButtonUnchecked,
+                        contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
+                        tint = if (isCompleted) RitualSuccess else CathedralGold.copy(alpha = 0.4f)
+                    )
+                }
+            }
+
+            alarm.tasks.forEach { task ->
+                Text(
+                    text = "• $task",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isCompleted)
+                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                    else
+                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(start = 16.dp, top = 2.dp)
+                )
+            }
         }
     }
 }

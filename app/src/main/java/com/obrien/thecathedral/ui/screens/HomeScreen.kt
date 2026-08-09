@@ -30,6 +30,7 @@ import com.obrien.thecathedral.viewmodel.ScheduleViewModel
 
 import androidx.compose.material.icons.filled.AccountTree
 import com.obrien.thecathedral.ui.components.PillarProgressRing
+import com.obrien.thecathedral.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.AmbientDust
 import com.obrien.thecathedral.ui.theme.glassCard
 
@@ -74,6 +75,14 @@ fun HomeScreenContent(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()
+
+            // Subtle sunflower charm — top right, floating (Bug #4)
+            SunflowerParticle(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 48.dp, end = 20.dp),
+                size = 20f
+            )
 
             LazyColumn(
                 modifier = Modifier

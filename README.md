@@ -1,19 +1,55 @@
 # The Cathedral Codex
 
-A daily ritual engine for discipline, techne, and freedom.
+> "I am one of many. But I am the master of my own two hands."
 
-## Philosophy
-This is not a productivity app. It is a digital sanctuary designed to turn daily actions into sacred rituals.
+A daily discipline tracker for Android, built with Kotlin and Jetpack Compose.
+
+## What It Does
+The Cathedral structures your day into six sacred pillars — from morning ignition to evening sanctuary — and tracks your ritual completion with persistence, real-time awareness, and a monastic aesthetic.
 
 ## Features
-- **The Codex**: A 6-pillar daily schedule anchored in history and philosophy.
-- **The Forge (Focus Mode)**: Ritualistic 25-minute timers with rotating wisdom from Marcus Aurelius, Aristotle, and more.
-- **The Archive (Journal)**: Daily scorecard and free-text reflection to track your ascent.
-- **The Sanctuary (Philosophy)**: A place to anchor your purpose, mantra, and primary source curriculum.
+- **Six Daily Pillars** — Awakening, Forge, Archive, Afternoon Grind, Arena, Sanctuary
+- **Real-Time Active Pillar** — Home screen highlights the current pillar based on device time
+- **Task Completion Tracking** — Tap to mark rituals complete; persists across restarts
+- **Daily Score** — Visual progress indicator showing completed rituals vs. total
+- **Focus Mode** — 25-minute Pomodoro timer with rotating philosophical quotes
+- **Journal** — 4-pillar scorecard (Techne, Historia, Gymnos, Sophia) + free reflection
+- **Philosophy Screen** — Purpose, Mantra, Emergency Protocols, Primary Source tracker
+- **Sunflower Charm** — A quiet good-luck symbol woven throughout the app
 
-## Technical Foundation
-- Built with Jetpack Compose & Kotlin.
-- Persistent state via Android DataStore.
-- MVVM Architecture with Clean Repository pattern.
-- Modern Navigation with Type-Safe Routes.
-- Full support for Android 7.0+ (API 24) via Core Library Desugaring.
+## Tech Stack
+| Layer | Technology |
+|---|---|
+| **UI** | Jetpack Compose + Material 3 |
+| **Navigation** | Type-safe Compose Navigation (Kotlin Serialization) |
+| **State** | ViewModel + StateFlow |
+| **DI** | Hilt |
+| **Persistence** | DataStore Preferences |
+| **Time** | java.time (desugared for API 24+) |
+| **Build** | Gradle Version Catalogs |
+
+## Build
+```bash
+./gradlew assembleDebug
+```
+**Requirements:** Android Studio Ladybug+, JDK 17+, Android SDK 37
+
+## Architecture
+```
+MainActivity
+├── NavHost (type-safe routes)
+│   ├── HomeScreen ← ScheduleViewModel
+│   ├── FullScheduleScreen ← ScheduleViewModel
+│   ├── FocusModeScreen ← ScheduleViewModel
+│   ├── JournalScreen ← ScheduleViewModel
+│   └── PhilosophyScreen ← ScheduleViewModel
+│
+ScheduleViewModel
+├── ScheduleRepository
+│   └── DataStoreManager (persistent prefs)
+├── ScheduleData (static schedule source)
+└── Time-based state computation
+```
+
+## License
+MIT — Built by Obrien TG

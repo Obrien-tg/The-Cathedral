@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,78 +27,71 @@ class MainActivity : ComponentActivity() {
     lateinit var alarmScheduler: AlarmScheduler
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this)
         alarmScheduler.scheduleRitualAlarms()
 
-        splashScreen.setKeepOnScreenCondition { false }
-
         setContent {
             TheCathedralTheme {
-                var showSplash by remember { mutableStateOf(true) }
+                val navController = rememberNavController()
+                val viewModel: ScheduleViewModel = hiltViewModel()
 
-                if (showSplash) {
-                    SplashScreen(onSplashFinished = { showSplash = false })
-                } else {
-                    val navController = rememberNavController()
-                    val viewModel: ScheduleViewModel = hiltViewModel()
-
-                    NavHost(
-                        navController = navController,
-                        startDestination = HomeRoute
-                    ) {
-                        composable<HomeRoute> {
-                            HomeScreen(
-                                viewModel = viewModel,
-                                onViewFullSchedule = { navController.navigate(ScheduleRoute) },
-                                onFocusMode = { navController.navigate(FocusModeRoute) },
-                                onJournal = { navController.navigate(JournalRoute) },
-                                onPhilosophy = { navController.navigate(PhilosophyRoute) },
-                                onSkillTree = { navController.navigate(SkillTreeRoute) }
+                NavHost(
+                    navController = navController,
+                    startDestination = HomeRoute
+                ) {
+                    composable<HomeRoute> {
+                        HomeScreen(
+                            viewModel = viewModel,
+                            onViewFullSchedule = { navController.navigate(ScheduleRoute) },
+                            onFocusMode = { navController.navigate(FocusModeRoute) },
+                            onJournal = { navController.navigate(JournalRoute) },
+                            onPhilosophy = { navController.navigate(PhilosophyRoute) },
+                            onSkillTree = { navController.navigate(SkillTreeRoute) }
+                        )
+                    }
+                    composable<ScheduleRoute> {
+                        FullScheduleScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable<FocusModeRoute> {
+                        FocusModeScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable<JournalRoute> {
+                        JournalScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable<PhilosophyRoute> {
+                        PhilosophyScreen(
+                            viewModel = viewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable<SkillTreeRoute> {
+                        SkillTreeGraph(
+                            nodes = listOf(
+                                SkillNode("1", "Ignition", Offset(0.5f, 0.2f), unlocked = true, completed = true, pillar = "AWAKENING"),
+                                SkillNode("2", "Deep Work I", Offset(0.3f, 0.4f), unlocked = true, completed = false, pillar = "TECHNE"),
+                                SkillNode("3", "The Archive", Offset(0.7f, 0.4f), unlocked = true, completed = false, pillar = "HISTORIA"),
+                                SkillNode("4", "Physical Fortitude", Offset(0.5f, 0.6f), unlocked = false, completed = false, pillar = "GYMNOS")
+                            ),
+                            edges = listOf(
+                                SkillEdge("1", "2"),
+                                SkillEdge("1", "3"),
+                                SkillEdge("2", "4"),
+                                SkillEdge("3", "4")
                             )
-                        }
-                        composable<ScheduleRoute> {
-                            FullScheduleScreen(
-                                viewModel = viewModel,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable<FocusModeRoute> {
-                            FocusModeScreen(
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable<JournalRoute> {
-                            JournalScreen(
-                                viewModel = viewModel,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable<PhilosophyRoute> {
-                            PhilosophyScreen(
-                                viewModel = viewModel,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable<SkillTreeRoute> {
-                            SkillTreeGraph(
-                                nodes = listOf(
-                                    SkillNode("1", "Ignition", Offset(0.5f, 0.2f), unlocked = true, completed = true, pillar = "AWAKENING"),
-                                    SkillNode("2", "Deep Work I", Offset(0.3f, 0.4f), unlocked = true, completed = false, pillar = "TECHNE"),
-                                    SkillNode("3", "The Archive", Offset(0.7f, 0.4f), unlocked = true, completed = false, pillar = "HISTORIA"),
-                                    SkillNode("4", "Physical Fortitude", Offset(0.5f, 0.6f), unlocked = false, completed = false, pillar = "GYMNOS")
-                                ),
-                                edges = listOf(
-                                    SkillEdge("1", "2"),
-                                    SkillEdge("1", "3"),
-                                    SkillEdge("2", "4"),
-                                    SkillEdge("3", "4")
-                                )
-                            )
-                        }
+                        )
                     }
                 }
             }

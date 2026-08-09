@@ -26,34 +26,37 @@ import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
+import com.obrien.thecathedral.viewmodel.ScheduleViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusModeScreen(
+    viewModel: ScheduleViewModel,
     onBack: () -> Unit = {}
 ) {
-    var isRunning by remember { mutableStateOf(false) }
-    var timeRemaining by remember { mutableIntStateOf(25 * 60) }
+    val timeRemaining by viewModel.focusTimeRemaining.collectAsState()
+    val isRunning by viewModel.focusIsRunning.collectAsState()
+    val sessionCount by viewModel.focusSessionCount.collectAsState()
+    
     var quoteIndex by remember { mutableIntStateOf(0) }
-    var sessionCount by remember { mutableIntStateOf(0) }
+    var showCompletion by remember { mutableStateOf(false) }
 
     val quotes = FocusQuotes.all
 
-    LaunchedEffect(isRunning) {
-        while (isRunning && timeRemaining > 0) {
-            delay(1000L)
-            timeRemaining--
-        }
-        if (timeRemaining == 0 && isRunning) {
-            isRunning = false
-            sessionCount++
-        }
-    }
-
+    // Quote rotation
     LaunchedEffect(isRunning, timeRemaining) {
         if (isRunning && timeRemaining % 30 == 0) {
             quoteIndex = (quoteIndex + 1) % quotes.size
+        }
+    }
+
+    // Completion celebration
+    LaunchedEffect(timeRemaining) {
+        if (timeRemaining == 0 && !isRunning && sessionCount > 0) {
+            showCompletion = true
+            delay(2000)
+            showCompletion = false
         }
     }
 
@@ -95,7 +98,7 @@ fun FocusModeScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "SESSION ${sessionCount + 1}",
+                text = if (showCompletion) "RITUAL SEALED" else "SESSION ${sessionCount + 1}",
                 style = MaterialTheme.typography.labelMedium,
                 color = CathedralGold.copy(alpha = 0.6f),
                 letterSpacing = 4.sp
@@ -118,7 +121,7 @@ fun FocusModeScreen(
                     Text(
                         text = String.format("%02d:%02d", minutes, seconds),
                         style = MaterialTheme.typography.displayLarge,
-                        color = if (timeRemaining <= 60) RitualMiss else Parchment,
+                        color = if (timeRemaining <= 60 && timeRemaining > 0) RitualMiss else Parchment,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Light
                     )
@@ -168,10 +171,7 @@ fun FocusModeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = {
-                        isRunning = false
-                        timeRemaining = 25 * 60
-                    },
+                    onClick = { viewModel.resetFocusTimer() },
                     modifier = Modifier
                         .size(56.dp)
                         .background(CathedralGold.copy(alpha = 0.1f), CircleShape)
@@ -185,7 +185,7 @@ fun FocusModeScreen(
                 }
 
                 IconButton(
-                    onClick = { isRunning = !isRunning },
+                    onClick = { if (isRunning) viewModel.pauseFocusTimer() else viewModel.startFocusTimer() },
                     modifier = Modifier
                         .size(72.dp)
                         .background(CathedralGold, CircleShape)
@@ -199,10 +199,7 @@ fun FocusModeScreen(
                 }
 
                 IconButton(
-                    onClick = {
-                        isRunning = false
-                        timeRemaining = 5 * 60
-                    },
+                    onClick = { viewModel.setFocusBreak() },
                     modifier = Modifier
                         .size(56.dp)
                         .background(CathedralGold.copy(alpha = 0.1f), CircleShape)
@@ -225,13 +222,5 @@ fun FocusModeScreen(
                 textAlign = TextAlign.Center
             )
         }
-    }
-}
-
-@Preview
-@Composable
-fun FocusModeScreenPreview() {
-    TheCathedralTheme(darkTheme = true) {
-        FocusModeScreen()
     }
 }

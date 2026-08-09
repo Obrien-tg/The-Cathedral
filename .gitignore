@@ -1,37 +1,31 @@
-# Gradle files
+# Gradle
 .gradle/
 build/
 
-# Local configuration file (sdk path, etc)
+# Local config
 local.properties
 
-# Android Studio / IntelliJ
+# Android Studio
 .idea/
 *.iml
 *.iws
 *.ipr
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# Log files
+# Logs
 *.log
 
-# APK files
+# APKs
 *.apk
 *.ap_
 
-# Navigation safe args (generated)
-.navigation/
-
-# External native build folder
+# Native
 .externalNativeBuild
 .cxx/
 
-# Version control
-vcs.xml
-
-# Keystore files
+# Keystore
 *.jks
 *.keystore

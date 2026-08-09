@@ -28,6 +28,7 @@ import com.obrien.thecathedral.model.PrimarySources
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
+import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.RitualSuccess
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
 import com.obrien.thecathedral.viewmodel.ScheduleViewModel
@@ -47,6 +48,9 @@ fun PhilosophyScreen(
     var pageInput by remember(activePage) {
         mutableStateOf(if (activePage > 0) activePage.toString() else "")
     }
+
+    val isPageValid = pageInput.toIntOrNull()?.let { it in 0..activeSource.totalPages } ?: false
+    val showError = pageInput.isNotBlank() && !isPageValid
 
     Scaffold(
         topBar = {
@@ -191,12 +195,19 @@ fun PhilosophyScreen(
                         value = pageInput,
                         onValueChange = { pageInput = it.filter { c -> c.isDigit() } },
                         label = { Text("Page", color = CathedralGold.copy(alpha = 0.6f)) },
+                        isError = showError,
+                        supportingText = {
+                            if (showError) {
+                                Text("Enter 0-${activeSource.totalPages}", color = RitualMiss)
+                            }
+                        },
                         modifier = Modifier.width(100.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = CathedralGold,
                             unfocusedBorderColor = CathedralGold.copy(alpha = 0.3f),
                             focusedTextColor = Parchment,
-                            unfocusedTextColor = Parchment
+                            unfocusedTextColor = Parchment,
+                            errorBorderColor = RitualMiss
                         ),
                         singleLine = true
                     )
@@ -208,6 +219,7 @@ fun PhilosophyScreen(
                                 }
                             }
                         },
+                        enabled = isPageValid,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = CathedralGold,
                             contentColor = MonasteryBlack

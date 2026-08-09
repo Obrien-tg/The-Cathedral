@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class CathedralUiState(
@@ -55,10 +54,26 @@ class ScheduleViewModel @Inject constructor(
     private val _activeSourcePage = MutableStateFlow(0)
     private val _wakeTime = MutableStateFlow(LocalTime.of(7, 0))
 
+    // Focus Timer State (Bug #3)
+    private val _focusTimeRemaining = MutableStateFlow(25 * 60)
+    val focusTimeRemaining: StateFlow<Int> = _focusTimeRemaining.asStateFlow()
+
+    private val _focusIsRunning = MutableStateFlow(false)
+    val focusIsRunning: StateFlow<Boolean> = _focusIsRunning.asStateFlow()
+
+    private val _focusSessionCount = MutableStateFlow(0)
+    val focusSessionCount: StateFlow<Int> = _focusSessionCount.asStateFlow()
+
     init {
         viewModelScope.launch {
-            repository.checkDailyReset()
-            
+            // Daily reset check (Bug #1)
+            val today = LocalDate.now().toString()
+            val lastReset = repository.getLastResetDate()
+            if (lastReset != today) {
+                repository.clearAlarmCompletionsOnly()
+                repository.setLastResetDate(today)
+            }
+
             launch {
                 repository.completedAlarms.collect { ids ->
                     _completedAlarmIds.value = ids
@@ -77,6 +92,16 @@ class ScheduleViewModel @Inject constructor(
             launch {
                 repository.activeSourcePage.collect { page ->
                     _activeSourcePage.value = page
+                }
+            }
+        }
+
+        // Focus Timer Ticker (Bug #3)
+        viewModelScope.launch {
+            while (isActive) {
+                delay(1000L)
+                if (_focusIsRunning.value && _focusTimeRemaining.value > 0) {
+                    tickFocusTimer()
                 }
             }
         }
@@ -175,6 +200,34 @@ class ScheduleViewModel @Inject constructor(
     fun clearAllProgress() {
         viewModelScope.launch {
             repository.clearAllProgress()
+        }
+    }
+
+    // Focus Timer Actions (Bug #3)
+    fun startFocusTimer() {
+        _focusIsRunning.value = true
+    }
+
+    fun pauseFocusTimer() {
+        _focusIsRunning.value = false
+    }
+
+    fun resetFocusTimer() {
+        _focusIsRunning.value = false
+        _focusTimeRemaining.value = 25 * 60
+    }
+
+    fun setFocusBreak() {
+        _focusIsRunning.value = false
+        _focusTimeRemaining.value = 5 * 60
+    }
+
+    private fun tickFocusTimer() {
+        if (_focusTimeRemaining.value > 0) {
+            _focusTimeRemaining.value--
+        } else {
+            _focusIsRunning.value = false
+            _focusSessionCount.value++
         }
     }
 }
