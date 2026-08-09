@@ -92,6 +92,19 @@ fun SkillTreeGraph(
                 center = center
             )
 
+            // Progress Ring
+            if (node.unlocked && !node.completed && node.progress > 0f) {
+                drawArc(
+                    color = CathedralGold,
+                    startAngle = -90f,
+                    sweepAngle = 360f * node.progress,
+                    useCenter = false,
+                    topLeft = Offset(center.x - 20f, center.y - 20f),
+                    size = androidx.compose.ui.geometry.Size(40f, 40f),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f)
+                )
+            }
+
             // Node Label
             val textLayoutResult = textMeasurer.measure(node.name)
             drawText(
