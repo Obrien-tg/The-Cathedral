@@ -168,12 +168,12 @@ fun HomeScreenContent(
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()
 
-            // Subtle sunflower charm — top right, floating (Bug #4)
+            // Subtle sunflower charm — centered near top, clear of the settings button
             SunflowerParticle(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 48.dp, end = 20.dp),
-                size = 20f
+                    .align(Alignment.TopCenter)
+                    .padding(top = 12.dp),
+                size = 18f
             )
 
             LazyColumn(
