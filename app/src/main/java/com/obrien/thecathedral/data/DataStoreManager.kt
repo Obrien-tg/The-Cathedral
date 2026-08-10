@@ -38,7 +38,8 @@ class DataStoreManager(private val context: Context) {
 
     suspend fun acknowledgeAccountability() {
         try {
-            context.dataStore.edit { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] = LocalDate.now().toString() }
+            val today = LocalDate.now().toString()
+            context.dataStore.edit { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] = today }
         } catch (e: Exception) { e.printStackTrace() }
     }
 

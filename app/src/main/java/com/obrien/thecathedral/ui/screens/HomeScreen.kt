@@ -84,6 +84,7 @@ fun HomeScreen(
         onSkillTree = onSkillTree,
         onWeeklyReview = onWeeklyReview,
         onSettings = onSettings,
+        onDismissAccountability = { viewModel.dismissAccountabilityDialog() },
         onResetDay = { showResetConfirm = true }
     )
 }
