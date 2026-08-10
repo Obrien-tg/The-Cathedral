@@ -14,6 +14,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
@@ -97,7 +98,9 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = HomeRoute
                     ) {
-                        composable<HomeRoute> {
+                        composable<HomeRoute>(
+                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://home" })
+                        ) {
                             HomeScreen(
                                 viewModel = hiltViewModel(),
                                 onViewFullSchedule = { navController.navigate(ScheduleRoute) },
@@ -109,13 +112,17 @@ class MainActivity : ComponentActivity() {
                                 onSettings = { navController.navigate(SettingsRoute) }
                             )
                         }
-                        composable<ScheduleRoute> {
+                        composable<ScheduleRoute>(
+                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://schedule" })
+                        ) {
                             FullScheduleScreen(
                                 viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
-                        composable<FocusModeRoute> {
+                        composable<FocusModeRoute>(
+                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://focus" })
+                        ) {
                             FocusModeScreen(
                                 viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }

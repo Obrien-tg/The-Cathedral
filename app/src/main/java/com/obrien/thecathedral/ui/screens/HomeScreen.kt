@@ -2,10 +2,12 @@ package com.obrien.thecathedral.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -198,6 +200,22 @@ fun HomeScreenContent(
                 }
 
                 item {
+                    val isLate = uiState.currentTime.hour >= 18
+                    val incomplete = uiState.score.completedCount < (uiState.score.totalCount / 2)
+                    
+                    if (isLate && incomplete && uiState.score.totalCount > 0) {
+                        Text(
+                            text = "The day is not yet written. There is time to lay another stone.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = CathedralGold.copy(alpha = 0.5f),
+                            fontStyle = FontStyle.Italic,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp)
+                        )
+                    }
+                }
+
+                item {
                     val isSunday = java.time.LocalDate.now().dayOfWeek == java.time.DayOfWeek.SUNDAY
                     if (isSunday) {
                         Button(
@@ -239,7 +257,8 @@ fun HomeScreenContent(
                 item {
                     ProgressSection(
                         completed = uiState.score.completedCount,
-                        total = uiState.score.totalCount
+                        total = uiState.score.totalCount,
+                        streak = uiState.currentStreak
                     )
                 }
 
@@ -504,13 +523,43 @@ fun RestSection() {
 }
 
 @Composable
-fun ProgressSection(completed: Int, total: Int) {
+fun ProgressSection(completed: Int, total: Int, streak: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "DAILY SCORE: $completed OF $total",
-            style = MaterialTheme.typography.labelMedium,
-            color = CathedralGold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "DAILY SCORE: $completed OF $total",
+                style = MaterialTheme.typography.labelMedium,
+                color = CathedralGold
+            )
+            if (streak > 0) {
+                Surface(
+                    color = CathedralGold.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.LocalFireDepartment,
+                            contentDescription = null,
+                            tint = CathedralGold,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = streak.toString(),
+                            color = CathedralGold,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(12.dp))
         LinearProgressIndicator(
             progress = { if (total > 0) completed.toFloat() / total else 0f },

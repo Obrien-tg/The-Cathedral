@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -199,12 +200,36 @@ fun JournalScreen(
             )
 
             if (uiState.journalEntries.isEmpty()) {
-                Text(
-                    text = "No entries yet. Begin today.",
-                    color = Parchment.copy(alpha = 0.4f),
-                    fontFamily = FontFamily.Serif,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "“The unexamined life is not worth living.”",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Parchment.copy(alpha = 0.4f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            textAlign = TextAlign.Center,
+                            fontFamily = FontFamily.Serif
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "— Socrates",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = CathedralGold.copy(alpha = 0.3f)
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Begin your first entry above.",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = CathedralGold,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
             } else {
                 uiState.journalEntries.take(7).forEach { entry ->
                     HistoryCard(entry = entry)

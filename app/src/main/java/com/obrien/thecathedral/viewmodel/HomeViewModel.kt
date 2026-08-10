@@ -22,7 +22,8 @@ data class HomeUiState(
     val score: DailyScore = DailyScore(0, 0, 0f),
     val completionHistory: Map<String, Int> = emptyMap(),
     val todayCounsel: DailyCounsel = DailyCounselData.today(),
-    val showAccountabilityDialog: Boolean = false
+    val showAccountabilityDialog: Boolean = false,
+    val currentStreak: Int = 0
 )
 
 @HiltViewModel
@@ -70,6 +71,16 @@ class HomeViewModel @Inject constructor(
         val missedDayBefore = (history[dayBefore] ?: 0) == 0
         val showAccountability = missedYesterday && missedDayBefore && lastAcknowledge != todayStr
 
+        // Calculate Streak (Bug #4.4)
+        var streak = 0
+        var checkDate = java.time.LocalDate.now()
+        val totalRituals = score.totalCount
+        
+        while (totalRituals > 0 && (history[checkDate.toString()] ?: 0) >= totalRituals) {
+            streak++
+            checkDate = checkDate.minusDays(1)
+        }
+
         HomeUiState(
             currentTime = time,
             activePillar = active,
@@ -77,7 +88,8 @@ class HomeViewModel @Inject constructor(
             score = score,
             completionHistory = history,
             todayCounsel = DailyCounselData.today(),
-            showAccountabilityDialog = showAccountability
+            showAccountabilityDialog = showAccountability,
+            currentStreak = streak
         )
     }.stateIn(
         scope = viewModelScope,
