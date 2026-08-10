@@ -1,5 +1,6 @@
 package com.obrien.thecathedral.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +52,8 @@ fun HomeScreen(
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
-    onSettings: () -> Unit = {}
+    onSettings: () -> Unit = {},
+    onWeeklyIntention: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showResetConfirm by remember { mutableStateOf(false) }
@@ -84,6 +86,7 @@ fun HomeScreen(
         onSkillTree = onSkillTree,
         onWeeklyReview = onWeeklyReview,
         onSettings = onSettings,
+        onWeeklyIntention = onWeeklyIntention,
         onDismissAccountability = { viewModel.dismissAccountabilityDialog() },
         onResetDay = { showResetConfirm = true }
     )
@@ -101,6 +104,7 @@ fun HomeScreenContent(
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onWeeklyIntention: () -> Unit = {},
     onDismissAccountability: () -> Unit = {},
     onResetDay: () -> Unit = {}
 ) {
@@ -187,6 +191,20 @@ fun HomeScreenContent(
                 item { PurposeSection() }
 
                 item { DailyCounselCard(counsel = uiState.todayCounsel) }
+
+                item {
+                    OutlinedButton(
+                        onClick = onWeeklyIntention,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = CathedralGold),
+                        border = BorderStroke(1.dp, CathedralGold.copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("WEEK’S RULE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    }
+                }
 
                 item {
                     Row(

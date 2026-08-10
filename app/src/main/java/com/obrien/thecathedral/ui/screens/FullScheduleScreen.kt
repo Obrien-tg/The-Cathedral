@@ -52,6 +52,8 @@ fun FullScheduleScreen(
     viewModel: CodexViewModel,
     onBack: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -97,7 +99,7 @@ fun FullScheduleScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(vertical = 16.dp)
             ) {
-                items(ScheduleData.pillars) { pillar ->
+                items(uiState.pillars) { pillar ->
                     PillarItem(
                         pillar = pillar,
                         viewModel = viewModel

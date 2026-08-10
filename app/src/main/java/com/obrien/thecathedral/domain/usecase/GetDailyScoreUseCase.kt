@@ -13,10 +13,10 @@ data class DailyScore(
 
 class GetDailyScoreUseCase @Inject constructor(
     private val repository: ScheduleRepository,
-    private val getCurrentPillars: GetCurrentPillarsUseCase
+    private val getPersonalizedSchedule: GetPersonalizedScheduleUseCase
 ) {
     operator fun invoke(): Flow<DailyScore> = combine(
-        getCurrentPillars(),
+        getPersonalizedSchedule(),
         repository.completedAlarms
     ) { pillars, completedIds ->
         val allAlarms = pillars.flatMap { it.alarms }

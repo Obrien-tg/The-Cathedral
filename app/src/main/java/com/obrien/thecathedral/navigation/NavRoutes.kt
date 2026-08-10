@@ -25,3 +25,6 @@ object WeeklyReviewRoute
 
 @Serializable
 object SettingsRoute
+
+@Serializable
+object WeeklyIntentionRoute

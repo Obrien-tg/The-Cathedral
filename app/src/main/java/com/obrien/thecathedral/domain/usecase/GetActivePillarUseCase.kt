@@ -8,10 +8,10 @@ import java.time.LocalTime
 import javax.inject.Inject
 
 class GetActivePillarUseCase @Inject constructor(
-    private val getCurrentPillars: GetCurrentPillarsUseCase
+    private val getPersonalizedSchedule: GetPersonalizedScheduleUseCase
 ) {
     operator fun invoke(currentTime: Flow<LocalTime>): Flow<Pillar?> = combine(
-        getCurrentPillars(),
+        getPersonalizedSchedule(),
         currentTime
     ) { pillars, time ->
         pillars.find { it.isActiveAt(time) }

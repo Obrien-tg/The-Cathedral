@@ -28,7 +28,8 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onWeeklyIntention: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
@@ -111,6 +112,12 @@ fun SettingsScreen(
                     label = "Wake Time",
                     value = uiState.wakeTime.format(DateTimeFormatter.ofPattern("HH:mm")),
                     onClick = { showTimePicker = true }
+                )
+
+                SettingRow(
+                    label = "Week’s Rule",
+                    value = "EDIT",
+                    onClick = onWeeklyIntention
                 )
                 
                 SettingRow(

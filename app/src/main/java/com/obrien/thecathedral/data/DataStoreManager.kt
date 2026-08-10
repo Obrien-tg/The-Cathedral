@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.obrien.thecathedral.model.JournalEntry
+import com.obrien.thecathedral.model.WeeklyIntention
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -30,6 +32,7 @@ class DataStoreManager(private val context: Context) {
         val THEME = stringPreferencesKey("theme")
         val FONT_SIZE = stringPreferencesKey("font_size")
         val LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE = stringPreferencesKey("last_accountability_acknowledge_date")
+        val WEEKLY_INTENTION = stringPreferencesKey("weekly_intention")
     }
 
     val lastAccountabilityAcknowledgeDate: Flow<String> = context.dataStore.data
@@ -55,6 +58,24 @@ class DataStoreManager(private val context: Context) {
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[FONT_SIZE] ?: "medium" }
 
+    val weeklyIntention: Flow<WeeklyIntention?> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs ->
+            val json = prefs[WEEKLY_INTENTION] ?: return@map null
+            try {
+                val intention = Json.decodeFromString<WeeklyIntention>(json)
+                if (intention.weekStart == currentWeekStart()) intention else null
+            } catch (_: Exception) {
+                null
+            }
+        }
+
+    fun currentWeekStart(): String {
+        val today = LocalDate.now()
+        val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+        return monday.toString() // yyyy-MM-dd
+    }
+
     suspend fun setNotificationLeadTime(minutes: Int) {
         try {
             context.dataStore.edit { it[NOTIFICATION_LEAD_TIME] = minutes }
@@ -70,6 +91,18 @@ class DataStoreManager(private val context: Context) {
     suspend fun setFontSize(size: String) {
         try {
             context.dataStore.edit { it[FONT_SIZE] = size }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    suspend fun saveWeeklyIntention(intention: WeeklyIntention) {
+        try {
+            context.dataStore.edit { it[WEEKLY_INTENTION] = Json.encodeToString(intention) }
+        } catch (e: Exception) { e.printStackTrace() }
+    }
+
+    suspend fun clearWeeklyIntention() {
+        try {
+            context.dataStore.edit { it.remove(WEEKLY_INTENTION) }
         } catch (e: Exception) { e.printStackTrace() }
     }
 

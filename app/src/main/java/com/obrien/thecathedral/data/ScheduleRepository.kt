@@ -1,6 +1,7 @@
 package com.obrien.thecathedral.data
 
 import com.obrien.thecathedral.model.JournalEntry
+import com.obrien.thecathedral.model.WeeklyIntention
 import com.obrien.thecathedral.model.WeeklyReview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,6 +27,7 @@ class ScheduleRepository @Inject constructor(
     val theme: Flow<String> = dataStoreManager.theme
     val fontSize: Flow<String> = dataStoreManager.fontSize
     val lastAccountabilityAcknowledgeDate: Flow<String> = dataStoreManager.lastAccountabilityAcknowledgeDate
+    val weeklyIntention: Flow<WeeklyIntention?> = dataStoreManager.weeklyIntention
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)
@@ -59,6 +61,10 @@ class ScheduleRepository @Inject constructor(
     suspend fun setFontSize(size: String) = dataStoreManager.setFontSize(size)
     suspend fun acknowledgeAccountability() = dataStoreManager.acknowledgeAccountability()
     
+    suspend fun saveWeeklyIntention(intention: WeeklyIntention) = dataStoreManager.saveWeeklyIntention(intention)
+    suspend fun clearWeeklyIntention() = dataStoreManager.clearWeeklyIntention()
+    fun currentWeekStart() = dataStoreManager.currentWeekStart()
+
     suspend fun clearAllProgress() {
         dataStoreManager.clearAllProgress()
         // Should we clear Room too? User said daily reset should only clear alarm completions.

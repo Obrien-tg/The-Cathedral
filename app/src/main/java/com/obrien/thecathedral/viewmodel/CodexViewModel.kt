@@ -3,7 +3,7 @@ package com.obrien.thecathedral.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.obrien.thecathedral.data.ScheduleRepository
-import com.obrien.thecathedral.domain.usecase.GetCurrentPillarsUseCase
+import com.obrien.thecathedral.domain.usecase.GetPersonalizedScheduleUseCase
 import com.obrien.thecathedral.domain.usecase.ToggleRitualUseCase
 import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.Pillar
@@ -27,7 +27,7 @@ data class CodexUiState(
 @HiltViewModel
 class CodexViewModel @Inject constructor(
     private val repository: ScheduleRepository,
-    private val getCurrentPillars: GetCurrentPillarsUseCase,
+    private val getPersonalizedSchedule: GetPersonalizedScheduleUseCase,
     private val toggleRitualUseCase: ToggleRitualUseCase
 ) : ViewModel() {
 
@@ -44,7 +44,7 @@ class CodexViewModel @Inject constructor(
 
     val uiState: StateFlow<CodexUiState> = combine(
         _currentTime,
-        getCurrentPillars(),
+        getPersonalizedSchedule(),
         repository.completedAlarms,
         repository.skippedAlarms
     ) { time, pillars, completed, skipped ->

@@ -109,7 +109,8 @@ class MainActivity : ComponentActivity() {
                                 onPhilosophy = { navController.navigate(PhilosophyRoute) },
                                 onSkillTree = { navController.navigate(SkillTreeRoute) },
                                 onWeeklyReview = { navController.navigate(WeeklyReviewRoute) },
-                                onSettings = { navController.navigate(SettingsRoute) }
+                                onSettings = { navController.navigate(SettingsRoute) },
+                                onWeeklyIntention = { navController.navigate(WeeklyIntentionRoute) }
                             )
                         }
                         composable<ScheduleRoute>(
@@ -156,6 +157,13 @@ class MainActivity : ComponentActivity() {
                         composable<SettingsRoute> {
                             SettingsScreen(
                                 viewModel = settingsViewModel,
+                                onBack = { navController.popBackStack() },
+                                onWeeklyIntention = { navController.navigate(WeeklyIntentionRoute) }
+                            )
+                        }
+                        composable<WeeklyIntentionRoute> {
+                            WeeklyIntentionScreen(
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
