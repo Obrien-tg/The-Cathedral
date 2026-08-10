@@ -22,7 +22,7 @@ import com.obrien.thecathedral.ui.skilltree.*
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
 import com.obrien.thecathedral.util.AlarmScheduler
 import com.obrien.thecathedral.util.NotificationHelper
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.*
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -34,6 +34,16 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
 
+    private lateinit var settingsViewModel: SettingsViewModel
+
+    private val timeChangeReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
+            if (::settingsViewModel.isInitialized) {
+                alarmScheduler.scheduleRitualAlarms(settingsViewModel.uiState.value.wakeTime)
+            }
+        }
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean -> }
@@ -44,6 +54,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this)
+
+        val filter = android.content.IntentFilter().apply {
+            addAction(android.content.Intent.ACTION_TIME_CHANGED)
+            addAction(android.content.Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        registerReceiver(timeChangeReceiver, filter)
 
         // Request notification permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -71,12 +87,13 @@ class MainActivity : ComponentActivity() {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
                     val navController = rememberNavController()
-                    val viewModel: ScheduleViewModel = hiltViewModel()
-                    val uiState by viewModel.uiState.collectAsState()
                     
-                    // Reschedule alarms whenever wake time changes
-                    LaunchedEffect(uiState.wakeTime) {
-                        alarmScheduler.scheduleRitualAlarms(uiState.wakeTime)
+                    // Root ViewModel for global state (like wakeTime for alarms)
+                    settingsViewModel = hiltViewModel()
+                    val settingsState by settingsViewModel.uiState.collectAsState()
+                    
+                    LaunchedEffect(settingsState.wakeTime) {
+                        alarmScheduler.scheduleRitualAlarms(settingsState.wakeTime)
                     }
 
                     NavHost(
@@ -85,7 +102,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable<HomeRoute> {
                             HomeScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onViewFullSchedule = { navController.navigate(ScheduleRoute) },
                                 onFocusMode = { navController.navigate(FocusModeRoute) },
                                 onJournal = { navController.navigate(JournalRoute) },
@@ -97,30 +114,32 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<ScheduleRoute> {
                             FullScheduleScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
                         composable<FocusModeRoute> {
                             FocusModeScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
                         composable<JournalRoute> {
                             JournalScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
                         composable<PhilosophyRoute> {
                             PhilosophyScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() },
                                 onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
                             )
                         }
                         composable<SkillTreeRoute> {
+                            val skillTreeViewModel: SkillTreeViewModel = hiltViewModel()
+                            val uiState by skillTreeViewModel.uiState.collectAsState()
                             val progressMap = uiState.skillProgress.associateBy { it.nodeId }
 
                             SkillTreeGraph(
@@ -148,13 +167,13 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<WeeklyReviewRoute> {
                             WeeklyReviewScreen(
-                                viewModel = viewModel,
+                                viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
                         composable<SettingsRoute> {
                             SettingsScreen(
-                                viewModel = viewModel,
+                                viewModel = settingsViewModel,
                                 onBack = { navController.popBackStack() }
                             )
                         }
@@ -162,5 +181,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(timeChangeReceiver)
     }
 }

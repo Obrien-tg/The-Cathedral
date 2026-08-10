@@ -19,17 +19,19 @@ import androidx.compose.ui.unit.sp
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: SettingsViewModel,
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
     
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(
@@ -143,13 +145,15 @@ fun SettingsScreen(
                 val context = LocalContext.current
                 Button(
                     onClick = { 
-                        val json = viewModel.getExportData()
-                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(android.content.Intent.EXTRA_SUBJECT, "The Cathedral Codex - Data Export")
-                            putExtra(android.content.Intent.EXTRA_TEXT, json)
+                        scope.launch {
+                            val json = viewModel.getExportData()
+                            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, "The Cathedral Codex - Data Export")
+                                putExtra(android.content.Intent.EXTRA_TEXT, json)
+                            }
+                            context.startActivity(android.content.Intent.createChooser(intent, "Export Data"))
                         }
-                        context.startActivity(android.content.Intent.createChooser(intent, "Export Data"))
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(

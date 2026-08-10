@@ -26,18 +26,18 @@ import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.FocusViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusModeScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: FocusViewModel,
     onBack: () -> Unit = {}
 ) {
-    val timeRemaining by viewModel.focusTimeRemaining.collectAsState()
-    val isRunning by viewModel.focusIsRunning.collectAsState()
-    val sessionCount by viewModel.focusSessionCount.collectAsState()
+    val timeRemaining by viewModel.timeRemaining.collectAsState()
+    val isRunning by viewModel.isRunning.collectAsState()
+    val sessionCount by viewModel.sessionCount.collectAsState()
     
     var quoteIndex by remember { mutableIntStateOf(0) }
     var showCompletion by remember { mutableStateOf(false) }

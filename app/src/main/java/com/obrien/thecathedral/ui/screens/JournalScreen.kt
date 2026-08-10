@@ -23,7 +23,7 @@ import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.RitualSuccess
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.JournalViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -31,7 +31,7 @@ import java.time.format.FormatStyle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JournalScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: JournalViewModel,
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()

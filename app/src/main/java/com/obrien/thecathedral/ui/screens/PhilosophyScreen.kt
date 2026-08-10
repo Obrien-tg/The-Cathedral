@@ -9,14 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,21 +31,20 @@ import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.RitualSuccess
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.PhilosophyViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhilosophyScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: PhilosophyViewModel,
     onBack: () -> Unit = {},
     onWeeklyReview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val activeIndex = uiState.activeSourceIndex
     val activePage = uiState.activeSourcePage
-    val wakeTime = uiState.wakeTime
     
     val activeSource = PrimarySources.curriculum.getOrNull(activeIndex)
         ?: PrimarySources.curriculum.first()
@@ -58,46 +55,6 @@ fun PhilosophyScreen(
 
     val isPageValid = pageInput.toIntOrNull()?.let { it in 0..activeSource.totalPages } ?: false
     val showError = pageInput.isNotBlank() && !isPageValid
-
-    var showTimePicker by remember { mutableStateOf(false) }
-    val timePickerState = rememberTimePickerState(
-        initialHour = wakeTime.hour,
-        initialMinute = wakeTime.minute
-    )
-
-    if (showTimePicker) {
-        AlertDialog(
-            onDismissRequest = { showTimePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    viewModel.setWakeTime(LocalTime.of(timePickerState.hour, timePickerState.minute))
-                    showTimePicker = false
-                }) { Text("SET", color = CathedralGold) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("CANCEL", color = CathedralGold.copy(alpha = 0.6f)) }
-            },
-            containerColor = MonasteryBlack,
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    TimePicker(
-                        state = timePickerState,
-                        colors = TimePickerDefaults.colors(
-                            clockDialColor = MonasteryBlack,
-                            selectorColor = CathedralGold,
-                            containerColor = MonasteryBlack,
-                            periodSelectorSelectedContainerColor = CathedralGold,
-                            periodSelectorUnselectedContainerColor = MonasteryBlack,
-                            periodSelectorSelectedContentColor = MonasteryBlack,
-                            periodSelectorUnselectedContentColor = CathedralGold,
-                            clockDialUnselectedContentColor = CathedralGold.copy(alpha = 0.5f),
-                            clockDialSelectedContentColor = MonasteryBlack
-                        )
-                    )
-                }
-            }
-        )
-    }
 
     Scaffold(
         topBar = {
@@ -152,46 +109,6 @@ fun PhilosophyScreen(
                     fontFamily = FontFamily.Serif,
                     fontStyle = FontStyle.Italic,
                     lineHeight = 24.sp
-                )
-            }
-
-            SacredCard(title = "CHRONOS — WAKE TIME") {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = "CURRENT WAKE TIME",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = CathedralGold.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = wakeTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = CathedralGold,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    }
-                    Button(
-                        onClick = { showTimePicker = true },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = CathedralGold,
-                            contentColor = MonasteryBlack
-                        )
-                    ) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("ADJUST")
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = "Adjusting your wake time will shift all daily rituals proportionally. Discipline respects the sun, but adapts to the man.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Parchment.copy(alpha = 0.5f),
-                    fontFamily = FontFamily.Serif
                 )
             }
 

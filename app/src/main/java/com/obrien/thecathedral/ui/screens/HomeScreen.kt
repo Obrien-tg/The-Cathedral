@@ -9,12 +9,12 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +27,9 @@ import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.viewmodel.CathedralUiState
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.HomeUiState
+import com.obrien.thecathedral.viewmodel.HomeViewModel
+import com.obrien.thecathedral.domain.usecase.DailyScore
 
 import androidx.compose.material.icons.filled.AccountTree
 import com.obrien.thecathedral.ui.components.PillarProgressRing
@@ -41,7 +42,7 @@ import com.obrien.thecathedral.ui.theme.glassCard
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: ScheduleViewModel,
+    viewModel: HomeViewModel,
     onViewFullSchedule: () -> Unit = {},
     onFocusMode: () -> Unit = {},
     onJournal: () -> Unit = {},
@@ -51,6 +52,25 @@ fun HomeScreen(
     onSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showResetConfirm by remember { mutableStateOf(false) }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = { Text("PURGE ALL PROGRESS?", color = CathedralGold) },
+            text = { Text("This will clear today's rituals and reading progress. The historical record remains untouched.", color = Color.White) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearAllProgress()
+                    showResetConfirm = false
+                }) { Text("PURGE", color = Color.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) { Text("CANCEL", color = CathedralGold) }
+            },
+            containerColor = MonasteryBlack
+        )
+    }
     
     HomeScreenContent(
         modifier = modifier,
@@ -62,8 +82,7 @@ fun HomeScreen(
         onSkillTree = onSkillTree,
         onWeeklyReview = onWeeklyReview,
         onSettings = onSettings,
-        onDismissAccountability = { viewModel.dismissAccountabilityDialog() },
-        onResetDay = { viewModel.clearAllProgress() }
+        onResetDay = { showResetConfirm = true }
     )
 }
 
@@ -71,7 +90,7 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
-    uiState: CathedralUiState,
+    uiState: HomeUiState,
     onViewFullSchedule: () -> Unit = {},
     onFocusMode: () -> Unit = {},
     onJournal: () -> Unit = {},
@@ -219,15 +238,15 @@ fun HomeScreenContent(
 
                 item {
                     ProgressSection(
-                        completed = uiState.completedCount,
-                        total = uiState.totalCount
+                        completed = uiState.score.completedCount,
+                        total = uiState.score.totalCount
                     )
                 }
 
                 item {
                     FidelityHeatmap(
                         completionHistory = uiState.completionHistory,
-                        totalRituals = uiState.totalCount,
+                        totalRituals = uiState.score.totalCount,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -547,10 +566,9 @@ fun DailyCounselCard(counsel: DailyCounsel) {
 fun HomeScreenPreview() {
     TheCathedralTheme(darkTheme = true) {
         HomeScreenContent(
-            uiState = CathedralUiState(
+            uiState = HomeUiState(
                 activePillar = ScheduleData.pillars.first(),
-                completedCount = 3,
-                totalCount = 15
+                score = DailyScore(3, 15, 0.2f)
             )
         )
     }

@@ -21,13 +21,13 @@ import com.obrien.thecathedral.model.WeeklyReview
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.PhilosophyViewModel
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeeklyReviewScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: PhilosophyViewModel,
     onBack: () -> Unit = {}
 ) {
     val today = LocalDate.now().toString()

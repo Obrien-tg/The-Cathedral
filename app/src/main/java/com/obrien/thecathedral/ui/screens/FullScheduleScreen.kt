@@ -24,6 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,13 +43,13 @@ import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.RitualMiss
 import com.obrien.thecathedral.ui.theme.RitualSuccess
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.viewmodel.ScheduleViewModel
+import com.obrien.thecathedral.viewmodel.CodexViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullScheduleScreen(
-    viewModel: ScheduleViewModel,
+    viewModel: CodexViewModel,
     onBack: () -> Unit = {}
 ) {
     Scaffold(
@@ -107,7 +111,7 @@ fun FullScheduleScreen(
 @Composable
 fun PillarItem(
     pillar: Pillar,
-    viewModel: ScheduleViewModel
+    viewModel: CodexViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -171,8 +175,9 @@ fun PillarItem(
 @Composable
 fun AlarmDetail(
     alarm: Alarm,
-    viewModel: ScheduleViewModel
+    viewModel: CodexViewModel
 ) {
+    val haptic = LocalHapticFeedback.current
     val status = viewModel.getAlarmStatus(alarm)
     val isCompleted = status == PillarStatus.COMPLETE
     val isSkipped = status == PillarStatus.SKIPPED
@@ -204,6 +209,7 @@ fun AlarmDetail(
         PillarStatus.MISSED -> RitualMiss
         PillarStatus.ACTIVE -> CathedralGold
         PillarStatus.PENDING -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+        else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
     }
 
     Box(contentAlignment = Alignment.Center) {
@@ -246,7 +252,10 @@ fun AlarmDetail(
                 Row {
                     if (!isCompleted) {
                         TextButton(
-                            onClick = { viewModel.toggleSkip(alarm.id) },
+                            onClick = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.toggleSkip(alarm.id) 
+                            },
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier.height(32.dp)
                         ) {
@@ -259,8 +268,15 @@ fun AlarmDetail(
                     }
                     
                     IconButton(
-                        onClick = { if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) },
-                        modifier = Modifier.size(32.dp)
+                        onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) 
+                        },
+                        modifier = Modifier
+                            .size(32.dp)
+                            .semantics {
+                                stateDescription = if (isCompleted) "Completed" else if (isSkipped) "Skipped" else "Pending"
+                            }
                     ) {
                         Icon(
                             imageVector = if (isCompleted)
