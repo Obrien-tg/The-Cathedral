@@ -9,30 +9,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
-import androidx.compose.ui.geometry.Offset
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.obrien.thecathedral.model.SkillTreeData
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
-import com.obrien.thecathedral.ui.skilltree.*
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.Modifier
-import com.obrien.thecathedral.ui.theme.CathedralGold
-import com.obrien.thecathedral.ui.theme.MonasteryBlack
-import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
 import com.obrien.thecathedral.util.AlarmScheduler
 import com.obrien.thecathedral.util.NotificationHelper
@@ -151,58 +134,11 @@ class MainActivity : ComponentActivity() {
                                 onWeeklyReview = { navController.navigate(WeeklyReviewRoute) }
                             )
                         }
-                        @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
                         composable<SkillTreeRoute> {
-                            val skillTreeViewModel: SkillTreeViewModel = hiltViewModel()
-                            val uiState by skillTreeViewModel.uiState.collectAsState()
-                            val progressMap = uiState.skillProgress.associateBy { it.nodeId }
-
-                            Scaffold(
-                                containerColor = MonasteryBlack,
-                                topBar = {
-                                    TopAppBar(
-                                        title = {
-                                            Text("Formation Path", color = CathedralGold)
-                                        },
-                                        navigationIcon = {
-                                            IconButton(onClick = { navController.popBackStack() }) {
-                                                Icon(
-                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                    contentDescription = "Back",
-                                                    tint = Parchment
-                                                )
-                                            }
-                                        },
-                                        colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = MonasteryBlack
-                                        )
-                                    )
-                                }
-                            ) { padding ->
-                                androidx.compose.foundation.layout.Box(
-                                    modifier = Modifier
-                                        .padding(padding)
-                                        .fillMaxSize()
-                                ) {
-                                    SkillTreeGraph(
-                                        nodes = SkillTreeData.nodes.map { node ->
-                                            val prog = progressMap[node.id]
-                                            SkillNode(
-                                                id = node.id,
-                                                name = node.title,
-                                                position = SkillTreeLayout.positionFor(node.id),
-                                                unlocked = prog?.unlocked ?: false,
-                                                completed = prog?.completed ?: false,
-                                                pillar = node.pillar,
-                                                progress = prog?.progress ?: 0f,
-                                                tier = node.tier,
-                                                description = node.description
-                                            )
-                                        },
-                                        edges = SkillTreeData.edges.map { SkillEdge(it.from, it.to) }
-                                    )
-                                }
-                            }
+                            SkillTreeScreen(
+                                viewModel = hiltViewModel(),
+                                onBack = { navController.popBackStack() }
+                            )
                         }
                         composable<WeeklyReviewRoute> {
                             WeeklyReviewScreen(

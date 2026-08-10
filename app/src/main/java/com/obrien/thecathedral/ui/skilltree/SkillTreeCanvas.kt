@@ -2,6 +2,7 @@ package com.obrien.thecathedral.ui.skilltree
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -21,15 +22,22 @@ import com.obrien.thecathedral.ui.theme.Bronze
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
+import kotlin.math.hypot
 
 @Composable
 fun SkillTreeGraph(
     nodes: List<SkillNode>,
-    edges: List<SkillEdge>
+    edges: List<SkillEdge>,
+    onNodeClick: (String) -> Unit = {}
 ) {
     var panOffset by remember { mutableStateOf(Offset.Zero) }
     var scale by remember { mutableFloatStateOf(1f) }
     val textMeasurer = rememberTextMeasurer()
+
+    // Keep latest transform values readable inside pointerInput
+    val currentPan by rememberUpdatedState(panOffset)
+    val currentScale by rememberUpdatedState(scale)
+    val currentNodes by rememberUpdatedState(nodes)
 
     Canvas(
         modifier = Modifier
@@ -39,6 +47,43 @@ fun SkillTreeGraph(
                 detectTransformGestures { _, pan, zoom, _ ->
                     scale = (scale * zoom).coerceIn(0.55f, 2.2f)
                     panOffset += pan
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures { tapOffset ->
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
+                    val pivot = Offset(canvasWidth / 2f, canvasHeight / 2f)
+
+                    // Inverse of the withTransform used when drawing
+                    val unscaled = (tapOffset - currentPan - pivot) / currentScale + pivot
+
+                    // Hit-test nodes (generous radius for finger taps)
+                    val hit = currentNodes.minByOrNull { node ->
+                        val center = Offset(
+                            node.position.x * canvasWidth,
+                            node.position.y * canvasHeight
+                        )
+                        hypot(
+                            (unscaled.x - center.x).toDouble(),
+                            (unscaled.y - center.y).toDouble()
+                        )
+                    }
+
+                    if (hit != null) {
+                        val center = Offset(
+                            hit.position.x * canvasWidth,
+                            hit.position.y * canvasHeight
+                        )
+                        val dist = hypot(
+                            (unscaled.x - center.x).toDouble(),
+                            (unscaled.y - center.y).toDouble()
+                        )
+                        // ~48dp-equivalent hit radius in canvas space
+                        if (dist < 48.0 / currentScale) {
+                            onNodeClick(hit.id)
+                        }
+                    }
                 }
             }
     ) {
@@ -91,7 +136,7 @@ fun SkillTreeGraph(
                     else -> Bronze.copy(alpha = 0.22f)
                 }
 
-                // Soft outer glow for unlocked / completed nodes
+                // Soft outer glow
                 if (node.unlocked || node.completed) {
                     drawCircle(
                         color = nodeColor.copy(alpha = 0.18f),
@@ -100,7 +145,7 @@ fun SkillTreeGraph(
                     )
                 }
 
-                // Core orb – slightly larger for higher tiers
+                // Core orb – larger for higher tiers
                 val coreRadius = when {
                     node.tier >= 5 -> 19f
                     node.tier >= 4 -> 17f
@@ -112,7 +157,7 @@ fun SkillTreeGraph(
                     center = center
                 )
 
-                // Progress ring for in-progress unlocked nodes
+                // Progress ring
                 if (node.unlocked && !node.completed && node.progress > 0f) {
                     drawArc(
                         color = CathedralGold,
@@ -125,7 +170,7 @@ fun SkillTreeGraph(
                     )
                 }
 
-                // Double ring for synthesis / capstone nodes
+                // Double ring for synthesis / capstone
                 if (node.tier >= 4 && (node.unlocked || node.completed)) {
                     drawCircle(
                         color = CathedralGold.copy(alpha = 0.45f),
