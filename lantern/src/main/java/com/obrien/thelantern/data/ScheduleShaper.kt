@@ -10,10 +10,10 @@ import com.obrien.core.model.WeeklyIntention
  */
 object ScheduleShaper {
 
-    fun shape(intention: WeeklyIntention): List<Pillar> {
-        if (!intention.isActiveForCurrentWeek()) return ScheduleData.pillars
+    fun shape(intention: WeeklyIntention, basePillars: List<Pillar> = ScheduleData.pillars): List<Pillar> {
+        if (!intention.isActiveForCurrentWeek()) return basePillars
 
-        return ScheduleData.pillars.map { pillar ->
+        return basePillars.map { pillar ->
             pillar.copy(
                 alarms = pillar.alarms.map { alarm ->
                     alarm.copy(tasks = shapeTasks(alarm, intention))

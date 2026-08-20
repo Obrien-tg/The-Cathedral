@@ -7,7 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
-    primary = LanternGold,
+    primary = LanternViolet,
     onPrimary = LanternNight,
     secondary = LanternBlue,
     onSecondary = LanternText,
@@ -22,7 +22,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = LanternGold,
+    primary = LanternViolet,
     onPrimary = LanternNight,
     secondary = LanternBlue,
     onSecondary = LanternText,

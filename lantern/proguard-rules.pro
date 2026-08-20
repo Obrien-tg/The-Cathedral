@@ -1,12 +1,21 @@
-# Keep DataStore and Kotlin Serialization classes
--keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
-    <fields>;
-}
+-keepattributes *Annotation*, InnerClasses, Signature, Exceptions, *Annotation*
 
-# Keep Kotlinx Serialization
--keepattributes Annotation, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
--keepclassmembers class kotlinx.serialization.json.** { *; }
+# Hilt
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep class * extends dagger.hilt.internal.GeneratedComponent { *; }
+
+# Room
+-keep class * extends androidx.room.RoomDatabase
+-dontwarn androidx.room.paging.**
+
+# Kotlin Serialization
+-keepclassmembers class * {
+    @kotlinx.serialization.Serializable <fields>;
+}
+-keep @kotlinx.serialization.Serializable class * { *; }
+-keepclassmembers @kotlinx.serialization.Serializable class * { *; }
 
 # Keep model classes for serialization
 -keep class com.obrien.thelantern.model.** { *; }
+-keep class com.obrien.core.model.** { *; }

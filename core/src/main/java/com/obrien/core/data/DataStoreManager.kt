@@ -16,7 +16,7 @@ import java.time.LocalDate
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "formation_prefs")
 
-class DataStoreManager(private val context: Context, private val prefsName: String = "formation_prefs") {
+class DataStoreManager(private val context: Context) {
 
     companion object {
         val COMPLETED_ALARMS = stringSetPreferencesKey("completed_alarms")
