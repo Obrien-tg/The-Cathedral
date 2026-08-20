@@ -1,6 +1,6 @@
 package com.obrien.thecathedral.domain.usecase
 
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.core.data.ScheduleRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 

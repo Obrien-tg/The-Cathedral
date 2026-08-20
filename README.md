@@ -1,4 +1,4 @@
-# The Cathedral Codex
+# The Lantern Codex
 
 > "I am one of many. But I am the master of my own two hands."
 
@@ -6,7 +6,7 @@ A daily discipline tracker for Android, built with Kotlin and Jetpack Compose.
 
 ## What It Does
 
-The Cathedral structures your day into six sacred pillars — from morning ignition to evening sanctuary — and tracks your ritual completion with persistence, real-time awareness, and a monastic aesthetic.
+The Lantern structures your day into six sacred pillars — from morning ignition to evening sanctuary — and tracks your ritual completion with persistence, real-time awareness, and a monastic aesthetic.
 
 This is not a productivity app.  
 It is a digital sanctuary designed to turn daily actions into sacred rituals.
@@ -34,7 +34,7 @@ Progress is earned exclusively through **lifetime** ritual consistency (not dail
 | 2    | Strengthening      | Deep Work II · Living Sources · Physical Fortitude · Evening Vigil |
 | 3    | Integration        | The Forge Master · The Chronicler · Embodied Discipline · Quiet Mind |
 | 4    | Synthesis          | Builder’s Hand · Scholar’s Compass · Guardian of the Day |
-| 5    | Capstone           | Master of Two Hands → The Cathedral Complete |
+| 5    | Capstone           | Master of Two Hands → The Lantern Complete |
 
 A node unlocks only when **all** of its parents are fully completed.  
 A node is completed only when every requirement (completions + focus sessions + journal days) reaches 100 %.

@@ -2,10 +2,11 @@ package com.obrien.thecathedral.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.core.data.ScheduleRepository
 import com.obrien.thecathedral.domain.usecase.GetSkillProgressUseCase
-import com.obrien.thecathedral.model.SkillNode
-import com.obrien.thecathedral.model.SkillProgress
+import com.obrien.core.model.JournalEntry
+import com.obrien.core.model.SkillNode
+import com.obrien.core.model.SkillProgress
 import com.obrien.thecathedral.model.SkillTreeData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +64,7 @@ class SkillTreeViewModel @Inject constructor(
         repository.totalFocusSessions,
         repository.journalEntries,
         _selectedNodeId
-    ) { progress, historical, focusSessions, journalEntries, selectedId ->
+    ) { progress: List<SkillProgress>, historical: Map<String, Int>, focusSessions: Int, journalEntries: List<JournalEntry>, selectedId: String? ->
         SkillTreeUiState(
             skillProgress = progress,
             historicalCompletions = historical,

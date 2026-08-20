@@ -1,87 +1,64 @@
 package com.obrien.thecathedral.ui.screens
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.obrien.core.focus.FocusKind
 import com.obrien.thecathedral.model.FocusQuotes
-import com.obrien.thecathedral.ui.theme.CathedralGold
-import com.obrien.thecathedral.ui.theme.MonasteryBlack
-import com.obrien.thecathedral.ui.theme.Parchment
-import com.obrien.thecathedral.ui.theme.RitualMiss
-import com.obrien.thecathedral.ui.theme.TheCathedralTheme
+import com.obrien.thecathedral.ui.theme.*
 import com.obrien.thecathedral.viewmodel.FocusViewModel
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FocusModeScreen(
     viewModel: FocusViewModel,
     onBack: () -> Unit = {}
 ) {
-    val timeRemaining by viewModel.timeRemaining.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
-    val sessionCount by viewModel.sessionCount.collectAsState()
     
-    var quoteIndex by remember { mutableIntStateOf(0) }
-    var showCompletion by remember { mutableStateOf(false) }
-
-    val quotes = FocusQuotes.all
-
-    // Quote rotation
-    LaunchedEffect(isRunning, timeRemaining) {
-        if (isRunning && timeRemaining % 30 == 0) {
-            quoteIndex = (quoteIndex + 1) % quotes.size
-        }
+    if (isRunning) {
+        FocusSessionContent(viewModel, onBack)
+    } else {
+        FocusSetupContent(viewModel, onBack)
     }
+}
 
-    // Completion celebration
-    LaunchedEffect(timeRemaining) {
-        if (timeRemaining == 0 && !isRunning && sessionCount > 0) {
-            showCompletion = true
-            delay(2000)
-            showCompletion = false
-        }
-    }
-
-    val minutes = timeRemaining / 60
-    val seconds = timeRemaining % 60
-    val progress = 1f - (timeRemaining / (25f * 60f))
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FocusSetupContent(
+    viewModel: FocusViewModel,
+    onBack: () -> Unit
+) {
+    var selectedKind by remember { mutableStateOf<FocusKind?>(null) }
+    val suggestedPrompt by viewModel.suggestedPrompt.collectAsState()
+    var customTarget by remember(suggestedPrompt) { mutableStateOf(suggestedPrompt) }
+    var selectedDuration by remember { mutableIntStateOf(25) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "THE FORGE",
-                        style = MaterialTheme.typography.titleMedium,
-                        letterSpacing = 3.sp,
-                        color = CathedralGold
-                    )
-                },
+                title = { Text("FOCUS MODE", letterSpacing = 2.sp, color = CathedralGold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = CathedralGold
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = CathedralGold)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MonasteryBlack)
@@ -94,133 +71,247 @@ fun FocusModeScreen(
                 .padding(padding)
                 .fillMaxSize()
                 .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            if (selectedKind == null) {
+                Text(
+                    "Choose your energy:",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = CathedralGold.copy(alpha = 0.6f)
+                )
+                
+                LocalFocusModeCard(
+                    title = "Deep Work",
+                    description = "Techne. Build, write, or solve.",
+                    icon = Icons.Default.Handyman,
+                    color = CathedralGold,
+                    onClick = { selectedKind = FocusKind.DEEP_WORK }
+                )
+
+                LocalFocusModeCard(
+                    title = "Mindfulness",
+                    description = "Sophia. Sit, breathe, or reflect.",
+                    icon = Icons.Default.SelfImprovement,
+                    color = Bronze,
+                    onClick = { 
+                        selectedKind = FocusKind.MINDFULNESS
+                        selectedDuration = 10
+                    }
+                )
+            } else {
+                Text(
+                    text = if (selectedKind == FocusKind.DEEP_WORK) "THE FORGE" else "THE SANCTUARY",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = CathedralGold,
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (selectedKind == FocusKind.DEEP_WORK) {
+                    OutlinedTextField(
+                        value = customTarget,
+                        onValueChange = { customTarget = it },
+                        label = { Text("Focusing on:", color = CathedralGold.copy(alpha = 0.6f)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = CathedralGold,
+                            unfocusedBorderColor = CathedralGold.copy(alpha = 0.3f),
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        listOf(15, 25, 50).forEach { mins ->
+                            LocalDurationOption(
+                                minutes = mins,
+                                selected = selectedDuration == mins,
+                                color = CathedralGold,
+                                onClick = { selectedDuration = mins }
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        listOf(5, 10, 15, 20).forEach { mins ->
+                            LocalDurationOption(
+                                minutes = mins,
+                                selected = selectedDuration == mins,
+                                color = Bronze,
+                                onClick = { selectedDuration = mins }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = { 
+                        if (selectedKind == FocusKind.DEEP_WORK) {
+                            viewModel.startDeepWork(customTarget, selectedDuration)
+                        } else {
+                            viewModel.startMindfulness(selectedDuration)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (selectedKind == FocusKind.DEEP_WORK) CathedralGold else Bronze,
+                        contentColor = MonasteryBlack
+                    )
+                ) {
+                    Text("BEGIN SESSION", fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
+                }
+
+                TextButton(
+                    onClick = { selectedKind = null },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Change Mode", color = CathedralGold.copy(alpha = 0.5f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LocalFocusModeCard(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(40.dp)
+            )
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = color,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LocalDurationOption(
+    minutes: Int,
+    selected: Boolean,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) color else Color.Transparent,
+        border = if (selected) null else androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.4f)),
+        modifier = Modifier.size(64.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = minutes.toString(),
+                color = if (selected) MonasteryBlack else color,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FocusSessionContent(
+    viewModel: FocusViewModel,
+    onBack: () -> Unit
+) {
+    val timeRemaining by viewModel.timeRemaining.collectAsState()
+    val currentKind by viewModel.currentKind.collectAsState()
+    val currentTarget by viewModel.currentTarget.collectAsState()
+    
+    val minutes = timeRemaining / 60
+    val seconds = timeRemaining % 60
+    val themeColor = if (currentKind == FocusKind.DEEP_WORK) CathedralGold else Bronze
+
+    Scaffold(
+        containerColor = MonasteryBlack
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = if (showCompletion) "RITUAL SEALED" else "SESSION ${sessionCount + 1}",
-                style = MaterialTheme.typography.labelMedium,
-                color = CathedralGold.copy(alpha = 0.6f),
-                letterSpacing = 4.sp
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier.size(240.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxSize(),
-                    color = CathedralGold,
-                    trackColor = CathedralGold.copy(alpha = 0.1f),
-                    strokeWidth = 4.dp
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = if (currentKind == FocusKind.DEEP_WORK) "DEEP WORK" else "MINDFULNESS",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = themeColor.copy(alpha = 0.6f),
+                    letterSpacing = 4.sp
                 )
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (currentTarget.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = String.format("%02d:%02d", minutes, seconds),
-                        style = MaterialTheme.typography.displayLarge,
-                        color = if (timeRemaining <= 60 && timeRemaining > 0) RitualMiss else Parchment,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Light
-                    )
-                    Text(
-                        text = if (isRunning) "FORGING..." else if (timeRemaining == 0) "COMPLETE" else "READY",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = CathedralGold.copy(alpha = 0.7f),
-                        letterSpacing = 3.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            AnimatedContent(
-                targetState = quoteIndex,
-                label = "quote"
-            ) { idx ->
-                val quote = quotes[idx]
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = """"${quote.text}"""",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Parchment.copy(alpha = 0.85f),
-                        textAlign = TextAlign.Center,
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic,
-                        lineHeight = 26.sp
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "— ${quote.author}, ${quote.source}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = CathedralGold.copy(alpha = 0.6f),
+                        text = currentTarget,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
                         textAlign = TextAlign.Center
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = String.format("%02d:%02d", minutes, seconds),
+                style = MaterialTheme.typography.displayLarge,
+                fontSize = 80.sp,
+                color = if (timeRemaining <= 60 && timeRemaining > 0) RitualMiss else Color.White,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Light
+            )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 IconButton(
-                    onClick = { viewModel.resetFocusTimer() },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(CathedralGold.copy(alpha = 0.1f), CircleShape)
+                    onClick = { viewModel.pauseFocus() },
+                    modifier = Modifier.size(72.dp).background(themeColor, CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Reset",
-                        tint = CathedralGold,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Icon(Icons.Default.Pause, contentDescription = "Pause", tint = MonasteryBlack, modifier = Modifier.size(32.dp))
                 }
-
-                IconButton(
-                    onClick = { if (isRunning) viewModel.pauseFocusTimer() else viewModel.startFocusTimer() },
-                    modifier = Modifier
-                        .size(72.dp)
-                        .background(CathedralGold, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isRunning) "Pause" else "Start",
-                        tint = MonasteryBlack,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = { viewModel.setFocusBreak() },
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(CathedralGold.copy(alpha = 0.1f), CircleShape)
-                ) {
-                    Text(
-                        text = "5m",
-                        color = CathedralGold,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                
+                TextButton(onClick = { viewModel.resetFocus() }) {
+                    Text("END SESSION", color = themeColor.copy(alpha = 0.5f), letterSpacing = 1.sp)
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "The 5-Minute Rescue: commit to just 5 minutes. You will likely continue.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Parchment.copy(alpha = 0.4f),
-                textAlign = TextAlign.Center
-            )
         }
     }
 }

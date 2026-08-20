@@ -18,9 +18,11 @@ import androidx.navigation.navDeepLink
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
-import com.obrien.thecathedral.util.AlarmScheduler
-import com.obrien.thecathedral.util.NotificationHelper
-import com.obrien.thecathedral.viewmodel.*
+import com.obrien.core.util.AlarmScheduler
+import com.obrien.core.util.NotificationHelper
+import com.obrien.thecathedral.notifications.PillarReceiver
+import com.obrien.thecathedral.data.ScheduleData
+import com.obrien.thecathedral.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -37,7 +39,11 @@ class MainActivity : ComponentActivity() {
     private val timeChangeReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
             if (::settingsViewModel.isInitialized) {
-                alarmScheduler.scheduleRitualAlarms(settingsViewModel.uiState.value.wakeTime)
+                alarmScheduler.scheduleRitualAlarms(
+                    pillars = ScheduleData.pillars,
+                    receiverClass = PillarReceiver::class.java,
+                    wakeTime = settingsViewModel.uiState.value.wakeTime
+                )
             }
         }
     }
@@ -51,7 +57,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        NotificationHelper.createNotificationChannel(this)
+        NotificationHelper.createNotificationChannel(this, "Cathedral Reminders")
 
         val filter = android.content.IntentFilter().apply {
             addAction(android.content.Intent.ACTION_TIME_CHANGED)
@@ -91,7 +97,11 @@ class MainActivity : ComponentActivity() {
                     val settingsState by settingsViewModel.uiState.collectAsState()
                     
                     LaunchedEffect(settingsState.wakeTime) {
-                        alarmScheduler.scheduleRitualAlarms(settingsState.wakeTime)
+                        alarmScheduler.scheduleRitualAlarms(
+                            pillars = ScheduleData.pillars,
+                            receiverClass = PillarReceiver::class.java,
+                            wakeTime = settingsState.wakeTime
+                        )
                     }
 
                     NavHost(

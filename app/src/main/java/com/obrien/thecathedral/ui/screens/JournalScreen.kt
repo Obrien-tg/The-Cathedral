@@ -18,12 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thecathedral.model.JournalEntry
-import com.obrien.thecathedral.ui.theme.CathedralGold
-import com.obrien.thecathedral.ui.theme.MonasteryBlack
-import com.obrien.thecathedral.ui.theme.Parchment
-import com.obrien.thecathedral.ui.theme.RitualSuccess
-import com.obrien.thecathedral.ui.theme.TheCathedralTheme
+import com.obrien.core.model.JournalEntry
+import com.obrien.thecathedral.ui.theme.*
 import com.obrien.thecathedral.viewmodel.JournalViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -40,23 +36,28 @@ fun JournalScreen(
     val todayStr = today.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val todayEntry = uiState.journalEntries.find { it.date == todayStr }
 
-    var techne by remember { mutableStateOf(todayEntry?.techneCompleted ?: false) }
-    var historia by remember { mutableStateOf(todayEntry?.historiaCompleted ?: false) }
-    var gymnoso by remember { mutableStateOf(todayEntry?.gymnosoCompleted ?: false) }
-    var sophia by remember { mutableStateOf(todayEntry?.sophiaCompleted ?: false) }
-    var freeText by remember { mutableStateOf(todayEntry?.freeText ?: "") }
-    var learning by remember { mutableStateOf(todayEntry?.learning ?: "") }
-    var improvement by remember { mutableStateOf(todayEntry?.improvement ?: "") }
+    var p1 by remember { mutableStateOf(todayEntry?.morningCompleted ?: false) }
+    var p2 by remember { mutableStateOf(todayEntry?.schoolCompleted ?: false) }
+    var p3 by remember { mutableStateOf(todayEntry?.resetCompleted ?: false) }
+    var p4 by remember { mutableStateOf(todayEntry?.studyCompleted ?: false) }
+    var p5 by remember { mutableStateOf(todayEntry?.bodyCompleted ?: false) }
+    var p6 by remember { mutableStateOf(todayEntry?.eveningCompleted ?: false) }
+    
+    var wentWell by remember { mutableStateOf(todayEntry?.wentWell ?: "") }
+    var hardPart by remember { mutableStateOf(todayEntry?.hardPart ?: "") }
+    var gratitude by remember { mutableStateOf(todayEntry?.gratitude ?: "") }
 
     LaunchedEffect(todayEntry) {
         todayEntry?.let {
-            techne = it.techneCompleted
-            historia = it.historiaCompleted
-            gymnoso = it.gymnosoCompleted
-            sophia = it.sophiaCompleted
-            freeText = it.freeText
-            learning = it.learning
-            improvement = it.improvement
+            p1 = it.morningCompleted
+            p2 = it.schoolCompleted
+            p3 = it.resetCompleted
+            p4 = it.studyCompleted
+            p5 = it.bodyCompleted
+            p6 = it.eveningCompleted
+            wentWell = it.wentWell
+            hardPart = it.hardPart
+            gratitude = it.gratitude
         }
     }
 
@@ -101,33 +102,19 @@ fun JournalScreen(
             )
 
             Text(
-                text = "DAILY SCORECARD",
+                text = "DAILY PILLARS",
                 style = MaterialTheme.typography.titleSmall,
                 color = CathedralGold,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
 
-            ScoreCardRow(
-                label = "⚙️ TECHNE — The Forge",
-                checked = techne,
-                onCheckedChange = { techne = it }
-            )
-            ScoreCardRow(
-                label = "📜 HISTORIA — The Archive",
-                checked = historia,
-                onCheckedChange = { historia = it }
-            )
-            ScoreCardRow(
-                label = "🏛️ GYMNOS — The Arena",
-                checked = gymnoso,
-                onCheckedChange = { gymnoso = it }
-            )
-            ScoreCardRow(
-                label = "🌙 SOPHIA — The Sanctuary",
-                checked = sophia,
-                onCheckedChange = { sophia = it }
-            )
+            ScoreCardRow(label = "AWAKENING", checked = p1, onCheckedChange = { p1 = it })
+            ScoreCardRow(label = "TECHNE", checked = p2, onCheckedChange = { p2 = it })
+            ScoreCardRow(label = "HISTORIA", checked = p3, onCheckedChange = { p3 = it })
+            ScoreCardRow(label = "GRIND", checked = p4, onCheckedChange = { p4 = it })
+            ScoreCardRow(label = "GYMNOS", checked = p5, onCheckedChange = { p5 = it })
+            ScoreCardRow(label = "SOPHIA", checked = p6, onCheckedChange = { p6 = it })
 
             HorizontalDivider(color = CathedralGold.copy(alpha = 0.2f))
 
@@ -140,24 +127,24 @@ fun JournalScreen(
             )
 
             JournalField(
-                value = freeText,
-                onValueChange = { freeText = it },
-                label = "What did you build today?",
-                placeholder = "Describe your labour..."
+                value = wentWell,
+                onValueChange = { wentWell = it },
+                label = "What went well?",
+                placeholder = "A win, even a small one..."
             )
 
             JournalField(
-                value = learning,
-                onValueChange = { learning = it },
-                label = "What did you learn?",
-                placeholder = "A truth discovered or reinforced..."
+                value = hardPart,
+                onValueChange = { hardPart = it },
+                label = "What was hard?",
+                placeholder = "Where did you struggle?"
             )
 
             JournalField(
-                value = improvement,
-                onValueChange = { improvement = it },
-                label = "How will you be better tomorrow?",
-                placeholder = "The specific correction..."
+                value = gratitude,
+                onValueChange = { gratitude = it },
+                label = "One thing I’m grateful for",
+                placeholder = "Name one good thing..."
             )
 
             Button(
@@ -165,13 +152,15 @@ fun JournalScreen(
                     viewModel.saveJournalEntry(
                         JournalEntry(
                             date = todayStr,
-                            techneCompleted = techne,
-                            historiaCompleted = historia,
-                            gymnosoCompleted = gymnoso,
-                            sophiaCompleted = sophia,
-                            freeText = freeText,
-                            learning = learning,
-                            improvement = improvement,
+                            morningCompleted = p1,
+                            schoolCompleted = p2,
+                            resetCompleted = p3,
+                            studyCompleted = p4,
+                            bodyCompleted = p5,
+                            eveningCompleted = p6,
+                            wentWell = wentWell,
+                            hardPart = hardPart,
+                            gratitude = gratitude,
                             timestamp = System.currentTimeMillis()
                         )
                     )
@@ -220,13 +209,6 @@ fun JournalScreen(
                             text = "— Socrates",
                             style = MaterialTheme.typography.labelSmall,
                             color = CathedralGold.copy(alpha = 0.3f)
-                        )
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "Begin your first entry above.",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = CathedralGold,
-                            letterSpacing = 1.sp
                         )
                     }
                 }
@@ -332,12 +314,7 @@ fun HistoryCard(entry: JournalEntry) {
         entry.date
     }
 
-    val score = listOf(
-        entry.techneCompleted,
-        entry.historiaCompleted,
-        entry.gymnosoCompleted,
-        entry.sophiaCompleted
-    ).count { it }
+    val score = entry.score
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MonasteryBlack),
@@ -360,45 +337,24 @@ fun HistoryCard(entry: JournalEntry) {
                     color = CathedralGold.copy(alpha = 0.6f)
                 )
                 Text(
-                    text = "$score / 4",
+                    text = "$score / 6",
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (score == 4) RitualSuccess else CathedralGold,
+                    color = if (score == 6) RitualSuccess else CathedralGold,
                     fontWeight = FontWeight.Bold
                 )
             }
-            if (entry.freeText.isNotBlank() || entry.learning.isNotBlank() || entry.improvement.isNotBlank()) {
+            val reflection = listOf(entry.wentWell, entry.hardPart, entry.gratitude)
+                .filter { it.isNotBlank() }
+                .joinToString(" • ")
+            if (reflection.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                val summary = listOf(entry.freeText, entry.learning, entry.improvement)
-                    .filter { it.isNotBlank() }
-                    .joinToString(" • ")
                 Text(
-                    text = summary.take(120) + if (summary.length > 120) "…" else "",
+                    text = reflection.take(120) + if (reflection.length > 120) "…" else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = Parchment.copy(alpha = 0.5f),
                     fontFamily = FontFamily.Serif,
                     lineHeight = 18.sp
                 )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun JournalScreenPreview() {
-    TheCathedralTheme(darkTheme = true) {
-        Scaffold(containerColor = MonasteryBlack) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(20.dp)
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text("DAILY SCORECARD", color = CathedralGold)
-                ScoreCardRow("⚙️ TECHNE", checked = true) {}
-                ScoreCardRow("📜 HISTORIA", checked = false) {}
             }
         }
     }

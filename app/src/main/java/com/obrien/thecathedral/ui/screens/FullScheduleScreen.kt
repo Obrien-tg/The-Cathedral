@@ -34,10 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thecathedral.data.ScheduleData
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.PillarStatus
-import com.obrien.thecathedral.ui.components.SunflowerParticle
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.PillarStatus
+import com.obrien.core.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.RitualMiss
@@ -58,12 +58,22 @@ fun FullScheduleScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "THE CATHEDRAL CODEX",
-                        style = MaterialTheme.typography.titleMedium,
-                        letterSpacing = 2.sp,
-                        color = CathedralGold
-                    )
+                    Column {
+                        Text(
+                            "THE CATHEDRAL CODEX",
+                            style = MaterialTheme.typography.titleMedium,
+                            letterSpacing = 2.sp,
+                            color = CathedralGold
+                        )
+                        if (uiState.weeklyIntention.weeklyAim.isNotBlank()) {
+                            Text(
+                                text = uiState.weeklyIntention.weeklyAim.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = CathedralGold.copy(alpha = 0.5f),
+                                letterSpacing = 1.sp
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -88,7 +98,8 @@ fun FullScheduleScreen(
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 24.dp, end = 20.dp),
                 size = 16f,
-                drift = false
+                drift = false,
+                color = CathedralGold
             )
 
             LazyColumn(

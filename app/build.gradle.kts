@@ -44,6 +44,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core"))
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(platform(libs.androidx.compose.bom))

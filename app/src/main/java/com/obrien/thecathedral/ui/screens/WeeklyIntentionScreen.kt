@@ -43,7 +43,7 @@ fun WeeklyIntentionScreen(
                             color = CathedralGold
                         )
                         Text(
-                            "Week of ${uiState.weekStart}",
+                            "Week of ${uiState.weekStartDate}",
                             style = MaterialTheme.typography.labelSmall,
                             color = CathedralGold.copy(alpha = 0.5f)
                         )
@@ -76,19 +76,16 @@ fun WeeklyIntentionScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            if (uiState.isAnythingSet()) {
+                IntentionPreview(uiState)
+            }
+
             IntentionSection(title = "THE FORGE (TECHNE)") {
                 IntentionField(
-                    label = "Active Project",
-                    value = uiState.techneProject,
-                    onValueChange = { viewModel.updateTechneProject(it) },
+                    label = "Active Project / Focus",
+                    value = uiState.techneFocus,
+                    onValueChange = { viewModel.updateTechneFocus(it) },
                     placeholder = "e.g. Liberty Timeline – event list"
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                IntentionField(
-                    label = "Skill Focus",
-                    value = uiState.techneSkill,
-                    onValueChange = { viewModel.updateTechneSkill(it) },
-                    placeholder = "e.g. Room + Flow integration"
                 )
             }
 
@@ -102,8 +99,8 @@ fun WeeklyIntentionScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 IntentionField(
                     label = "Research Subject",
-                    value = uiState.historiaTopic,
-                    onValueChange = { viewModel.updateHistoriaTopic(it) },
+                    value = uiState.historiaResearch,
+                    onValueChange = { viewModel.updateHistoriaResearch(it) },
                     placeholder = "e.g. Pericles and civic speech"
                 )
             }
@@ -128,9 +125,9 @@ fun WeeklyIntentionScreen(
 
             IntentionSection(title = "THE CORE") {
                 IntentionField(
-                    label = "One-line Week Intention",
-                    value = uiState.weekNote,
-                    onValueChange = { viewModel.updateWeekNote(it) },
+                    label = "One-line Week Aim",
+                    value = uiState.weeklyAim,
+                    onValueChange = { viewModel.updateWeeklyAim(it) },
                     placeholder = "e.g. Ship one feature; finish Book I"
                 )
             }
@@ -161,6 +158,59 @@ fun WeeklyIntentionScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
         }
+    }
+}
+
+@Composable
+fun IntentionPreview(uiState: com.obrien.thecathedral.viewmodel.WeeklyIntentionUiState) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = CathedralGold.copy(alpha = 0.05f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CathedralGold.copy(alpha = 0.2f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                "LIVE PREVIEW",
+                style = MaterialTheme.typography.labelSmall,
+                color = CathedralGold,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            if (uiState.techneFocus.isNotBlank()) {
+                PreviewLine("Deep Work", "Build: ${uiState.techneFocus}")
+            }
+            if (uiState.historiaBook.isNotBlank()) {
+                PreviewLine("Archive", "Read from: ${uiState.historiaBook}")
+            }
+            if (uiState.historiaResearch.isNotBlank()) {
+                PreviewLine("Walk", "Turn over: ${uiState.historiaResearch}")
+            }
+            if (uiState.gymnosFocus.isNotBlank()) {
+                PreviewLine("Physical", "Train with emphasis: ${uiState.gymnosFocus}")
+            }
+            if (uiState.sophiaTheme.isNotBlank()) {
+                PreviewLine("Sanctuary", "Evening theme: ${uiState.sophiaTheme}")
+            }
+        }
+    }
+}
+
+@Composable
+fun PreviewLine(ritual: String, text: String) {
+    Row(modifier = Modifier.padding(vertical = 2.dp)) {
+        Text(
+            "$ritual will say: ",
+            style = MaterialTheme.typography.bodySmall,
+            color = Parchment.copy(alpha = 0.5f)
+        )
+        Text(
+            "“$text”",
+            style = MaterialTheme.typography.bodySmall,
+            color = CathedralGold,
+            fontStyle = FontStyle.Italic,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

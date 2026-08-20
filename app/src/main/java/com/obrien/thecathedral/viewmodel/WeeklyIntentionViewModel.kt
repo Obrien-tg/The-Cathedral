@@ -2,104 +2,103 @@ package com.obrien.thecathedral.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.data.ScheduleRepository
-import com.obrien.thecathedral.model.WeeklyIntention
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.WeeklyIntention
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class WeeklyIntentionUiState(
-    val techneProject: String = "",
-    val techneSkill: String = "",
+    val techneFocus: String = "",
     val historiaBook: String = "",
-    val historiaTopic: String = "",
+    val historiaResearch: String = "",
     val gymnosFocus: String = "",
     val sophiaTheme: String = "",
-    val weekNote: String = "",
-    val weekStart: String = ""
-)
+    val weeklyAim: String = "",
+    val weekStartDate: String = ""
+) {
+    fun isAnythingSet(): Boolean =
+        techneFocus.isNotBlank() ||
+                historiaBook.isNotBlank() ||
+                historiaResearch.isNotBlank() ||
+                gymnosFocus.isNotBlank() ||
+                sophiaTheme.isNotBlank() ||
+                weeklyAim.isNotBlank()
+}
 
 @HiltViewModel
 class WeeklyIntentionViewModel @Inject constructor(
     private val repository: ScheduleRepository
 ) : ViewModel() {
 
-    private val _techneProject = MutableStateFlow("")
-    private val _techneSkill = MutableStateFlow("")
+    private val _techneFocus = MutableStateFlow("")
     private val _historiaBook = MutableStateFlow("")
-    private val _historiaTopic = MutableStateFlow("")
+    private val _historiaResearch = MutableStateFlow("")
     private val _gymnosFocus = MutableStateFlow("")
     private val _sophiaTheme = MutableStateFlow("")
-    private val _weekNote = MutableStateFlow("")
+    private val _weeklyAim = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
             val intention = repository.weeklyIntention.first()
-            intention?.let {
-                _techneProject.value = it.techneProject
-                _techneSkill.value = it.techneSkill
-                _historiaBook.value = it.historiaBook
-                _historiaTopic.value = it.historiaTopic
-                _gymnosFocus.value = it.gymnosFocus
-                _sophiaTheme.value = it.sophiaTheme
-                _weekNote.value = it.weekNote
-            }
+            _techneFocus.value = intention.techneFocus
+            _historiaBook.value = intention.historiaBook
+            _historiaResearch.value = intention.historiaResearch
+            _gymnosFocus.value = intention.gymnosFocus
+            _sophiaTheme.value = intention.sophiaTheme
+            _weeklyAim.value = intention.weeklyAim
         }
     }
 
     val uiState: StateFlow<WeeklyIntentionUiState> = combine(
-        _techneProject, _techneSkill, _historiaBook, _historiaTopic,
-        _gymnosFocus, _sophiaTheme, _weekNote
+        _techneFocus, _historiaBook, _historiaResearch,
+        _gymnosFocus, _sophiaTheme, _weeklyAim
     ) { flows ->
         WeeklyIntentionUiState(
-            techneProject = flows[0],
-            techneSkill = flows[1],
-            historiaBook = flows[2],
-            historiaTopic = flows[3],
-            gymnosFocus = flows[4],
-            sophiaTheme = flows[5],
-            weekNote = flows[6],
-            weekStart = repository.currentWeekStart()
+            techneFocus = flows[0],
+            historiaBook = flows[1],
+            historiaResearch = flows[2],
+            gymnosFocus = flows[3],
+            sophiaTheme = flows[4],
+            weeklyAim = flows[5],
+            weekStartDate = repository.currentWeekStart()
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = WeeklyIntentionUiState(weekStart = repository.currentWeekStart())
+        initialValue = WeeklyIntentionUiState(weekStartDate = repository.currentWeekStart())
     )
 
-    fun updateTechneProject(value: String) { _techneProject.value = value }
-    fun updateTechneSkill(value: String) { _techneSkill.value = value }
+    fun updateTechneFocus(value: String) { _techneFocus.value = value }
     fun updateHistoriaBook(value: String) { _historiaBook.value = value }
-    fun updateHistoriaTopic(value: String) { _historiaTopic.value = value }
+    fun updateHistoriaResearch(value: String) { _historiaResearch.value = value }
     fun updateGymnosFocus(value: String) { _gymnosFocus.value = value }
     fun updateSophiaTheme(value: String) { _sophiaTheme.value = value }
-    fun updateWeekNote(value: String) { _weekNote.value = value }
+    fun updateWeeklyAim(value: String) { _weeklyAim.value = value }
 
     fun save() {
         viewModelScope.launch {
             val intention = WeeklyIntention(
-                weekStart = repository.currentWeekStart(),
-                techneProject = _techneProject.value,
-                techneSkill = _techneSkill.value,
+                weekStartDate = repository.currentWeekStart(),
+                techneFocus = _techneFocus.value,
                 historiaBook = _historiaBook.value,
-                historiaTopic = _historiaTopic.value,
+                historiaResearch = _historiaResearch.value,
                 gymnosFocus = _gymnosFocus.value,
                 sophiaTheme = _sophiaTheme.value,
-                weekNote = _weekNote.value
+                weeklyAim = _weeklyAim.value
             )
             repository.saveWeeklyIntention(intention)
         }
     }
 
     fun clear() {
-        _techneProject.value = ""
-        _techneSkill.value = ""
+        _techneFocus.value = ""
         _historiaBook.value = ""
-        _historiaTopic.value = ""
+        _historiaResearch.value = ""
         _gymnosFocus.value = ""
         _sophiaTheme.value = ""
-        _weekNote.value = ""
+        _weeklyAim.value = ""
         viewModelScope.launch {
             repository.clearWeeklyIntention()
         }

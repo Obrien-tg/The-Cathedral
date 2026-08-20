@@ -1,8 +1,8 @@
 package com.obrien.thecathedral.domain.usecase
 
 import com.obrien.thecathedral.data.ScheduleData
-import com.obrien.thecathedral.data.ScheduleRepository
-import com.obrien.thecathedral.model.Pillar
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.Pillar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.Duration

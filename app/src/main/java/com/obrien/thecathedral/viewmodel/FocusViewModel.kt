@@ -1,96 +1,47 @@
 package com.obrien.thecathedral.viewmodel
 
 import android.app.Application
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Build
-import android.os.IBinder
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.service.ForgeService
+import com.obrien.core.focus.BaseFocusViewModel
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.focus.FocusKind
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
+import com.obrien.thecathedral.domain.usecase.GetActivePillarUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
 class FocusViewModel @Inject constructor(
-    private val application: Application
-) : ViewModel() {
+    application: Application,
+    repository: ScheduleRepository,
+    private val getActivePillar: GetActivePillarUseCase
+) : BaseFocusViewModel(application, repository) {
 
-    private val _timeRemaining = MutableStateFlow(25 * 60)
-    val timeRemaining: StateFlow<Int> = _timeRemaining.asStateFlow()
+    private val _currentTime = MutableStateFlow(java.time.LocalTime.now())
 
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-
-    private val _sessionCount = MutableStateFlow(0)
-    val sessionCount: StateFlow<Int> = _sessionCount.asStateFlow()
-
-    private var forgeService: ForgeService? = null
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as ForgeService.ForgeBinder
-            forgeService = binder.getService()
-            
-            viewModelScope.launch {
-                forgeService?.timeRemaining?.collect { _timeRemaining.value = it }
-            }
-            viewModelScope.launch {
-                forgeService?.isRunning?.collect { _isRunning.value = it }
-            }
+    val suggestedPrompt: StateFlow<String> = combine(
+        getActivePillar(_currentTime),
+        repository.weeklyIntention
+    ) { pillar: Pillar?, intention: WeeklyIntention ->
+        when {
+            intention.techneFocus.isNotBlank() -> "Build: ${intention.techneFocus}"
+            pillar?.id == "forge" -> "Deep work — one concrete step"
+            pillar?.id == "archive" -> "Primary source — one claim + one question"
+            else -> "What is the one outcome of this block?"
         }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "What are you focusing on?"
+    )
 
-        override fun onServiceDisconnected(name: ComponentName?) {
-            forgeService = null
-        }
+    fun startDeepWork(target: String, durationMins: Int) {
+        startFocus(FocusKind.DEEP_WORK, target, durationMins, "com.obrien.thecathedral.MainActivity")
     }
 
-    init {
-        val intent = Intent(application, ForgeService::class.java)
-        application.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-    }
-
-    fun startFocusTimer() {
-        val intent = Intent(application, ForgeService::class.java).apply {
-            action = ForgeService.ACTION_START
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            application.startForegroundService(intent)
-        } else {
-            application.startService(intent)
-        }
-    }
-
-    fun pauseFocusTimer() {
-        val intent = Intent(application, ForgeService::class.java).apply {
-            action = ForgeService.ACTION_PAUSE
-        }
-        application.startService(intent)
-    }
-
-    fun resetFocusTimer() {
-        val intent = Intent(application, ForgeService::class.java).apply {
-            action = ForgeService.ACTION_RESET
-        }
-        application.startService(intent)
-    }
-
-    fun setFocusBreak() {
-        val intent = Intent(application, ForgeService::class.java).apply {
-            action = ForgeService.ACTION_SET_BREAK
-        }
-        application.startService(intent)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        try {
-            application.unbindService(serviceConnection)
-        } catch (_: Exception) { }
+    fun startMindfulness(durationMins: Int) {
+        startFocus(FocusKind.MINDFULNESS, "Sophia Sanctuary", durationMins, "com.obrien.thecathedral.MainActivity")
     }
 }

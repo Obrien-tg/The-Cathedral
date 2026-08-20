@@ -1,8 +1,8 @@
 package com.obrien.thecathedral.util
 
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.PillarStatus
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.PillarStatus
 import java.time.LocalTime
 
 fun Pillar.isActiveAt(time: LocalTime): Boolean {

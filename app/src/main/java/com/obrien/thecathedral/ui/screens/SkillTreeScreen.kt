@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thecathedral.model.SkillNode
-import com.obrien.thecathedral.model.SkillProgress
+import com.obrien.core.model.SkillNode
+import com.obrien.core.model.SkillProgress
 import com.obrien.thecathedral.model.SkillTreeData
 import com.obrien.thecathedral.ui.skilltree.SkillEdge
 import com.obrien.thecathedral.ui.skilltree.SkillNode as UiSkillNode

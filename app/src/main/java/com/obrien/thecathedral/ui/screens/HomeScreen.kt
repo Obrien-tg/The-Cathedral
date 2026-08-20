@@ -1,23 +1,22 @@
 package com.obrien.thecathedral.ui.screens
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -26,21 +25,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thecathedral.data.ScheduleData
-import com.obrien.thecathedral.model.Pillar
+import com.obrien.thecathedral.data.ScheduleShaper
+import com.obrien.thecathedral.domain.usecase.DailyScore
+import com.obrien.thecathedral.model.DailyCounsel
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
+import com.obrien.thecathedral.ui.components.FidelityHeatmap
+import com.obrien.core.ui.components.SunflowerParticle
+import com.obrien.thecathedral.ui.theme.AmbientDust
+import com.obrien.thecathedral.ui.theme.Bronze
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
+import com.obrien.thecathedral.ui.theme.Parchment
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
+import com.obrien.thecathedral.ui.theme.glassCard
 import com.obrien.thecathedral.viewmodel.HomeUiState
 import com.obrien.thecathedral.viewmodel.HomeViewModel
-import com.obrien.thecathedral.domain.usecase.DailyScore
-
-import androidx.compose.material.icons.filled.AccountTree
-import com.obrien.thecathedral.ui.components.PillarProgressRing
-import com.obrien.thecathedral.ui.components.SunflowerParticle
-import com.obrien.thecathedral.ui.components.FidelityHeatmap
-import com.obrien.thecathedral.model.DailyCounsel
-import com.obrien.thecathedral.ui.theme.AmbientDust
-import com.obrien.thecathedral.ui.theme.glassCard
 
 @Composable
 fun HomeScreen(
@@ -52,8 +52,8 @@ fun HomeScreen(
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
-    onSettings: () -> Unit = {},
-    onWeeklyIntention: () -> Unit = {}
+    onWeeklyIntention: () -> Unit = {},
+    onSettings: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showResetConfirm by remember { mutableStateOf(false) }
@@ -75,7 +75,7 @@ fun HomeScreen(
             containerColor = MonasteryBlack
         )
     }
-    
+
     HomeScreenContent(
         modifier = modifier,
         uiState = uiState,
@@ -85,9 +85,9 @@ fun HomeScreen(
         onPhilosophy = onPhilosophy,
         onSkillTree = onSkillTree,
         onWeeklyReview = onWeeklyReview,
-        onSettings = onSettings,
         onWeeklyIntention = onWeeklyIntention,
-        onDismissAccountability = { viewModel.dismissAccountabilityDialog() },
+        onSettings = onSettings,
+        onDismissAccountability = { viewModel.acknowledgeAccountability() },
         onResetDay = { showResetConfirm = true }
     )
 }
@@ -103,8 +103,8 @@ fun HomeScreenContent(
     onPhilosophy: () -> Unit = {},
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
-    onSettings: () -> Unit = {},
     onWeeklyIntention: () -> Unit = {},
+    onSettings: () -> Unit = {},
     onDismissAccountability: () -> Unit = {},
     onResetDay: () -> Unit = {}
 ) {
@@ -172,12 +172,12 @@ fun HomeScreenContent(
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()
 
-            // Subtle sunflower charm — centered near top, clear of the settings button
             SunflowerParticle(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 12.dp),
-                size = 18f
+                size = 18f,
+                color = CathedralGold
             )
 
             LazyColumn(
@@ -190,48 +190,23 @@ fun HomeScreenContent(
             ) {
                 item { PurposeSection() }
 
+                item {
+                    WeekRuleCard(
+                        hasWeekRule = uiState.hasWeekRule,
+                        intention = uiState.weeklyIntention,
+                        onClick = onWeeklyIntention
+                    )
+                }
+
                 item { DailyCounselCard(counsel = uiState.todayCounsel) }
 
                 item {
-                    OutlinedButton(
-                        onClick = onWeeklyIntention,
+                    FidelityHeatmap(
+                        completionHistory = uiState.completionHistory,
+                        totalRituals = uiState.score.totalCount.coerceAtLeast(1),
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = CathedralGold),
-                        border = BorderStroke(1.dp, CathedralGold.copy(alpha = 0.3f)),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("WEEK’S RULE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        PillarProgressRing(percentage = 0.5f, pillarName = "TECHNE", level = 1, modifier = Modifier.weight(1f))
-                        PillarProgressRing(percentage = 0.3f, pillarName = "HISTORIA", level = 1, modifier = Modifier.weight(1f))
-                        PillarProgressRing(percentage = 0.8f, pillarName = "GYMNOS", level = 2, modifier = Modifier.weight(1f))
-                        PillarProgressRing(percentage = 0.2f, pillarName = "SOPHIA", level = 1, modifier = Modifier.weight(1f))
-                    }
-                }
-
-                item {
-                    val isLate = uiState.currentTime.hour >= 18
-                    val incomplete = uiState.score.completedCount < (uiState.score.totalCount / 2)
-                    
-                    if (isLate && incomplete && uiState.score.totalCount > 0) {
-                        Text(
-                            text = "The day is not yet written. There is time to lay another stone.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = CathedralGold.copy(alpha = 0.5f),
-                            fontStyle = FontStyle.Italic,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 24.dp)
-                        )
-                    }
+                        weeksToShow = 8
+                    )
                 }
 
                 item {
@@ -256,7 +231,7 @@ fun HomeScreenContent(
                     val pillar = uiState.activePillar
                     if (pillar != null) {
                         ActivePillarSection(
-                            pillar = pillar, 
+                            pillar = pillar,
                             isActive = true,
                             morningPrompt = uiState.todayCounsel.morningPrompt,
                             eveningPrompt = uiState.todayCounsel.eveningPrompt
@@ -264,7 +239,7 @@ fun HomeScreenContent(
                     } else {
                         uiState.nextPillar?.let {
                             ActivePillarSection(
-                                pillar = it, 
+                                pillar = it,
                                 isActive = false,
                                 morningPrompt = uiState.todayCounsel.morningPrompt,
                                 eveningPrompt = uiState.todayCounsel.eveningPrompt
@@ -276,16 +251,7 @@ fun HomeScreenContent(
                 item {
                     ProgressSection(
                         completed = uiState.score.completedCount,
-                        total = uiState.score.totalCount,
-                        streak = uiState.currentStreak
-                    )
-                }
-
-                item {
-                    FidelityHeatmap(
-                        completionHistory = uiState.completionHistory,
-                        totalRituals = uiState.score.totalCount,
-                        modifier = Modifier.fillMaxWidth()
+                        total = uiState.score.totalCount
                     )
                 }
 
@@ -355,8 +321,6 @@ fun HomeScreenContent(
         }
     }
 }
-
-
 
 @Composable
 fun QuickActionButton(
@@ -446,7 +410,7 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
                 color = MaterialTheme.colorScheme.onBackground,
                 fontFamily = FontFamily.Monospace
             )
-            
+
             val prompt = if (pillar.id == "awakening") morningPrompt else if (pillar.id == "sanctuary") eveningPrompt else null
             if (prompt != null) {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -542,43 +506,13 @@ fun RestSection() {
 }
 
 @Composable
-fun ProgressSection(completed: Int, total: Int, streak: Int) {
+fun ProgressSection(completed: Int, total: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "DAILY SCORE: $completed OF $total",
-                style = MaterialTheme.typography.labelMedium,
-                color = CathedralGold
-            )
-            if (streak > 0) {
-                Surface(
-                    color = CathedralGold.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.LocalFireDepartment,
-                            contentDescription = null,
-                            tint = CathedralGold,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Text(
-                            text = streak.toString(),
-                            color = CathedralGold,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
+        Text(
+            text = "DAILY SCORE: $completed OF $total",
+            style = MaterialTheme.typography.labelMedium,
+            color = CathedralGold
+        )
         Spacer(modifier = Modifier.height(12.dp))
         LinearProgressIndicator(
             progress = { if (total > 0) completed.toFloat() / total else 0f },
@@ -624,6 +558,73 @@ fun DailyCounselCard(counsel: DailyCounsel) {
                 style = MaterialTheme.typography.labelSmall,
                 color = CathedralGold.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeekRuleCard(
+    hasWeekRule: Boolean,
+    intention: WeeklyIntention,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(12.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, if (hasWeekRule) CathedralGold.copy(alpha = 0.35f) else Bronze.copy(alpha = 0.45f), shape)
+            .clickable(onClick = onClick)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = if (hasWeekRule) "THIS WEEK'S RULE" else "SET THIS WEEK'S RULE",
+            color = CathedralGold,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.sp,
+            style = MaterialTheme.typography.labelSmall
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        if (!hasWeekRule) {
+            Text(
+                text = "Name what you are building, reading, and researching. The schedule will speak those names.",
+                color = Parchment.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.bodyMedium,
+                lineHeight = 20.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Tap to set →",
+                color = CathedralGold.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.labelMedium
+            )
+        } else {
+            val rows = ScheduleShaper.focusSummary(intention)
+            rows.forEach { (label, value) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = label,
+                        color = Bronze,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.width(72.dp)
+                    )
+                    Text(
+                        text = value,
+                        color = Parchment.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Tap to revise →",
+                color = CathedralGold.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall
             )
         }
     }

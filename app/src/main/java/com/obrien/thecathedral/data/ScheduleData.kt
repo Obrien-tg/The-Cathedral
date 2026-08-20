@@ -1,7 +1,7 @@
 package com.obrien.thecathedral.data
 
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
 import java.time.LocalTime
 
 object ScheduleData {

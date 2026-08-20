@@ -36,7 +36,7 @@
         <receiver android:name=".notifications.PillarReceiver" android:exported="false" />
 
         <service
-            android:name=".service.ForgeService"
+            android:name="com.obrien.core.focus.FocusService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
