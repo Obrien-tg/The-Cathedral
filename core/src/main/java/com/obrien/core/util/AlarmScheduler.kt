@@ -24,9 +24,9 @@ class AlarmScheduler @Inject constructor(
     fun scheduleRitualAlarms(
         pillars: List<Pillar>,
         receiverClass: Class<out BroadcastReceiver>,
-        wakeTime: LocalTime = LocalTime.of(7, 0)
+        wakeTime: LocalTime = LocalTime.of(7, 0),
+        baseWake: LocalTime = LocalTime.of(7, 0)
     ) {
-        val baseWake = LocalTime.of(7, 0)
         val offset = Duration.between(baseWake, wakeTime)
 
         pillars.forEach { pillar ->

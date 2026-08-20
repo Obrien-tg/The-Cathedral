@@ -20,10 +20,10 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
         val wakeTime = try {
             LocalTime.parse(wakeTimeStr)
         } catch (_: Exception) {
-            LocalTime.of(7, 0)
+            LocalTime.of(6, 30)
         }
 
-        val baseWakeTime = LocalTime.of(7, 0)
+        val baseWakeTime = LocalTime.of(6, 30)
         val offset = Duration.between(baseWakeTime, wakeTime)
 
         // 1. Shape the pillars based on weekly intentions

@@ -1,5 +1,8 @@
 package com.obrien.thecathedral
 
+import android.content.Context
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
 import android.app.AlarmManager
 import android.content.Intent
 import android.os.Build
@@ -34,17 +37,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
 
-    private lateinit var settingsViewModel: SettingsViewModel
-
-    private val timeChangeReceiver = object : android.content.BroadcastReceiver() {
-        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
-            if (::settingsViewModel.isInitialized) {
-                alarmScheduler.scheduleRitualAlarms(
-                    pillars = ScheduleData.pillars,
-                    receiverClass = PillarReceiver::class.java,
-                    wakeTime = settingsViewModel.uiState.value.wakeTime
-                )
-            }
+    private val timeChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: android.content.Intent?) {
+            // System time changed; rescheduling is handled by LaunchedEffect(wakeTime)
         }
     }
 
@@ -63,7 +58,11 @@ class MainActivity : ComponentActivity() {
             addAction(android.content.Intent.ACTION_TIME_CHANGED)
             addAction(android.content.Intent.ACTION_TIMEZONE_CHANGED)
         }
-        registerReceiver(timeChangeReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(timeChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(timeChangeReceiver, filter)
+        }
 
         // Request notification permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -92,15 +91,15 @@ class MainActivity : ComponentActivity() {
                 } else {
                     val navController = rememberNavController()
                     
-                    // Root ViewModel for global state (like wakeTime for alarms)
-                    settingsViewModel = hiltViewModel()
+                    val settingsViewModel: SettingsViewModel = hiltViewModel()
                     val settingsState by settingsViewModel.uiState.collectAsState()
                     
                     LaunchedEffect(settingsState.wakeTime) {
                         alarmScheduler.scheduleRitualAlarms(
                             pillars = ScheduleData.pillars,
                             receiverClass = PillarReceiver::class.java,
-                            wakeTime = settingsState.wakeTime
+                            wakeTime = settingsState.wakeTime,
+                            baseWake = java.time.LocalTime.of(7, 0)
                         )
                     }
 

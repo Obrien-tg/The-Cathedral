@@ -99,7 +99,8 @@ class MainActivity : ComponentActivity() {
                         alarmScheduler.scheduleRitualAlarms(
                             pillars = ScheduleData.pillars,
                             receiverClass = PillarReceiver::class.java,
-                            wakeTime = settingsState.wakeTime
+                            wakeTime = settingsState.wakeTime,
+                            baseWake = java.time.LocalTime.of(6, 30)
                         )
                     }
 

@@ -72,7 +72,8 @@ class HomeViewModel @Inject constructor(
         val dayBefore = java.time.LocalDate.now().minusDays(2).toString()
         val missedYesterday = (history[yesterday] ?: 0) == 0
         val missedDayBefore = (history[dayBefore] ?: 0) == 0
-        val showAccountability = missedYesterday && missedDayBefore && lastAcknowledge != todayStr
+        val hasAnyHistory = history.isNotEmpty()
+        val showAccountability = hasAnyHistory && missedYesterday && missedDayBefore && lastAcknowledge != todayStr
 
         val activeIntention = if (intention.isActiveForCurrentWeek()) intention else WeeklyIntention.emptyForCurrentWeek()
 

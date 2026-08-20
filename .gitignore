@@ -29,3 +29,4 @@ Thumbs.db
 # Keystore
 *.jks
 *.keystore
+build_log.txt

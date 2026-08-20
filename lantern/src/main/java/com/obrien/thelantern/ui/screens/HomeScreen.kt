@@ -109,13 +109,14 @@ fun HomeScreenContent(
     onResetDay: () -> Unit = {}
 ) {
     if (uiState.showAccountabilityDialog) {
+        val primary = MaterialTheme.colorScheme.primary
         AlertDialog(
             onDismissRequest = onDismissAccountability,
             title = {
                 Text(
                     "THE LANTERN",
                     style = MaterialTheme.typography.titleMedium,
-                    color = LanternGold
+                    color = primary
                 )
             },
             text = {
@@ -129,7 +130,7 @@ fun HomeScreenContent(
                     Text(
                         text = """"${ScheduleData.PURPOSE_STATEMENT}"""",
                         style = MaterialTheme.typography.bodySmall,
-                        color = LanternGold.copy(alpha = 0.7f),
+                        color = primary.copy(alpha = 0.7f),
                         fontStyle = FontStyle.Italic
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -143,7 +144,7 @@ fun HomeScreenContent(
             },
             confirmButton = {
                 TextButton(onClick = onDismissAccountability) {
-                    Text("I AM READY", color = LanternGold)
+                    Text("I AM READY", color = primary)
                 }
             },
             containerColor = LanternNight
@@ -161,7 +162,7 @@ fun HomeScreenContent(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = LanternGold.copy(alpha = 0.6f)
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     }
                 },
@@ -310,7 +311,7 @@ fun HomeScreenContent(
                     ) {
                         Text(
                             "Reset Day",
-                            color = LanternGold.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                             fontSize = 12.sp,
                             letterSpacing = 1.sp
                         )
@@ -328,21 +329,22 @@ fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.height(64.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = LanternGold
+            contentColor = primary
         ),
         border = ButtonDefaults.outlinedButtonBorder.copy(
-            brush = androidx.compose.ui.graphics.SolidColor(LanternGold.copy(alpha = 0.3f))
+            brush = androidx.compose.ui.graphics.SolidColor(primary.copy(alpha = 0.3f))
         )
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = LanternGold,
+                tint = primary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -358,11 +360,12 @@ fun QuickActionButton(
 
 @Composable
 fun PurposeSection() {
+    val primary = MaterialTheme.colorScheme.primary
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "THE PURPOSE",
             style = MaterialTheme.typography.labelMedium,
-            color = LanternGold,
+            color = primary,
             letterSpacing = 3.sp
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -375,7 +378,7 @@ fun PurposeSection() {
             lineHeight = 28.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = LanternGold.copy(alpha = 0.3f), thickness = 1.dp)
+        HorizontalDivider(color = primary.copy(alpha = 0.3f), thickness = 1.dp)
     }
 }
 
@@ -506,11 +509,12 @@ fun RestSection() {
 
 @Composable
 fun ProgressSection(completed: Int, total: Int) {
+    val primary = MaterialTheme.colorScheme.primary
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "DAILY SCORE: $completed OF $total",
             style = MaterialTheme.typography.labelMedium,
-            color = LanternGold
+            color = primary
         )
         Spacer(modifier = Modifier.height(12.dp))
         LinearProgressIndicator(
@@ -518,14 +522,15 @@ fun ProgressSection(completed: Int, total: Int) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),
-            color = LanternGold,
-            trackColor = LanternGold.copy(alpha = 0.1f)
+            color = primary,
+            trackColor = primary.copy(alpha = 0.1f)
         )
     }
 }
 
 @Composable
 fun DailyCounselCard(counsel: DailyCounsel) {
+    val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -538,7 +543,7 @@ fun DailyCounselCard(counsel: DailyCounsel) {
             Text(
                 text = "DAILY COUNSEL — ${counsel.theme.uppercase()}",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.6f),
+                color = primary.copy(alpha = 0.6f),
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -555,7 +560,7 @@ fun DailyCounselCard(counsel: DailyCounsel) {
             Text(
                 text = "— ${counsel.author}, ${counsel.source}",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.5f),
+                color = primary.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center
             )
         }
@@ -569,16 +574,17 @@ private fun WeekRuleCard(
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(12.dp)
+    val primary = MaterialTheme.colorScheme.primary
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, if (hasWeekRule) LanternGold.copy(alpha = 0.35f) else LanternBlue.copy(alpha = 0.45f), shape)
+            .border(1.dp, if (hasWeekRule) primary.copy(alpha = 0.35f) else LanternBlue.copy(alpha = 0.45f), shape)
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
         Text(
             text = if (hasWeekRule) "THIS WEEK'S RULE" else "SET THIS WEEK'S RULE",
-            color = LanternGold,
+            color = primary,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 1.sp,
             style = MaterialTheme.typography.labelSmall
@@ -594,7 +600,7 @@ private fun WeekRuleCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Tap to set →",
-                color = LanternGold.copy(alpha = 0.8f),
+                color = primary.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.labelMedium
             )
         } else {
@@ -622,7 +628,7 @@ private fun WeekRuleCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Tap to revise →",
-                color = LanternGold.copy(alpha = 0.7f),
+                color = primary.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall
             )
         }
