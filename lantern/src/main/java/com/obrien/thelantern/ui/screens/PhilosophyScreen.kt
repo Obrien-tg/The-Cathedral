@@ -29,7 +29,7 @@ import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LanternSuccess
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.viewmodel.PhilosophyViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -115,7 +115,7 @@ fun PhilosophyScreen(
             SacredCard(title = "EMERGENCY PROTOCOLS") {
                 ProtocolItem(
                     title = "The 2-Day Rule",
-                    description = "Miss one day: fine. Miss two days: the lantern has flickered. Read your purpose aloud and take the smallest possible action to light it again."
+                    description = "Miss one day: fine. Miss two days: the light has flickered. Read your purpose aloud and take the smallest possible action to light it again."
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ProtocolItem(
@@ -393,7 +393,7 @@ fun SourceRow(
 @Preview
 @Composable
 fun PhilosophyScreenPreview() {
-    TheLanternTheme(darkTheme = true) {
+    LumiTheme(darkTheme = true) {
         Scaffold(containerColor = LanternNight) { padding ->
             Column(
                 modifier = Modifier

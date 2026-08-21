@@ -40,7 +40,7 @@ import com.obrien.core.model.PillarStatus
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LanternSuccess
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.viewmodel.CodexViewModel
 import kotlinx.coroutines.delay
 
@@ -58,7 +58,7 @@ fun FullScheduleScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "THE LANTERN CODEX",
+                        "LUMI CODEX",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 2.sp,
                         color = primary
@@ -290,13 +290,13 @@ fun AlarmDetail(
 @Preview
 @Composable
 fun FullScheduleScreenPreview() {
-    TheLanternTheme(darkTheme = true) {
+    LumiTheme(darkTheme = true) {
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
                         Text(
-                            "THE LANTERN CODEX",
+                            "LUMI CODEX",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 2.sp,
                             color = MaterialTheme.colorScheme.primary

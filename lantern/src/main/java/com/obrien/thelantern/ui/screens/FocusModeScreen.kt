@@ -25,7 +25,7 @@ import com.obrien.core.focus.FocusKind
 import com.obrien.thelantern.ui.theme.LanternBlue
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternMiss
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.viewmodel.FocusViewModel
 import kotlinx.coroutines.delay
 

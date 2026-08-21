@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
 
@@ -159,7 +159,7 @@ fun FocusScreen(
 @Preview
 @Composable
 fun FocusScreenPreview() {
-    TheLanternTheme(darkTheme = true) {
+    LumiTheme(darkTheme = true) {
         FocusScreen(durationMinutes = 90)
     }
 }

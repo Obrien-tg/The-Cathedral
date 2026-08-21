@@ -1,40 +1,48 @@
 package com.obrien.thelantern.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = LanternViolet,
-    onPrimary = LanternNight,
-    secondary = LanternBlue,
-    onSecondary = LanternText,
-    tertiary = LanternPink,
-    background = LanternNight,
-    surface = LanternSurface,
-    onBackground = LanternText,
-    onSurface = LanternText,
-    surfaceVariant = LanternMuted,
-    onSurfaceVariant = LanternNight,
-    surfaceTint = LanternGold
+    primary = LumiLavender,
+    onPrimary = TwilightIndigo,
+    secondary = LumiBlue,
+    onSecondary = LumiCream,
+    tertiary = LumiPink,
+    background = TwilightIndigo,
+    surface = TwilightSurface,
+    onBackground = LumiCream,
+    onSurface = LumiCream,
+    surfaceVariant = Color(0xFF3A3450),
+    onSurfaceVariant = LumiCream,
+    surfaceTint = LumiYellow,
+    error = Color(0xFFFFB7B2),
+    onError = TwilightIndigo
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = LanternViolet,
-    onPrimary = LanternNight,
-    secondary = LanternBlue,
-    onSecondary = LanternText,
-    background = LanternText,
-    surface = LanternText,
-    onBackground = LanternNight,
-    onSurface = LanternNight
+    primary = LumiPurple,
+    onPrimary = Color.White,
+    secondary = LumiPink,
+    onSecondary = LumiCharcoal,
+    tertiary = LumiMint,
+    background = LumiCream,
+    surface = LumiPeachWhite,
+    onBackground = LumiCharcoal,
+    onSurface = LumiCharcoal,
+    surfaceVariant = Color(0xFFFFF0EB),
+    onSurfaceVariant = LumiCharcoal,
+    surfaceTint = LumiYellow,
+    error = Color(0xFFFFADAD),
+    onError = Color.White
 )
 
 @Composable
-fun TheLanternTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+fun LumiTheme(
+    darkTheme: Boolean = false, // Always Lumi Daylight by default
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme

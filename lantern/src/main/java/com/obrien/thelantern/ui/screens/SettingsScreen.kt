@@ -162,7 +162,7 @@ fun SettingsScreen(
                             val json = viewModel.getExportData()
                             val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                                 type = "text/plain"
-                                putExtra(android.content.Intent.EXTRA_SUBJECT, "The Lantern Codex - Data Export")
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, "Lumi Codex - Data Export")
                                 putExtra(android.content.Intent.EXTRA_TEXT, json)
                             }
                             context.startActivity(android.content.Intent.createChooser(intent, "Export Data"))
@@ -191,7 +191,7 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(48.dp))
             
             Text(
-                text = "The Lantern v1.0",
+                text = "Lumi v1.0",
                 style = MaterialTheme.typography.labelSmall,
                 color = primary.copy(alpha = 0.2f),
                 modifier = Modifier.align(Alignment.CenterHorizontally)

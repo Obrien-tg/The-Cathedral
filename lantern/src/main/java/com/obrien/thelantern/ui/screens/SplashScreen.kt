@@ -24,7 +24,7 @@ import com.obrien.thelantern.R
 import com.obrien.thelantern.data.ScheduleData
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -93,7 +93,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "THE LANTERN",
+                text = "LUMI",
                 style = MaterialTheme.typography.headlineLarge,
                 color = primary,
                 fontWeight = FontWeight.Bold,
@@ -119,7 +119,7 @@ fun SplashScreen(
 @Preview(showBackground = true)
 @Composable
 fun SplashScreenPreview() {
-    TheLanternTheme(darkTheme = true) {
+    LumiTheme(darkTheme = true) {
         SplashScreen()
     }
 }

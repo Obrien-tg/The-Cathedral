@@ -19,7 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.obrien.thelantern.navigation.*
 import com.obrien.thelantern.ui.screens.*
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.core.util.AlarmScheduler
 import com.obrien.core.util.NotificationHelper
 import com.obrien.thelantern.notifications.PillarReceiver
@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            TheLanternTheme {
+            LumiTheme {
                 var showSplash by remember { mutableStateOf(true) }
 
                 if (showSplash) {

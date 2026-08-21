@@ -97,7 +97,7 @@ fun WeeklyReviewScreen(
 
             ReviewQuestion(
                 question = "Where did I struggle to keep my word?",
-                placeholder = "Where could the lantern have shone brighter?...",
+                placeholder = "Where could the light have shone brighter?...",
                 value = failure,
                 onValueChange = { failure = it }
             )

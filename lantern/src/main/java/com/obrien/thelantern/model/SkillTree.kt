@@ -4,7 +4,7 @@ import com.obrien.core.model.SkillNode
 import com.obrien.core.model.SkillEdge
 
 /**
- * The Lantern Formation Path – Grade 7 lifetime skill tree.
+ * Lumi Formation Path – Grade 7 lifetime skill tree.
  */
 object SkillTreeData {
 
@@ -110,7 +110,7 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "the_lantern",
-            title = "The Lantern",
+            title = "Lumi",
             pillar = "EVENING",
             requiredCompletions = 50,
             requiredJournalDays = 30,

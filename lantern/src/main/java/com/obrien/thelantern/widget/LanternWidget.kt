@@ -42,9 +42,9 @@ class LanternWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
             Text(
-                text = "THE LANTERN",
+                text = "LUMI",
                 style = TextStyle(
-                    color = ColorProvider(Color(0xFFD4AF37)),
+                    color = ColorProvider(Color(0xFFBFA8FF)),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )

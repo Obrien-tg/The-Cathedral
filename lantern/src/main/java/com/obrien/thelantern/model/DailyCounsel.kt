@@ -21,7 +21,7 @@ object DailyCounselData {
             id = 1,
             theme = "Becoming",
             quote = "I am still becoming. Today I show up. Tomorrow I show up again. That is how greatness begins.",
-            author = "The Lantern",
+            author = "Lumi",
             source = "Mantra",
             reflection = "Great things aren't built in a day. They are built by showing up, one day at a time.",
             morningPrompt = "How will I show up for myself today?",

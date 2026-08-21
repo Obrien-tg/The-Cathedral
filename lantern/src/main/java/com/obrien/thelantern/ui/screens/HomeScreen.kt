@@ -34,7 +34,7 @@ import com.obrien.thelantern.ui.theme.AmbientDust
 import com.obrien.thelantern.ui.theme.LanternBlue
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
-import com.obrien.thelantern.ui.theme.TheLanternTheme
+import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.ui.theme.glassCard
 import com.obrien.thelantern.viewmodel.HomeUiState
 import com.obrien.thelantern.viewmodel.HomeViewModel
@@ -112,7 +112,7 @@ fun HomeScreenContent(
             onDismissRequest = onDismissAccountability,
             title = {
                 Text(
-                    "THE LANTERN",
+                    "LUMI",
                     style = MaterialTheme.typography.titleMedium,
                     color = primary
                 )
@@ -120,7 +120,7 @@ fun HomeScreenContent(
             text = {
                 Column {
                     Text(
-                        text = "The light has flickered, but the lantern can be lit again today.",
+                        text = "The light has flickered, but the light can be lit again today.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
@@ -624,7 +624,7 @@ private fun WeekRuleCard(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    TheLanternTheme(darkTheme = true) {
+    LumiTheme(darkTheme = true) {
         HomeScreenContent(
             uiState = HomeUiState(
                 activePillar = ScheduleData.pillars.first(),
