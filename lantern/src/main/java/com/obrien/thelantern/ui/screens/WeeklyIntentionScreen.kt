@@ -66,7 +66,11 @@ fun WeeklyIntentionScreen(
                 },
                 actions = {
                     IconButton(onClick = { viewModel.clear() }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear", tint = Color.Red.copy(alpha = 0.6f))
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)

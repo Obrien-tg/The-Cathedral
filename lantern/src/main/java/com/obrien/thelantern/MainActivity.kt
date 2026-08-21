@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        NotificationHelper.createNotificationChannel(this, "Lantern Reminders")
+        NotificationHelper.createNotificationChannel(this, "Lumi Reminders")
 
         val filter = android.content.IntentFilter().apply {
             addAction(android.content.Intent.ACTION_TIME_CHANGED)
