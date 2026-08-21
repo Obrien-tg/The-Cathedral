@@ -9,7 +9,7 @@
     <style name="Theme.TheLantern.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/ic_lumi_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
-        <item name="windowSplashScreenAnimationDuration">800</item>
+        <item name="windowSplashScreenAnimationDuration">1500</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/ic_lumi_background</item>
         <item name="postSplashScreenTheme">@style/Theme.TheLantern</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

@@ -47,7 +47,7 @@ fun SplashScreen(
 
     LaunchedEffect(Unit) {
         startAnimation = true
-        delay(2500) // Show for 2.5 seconds
+        delay(2000) // Show for 2 seconds
         onSplashFinished()
     }
 
@@ -83,11 +83,10 @@ fun SplashScreen(
                 .alpha(alpha)
                 .scale(scale)
         ) {
-            // Sunflower Icon (The symbol of Dimpho)
             Image(
-                painter = painterResource(id = R.drawable.ic_sunflower),
-                contentDescription = "Sunflower",
-                modifier = Modifier.size(140.dp)
+                painter = painterResource(id = R.drawable.ic_splash),
+                contentDescription = "Lumi",
+                modifier = Modifier.size(160.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -119,7 +118,7 @@ fun SplashScreen(
 @Preview(showBackground = true)
 @Composable
 fun SplashScreenPreview() {
-    LumiTheme(darkTheme = true) {
+    LumiTheme(darkTheme = false) {
         SplashScreen()
     }
 }
