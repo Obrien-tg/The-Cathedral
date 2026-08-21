@@ -22,7 +22,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.data.ScheduleData
-import com.obrien.thelantern.ui.theme.*
+import com.obrien.thelantern.ui.theme.LanternNight
+import com.obrien.thelantern.ui.theme.LanternText
+import com.obrien.thelantern.ui.theme.LanternSurface
 import com.obrien.thelantern.viewmodel.WeeklyIntentionViewModel
 import com.obrien.thelantern.viewmodel.WeeklyIntentionUiState
 
@@ -33,6 +35,7 @@ fun WeeklyIntentionScreen(
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val primary = MaterialTheme.colorScheme.primary
 
     Scaffold(
         topBar = {
@@ -43,12 +46,12 @@ fun WeeklyIntentionScreen(
                             "WEEK’S LIGHT",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 3.sp,
-                            color = LanternGold
+                            color = primary
                         )
                         Text(
                             "Week of ${uiState.weekStartDate}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = LanternGold.copy(alpha = 0.5f)
+                            color = primary.copy(alpha = 0.5f)
                         )
                     }
                 },
@@ -57,7 +60,7 @@ fun WeeklyIntentionScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -133,7 +136,7 @@ fun WeeklyIntentionScreen(
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LanternGold,
+                    containerColor = primary,
                     contentColor = LanternNight
                 )
             ) {
@@ -161,6 +164,7 @@ fun SubjectDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
     val subjects = ScheduleData.SUBJECTS
+    val primary = MaterialTheme.colorScheme.primary
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -178,11 +182,11 @@ fun SubjectDropdown(
                     .fillMaxWidth()
                     .clickable { expanded = true },
                 trailingIcon = {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = LanternGold)
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = primary)
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = LanternGold,
-                    unfocusedBorderColor = LanternGold.copy(alpha = 0.2f),
+                    focusedBorderColor = primary,
+                    unfocusedBorderColor = primary.copy(alpha = 0.2f),
                     focusedTextColor = LanternText,
                     unfocusedTextColor = LanternText
                 ),
@@ -219,16 +223,17 @@ fun SubjectDropdown(
 
 @Composable
 fun IntentionPreview(uiState: WeeklyIntentionUiState) {
+    val primary = MaterialTheme.colorScheme.primary
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = LanternGold.copy(alpha = 0.05f)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, LanternGold.copy(alpha = 0.2f))
+        colors = CardDefaults.cardColors(containerColor = primary.copy(alpha = 0.05f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 "THIS WEEK'S LIGHT",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold,
+                color = primary,
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -261,7 +266,7 @@ fun PreviewLine(ritual: String, text: String) {
         Text(
             text,
             style = MaterialTheme.typography.bodySmall,
-            color = LanternGold,
+            color = MaterialTheme.colorScheme.primary,
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.Bold
         )
@@ -270,11 +275,12 @@ fun PreviewLine(ritual: String, text: String) {
 
 @Composable
 fun IntentionSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
     Column {
         Text(
             text = title,
             style = MaterialTheme.typography.labelSmall,
-            color = LanternGold.copy(alpha = 0.6f),
+            color = primary.copy(alpha = 0.6f),
             letterSpacing = 2.sp,
             modifier = Modifier.padding(bottom = 12.dp)
         )
@@ -289,6 +295,7 @@ fun IntentionField(
     onValueChange: (String) -> Unit,
     placeholder: String
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = label,
@@ -301,8 +308,8 @@ fun IntentionField(
             placeholder = { Text(placeholder, color = LanternText.copy(alpha = 0.2f)) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LanternGold,
-                unfocusedBorderColor = LanternGold.copy(alpha = 0.2f),
+                focusedBorderColor = primary,
+                unfocusedBorderColor = primary.copy(alpha = 0.2f),
                 focusedTextColor = LanternText,
                 unfocusedTextColor = LanternText
             ),

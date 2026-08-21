@@ -17,10 +17,10 @@ import kotlin.math.sin
 
 @Composable
 fun LanternParticle(
-    modifier: Modifier = Modifier,
-    size: Float = 24f,
-    color: Color = Color(0xFFE6B800),
-    drift: Boolean = true
+    modifier: Modifier,
+    size: Float,
+    color: Color,
+    drift: Boolean
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "lantern")
     
@@ -60,11 +60,11 @@ fun LanternParticle(
         // Draw flame path
         val path = Path().apply {
             moveTo(centerX, centerY - flameHeight / 2)
-            quadraticBezierTo(
+            quadraticTo(
                 centerX + flameWidth / 2, centerY,
                 centerX, centerY + flameHeight / 2
             )
-            quadraticBezierTo(
+            quadraticTo(
                 centerX - flameWidth / 2, centerY,
                 centerX, centerY - flameHeight / 2
             )
@@ -78,11 +78,11 @@ fun LanternParticle(
 
         val innerPath = Path().apply {
             moveTo(centerX, centerY - flameHeight / 4)
-            quadraticBezierTo(
+            quadraticTo(
                 centerX + flameWidth / 4, centerY,
                 centerX, centerY + flameHeight / 4
             )
-            quadraticBezierTo(
+            quadraticTo(
                 centerX - flameWidth / 4, centerY,
                 centerX, centerY - flameHeight / 4
             )
@@ -98,10 +98,10 @@ fun LanternParticle(
 
 @Composable
 fun SunflowerParticle(
-    modifier: Modifier = Modifier,
-    size: Float = 24f,
-    color: Color = Color(0xFFD4AF37),
-    drift: Boolean = true
+    modifier: Modifier,
+    size: Float,
+    color: Color,
+    drift: Boolean
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "sunflower")
     

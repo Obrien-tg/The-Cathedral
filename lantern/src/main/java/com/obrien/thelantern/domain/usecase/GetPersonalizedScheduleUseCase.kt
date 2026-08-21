@@ -1,5 +1,6 @@
 package com.obrien.thelantern.domain.usecase
 
+import com.obrien.thelantern.util.shiftTimeRange
 import com.obrien.core.data.ScheduleRepository
 import com.obrien.thelantern.data.ScheduleShaper
 import com.obrien.core.model.Pillar
@@ -34,7 +35,10 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
             val shiftedAlarms = pillar.alarms.map { alarm ->
                 alarm.copy(time = alarm.time.plus(offset))
             }
-            pillar.copy(alarms = shiftedAlarms)
+            pillar.copy(
+                alarms = shiftedAlarms,
+                timeRange = pillar.shiftTimeRange(offset)
+            )
         }
     }
 }

@@ -19,7 +19,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.model.JournalEntry
-import com.obrien.thelantern.ui.theme.*
+import com.obrien.thelantern.ui.theme.LanternNight
+import com.obrien.thelantern.ui.theme.LanternText
+import com.obrien.thelantern.ui.theme.LanternSuccess
+import com.obrien.thelantern.ui.theme.TheLanternTheme
 import com.obrien.thelantern.viewmodel.JournalViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -35,6 +38,7 @@ fun JournalScreen(
     val today = LocalDate.now()
     val todayStr = today.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val todayEntry = uiState.journalEntries.find { it.date == todayStr }
+    val primary = MaterialTheme.colorScheme.primary
 
     var morning by remember { mutableStateOf(todayEntry?.morningCompleted ?: false) }
     var school by remember { mutableStateOf(todayEntry?.schoolCompleted ?: false) }
@@ -76,7 +80,7 @@ fun JournalScreen(
                         "THE CODEX",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 3.sp,
-                        color = LanternGold
+                        color = primary
                     )
                 },
                 navigationIcon = {
@@ -84,7 +88,7 @@ fun JournalScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -104,14 +108,14 @@ fun JournalScreen(
             Text(
                 text = today.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
                 style = MaterialTheme.typography.labelMedium,
-                color = LanternGold.copy(alpha = 0.7f),
+                color = primary.copy(alpha = 0.7f),
                 letterSpacing = 1.sp
             )
 
             Text(
                 text = "DAILY PILLARS",
                 style = MaterialTheme.typography.titleSmall,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -125,12 +129,12 @@ fun JournalScreen(
                 ScoreCardRow(label = "Evening Close", checked = evening, onCheckedChange = { evening = it })
             }
 
-            HorizontalDivider(color = LanternGold.copy(alpha = 0.2f))
+            HorizontalDivider(color = primary.copy(alpha = 0.2f))
 
             Text(
                 text = "EFFORT",
                 style = MaterialTheme.typography.titleSmall,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -144,12 +148,12 @@ fun JournalScreen(
                 EffortChip(label = "Character", selected = characterEffort, onToggle = { characterEffort = it }, modifier = Modifier.weight(1f))
             }
 
-            HorizontalDivider(color = LanternGold.copy(alpha = 0.2f))
+            HorizontalDivider(color = primary.copy(alpha = 0.2f))
 
             Text(
                 text = "REFLECTION",
                 style = MaterialTheme.typography.titleSmall,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -197,7 +201,7 @@ fun JournalScreen(
                     )
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LanternGold,
+                    containerColor = primary,
                     contentColor = LanternNight
                 ),
                 modifier = Modifier.fillMaxWidth()
@@ -209,12 +213,12 @@ fun JournalScreen(
                 )
             }
 
-            HorizontalDivider(color = LanternGold.copy(alpha = 0.2f))
+            HorizontalDivider(color = primary.copy(alpha = 0.2f))
 
             Text(
                 text = "ARCHIVE",
                 style = MaterialTheme.typography.titleSmall,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
@@ -239,7 +243,7 @@ fun JournalScreen(
                         Text(
                             text = "Begin your first entry above.",
                             style = MaterialTheme.typography.labelMedium,
-                            color = LanternGold,
+                            color = primary,
                             letterSpacing = 1.sp
                         )
                     }
@@ -261,22 +265,23 @@ fun EffortChip(
     onToggle: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     FilterChip(
         selected = selected,
         onClick = { onToggle(!selected) },
         label = { Text(label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
         modifier = modifier,
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = LanternGold,
+            selectedContainerColor = primary,
             selectedLabelColor = LanternNight,
             containerColor = LanternNight,
-            labelColor = LanternGold.copy(alpha = 0.6f)
+            labelColor = primary.copy(alpha = 0.6f)
         ),
         border = FilterChipDefaults.filterChipBorder(
             enabled = true,
             selected = selected,
-            borderColor = LanternGold.copy(alpha = 0.3f),
-            selectedBorderColor = LanternGold
+            borderColor = primary.copy(alpha = 0.3f),
+            selectedBorderColor = primary
         )
     )
 }
@@ -288,11 +293,12 @@ fun JournalField(
     label: String,
     placeholder: String
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = LanternGold.copy(alpha = 0.6f)
+            color = primary.copy(alpha = 0.6f)
         )
         OutlinedTextField(
             value = value,
@@ -308,8 +314,8 @@ fun JournalField(
                 .fillMaxWidth()
                 .heightIn(min = 80.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LanternGold,
-                unfocusedBorderColor = LanternGold.copy(alpha = 0.3f),
+                focusedBorderColor = primary,
+                unfocusedBorderColor = primary.copy(alpha = 0.3f),
                 focusedTextColor = LanternText,
                 unfocusedTextColor = LanternText,
                 focusedContainerColor = LanternNight,
@@ -330,13 +336,14 @@ fun ScoreCardRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = if (checked) LanternSuccess else LanternGold.copy(alpha = 0.2f),
+                color = if (checked) LanternSuccess else primary.copy(alpha = 0.2f),
                 shape = RoundedCornerShape(8.dp)
             )
             .background(
@@ -350,7 +357,7 @@ fun ScoreCardRow(
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
                 checkedColor = LanternSuccess,
-                uncheckedColor = LanternGold.copy(alpha = 0.5f),
+                uncheckedColor = primary.copy(alpha = 0.5f),
                 checkmarkColor = LanternNight
             )
         )
@@ -375,12 +382,13 @@ fun HistoryCard(entry: JournalEntry) {
     }
 
     val score = entry.score
+    val primary = MaterialTheme.colorScheme.primary
 
     Card(
         colors = CardDefaults.cardColors(containerColor = LanternNight),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            LanternGold.copy(alpha = 0.15f)
+            primary.copy(alpha = 0.15f)
         ),
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier.fillMaxWidth()
@@ -394,12 +402,12 @@ fun HistoryCard(entry: JournalEntry) {
                 Text(
                     text = date,
                     style = MaterialTheme.typography.labelSmall,
-                    color = LanternGold.copy(alpha = 0.6f)
+                    color = primary.copy(alpha = 0.6f)
                 )
                 Text(
                     text = "$score / 6",
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (score == 6) LanternSuccess else LanternGold,
+                    color = if (score == 6) LanternSuccess else primary,
                     fontWeight = FontWeight.Bold
                 )
             }

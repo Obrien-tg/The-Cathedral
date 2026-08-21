@@ -21,7 +21,12 @@ import com.obrien.thelantern.ui.skilltree.SkillEdge
 import com.obrien.thelantern.ui.skilltree.SkillNode as UiSkillNode
 import com.obrien.thelantern.ui.skilltree.SkillTreeGraph
 import com.obrien.thelantern.ui.skilltree.SkillTreeLayout
-import com.obrien.thelantern.ui.theme.*
+import com.obrien.thelantern.ui.theme.LanternBlue
+import com.obrien.thelantern.ui.theme.LanternMuted
+import com.obrien.thelantern.ui.theme.LanternNight
+import com.obrien.thelantern.ui.theme.LanternSuccess
+import com.obrien.thelantern.ui.theme.LanternText
+import com.obrien.thelantern.ui.theme.TheLanternTheme
 import com.obrien.thelantern.viewmodel.SkillTreeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +38,8 @@ fun SkillTreeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val primary = MaterialTheme.colorScheme.primary
+
     Scaffold(
         containerColor = LanternNight,
         topBar = {
@@ -40,7 +47,7 @@ fun SkillTreeScreen(
                 title = {
                     Text(
                         "Formation Path",
-                        color = LanternGold,
+                        color = primary,
                         fontWeight = FontWeight.SemiBold
                     )
                 },
@@ -137,6 +144,7 @@ private fun NodeDetailContent(
     val unlocked = progress?.unlocked ?: false
     val completed = progress?.completed ?: false
     val progressValue = progress?.progress ?: 0f
+    val primary = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = Modifier
@@ -157,7 +165,7 @@ private fun NodeDetailContent(
                 },
                 color = when {
                     completed -> LanternSuccess
-                    unlocked -> LanternGold
+                    unlocked -> primary
                     else -> LanternBlue
                 }
             )
@@ -173,7 +181,7 @@ private fun NodeDetailContent(
         // Title
         Text(
             text = node.title,
-            color = LanternGold,
+            color = primary,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
@@ -204,7 +212,7 @@ private fun NodeDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp),
-            color = LanternGold,
+            color = primary,
             trackColor = LanternBlue.copy(alpha = 0.3f),
         )
         Text(
@@ -294,6 +302,7 @@ private fun RequirementRow(
     val ratio = (current.toFloat() / required.coerceAtLeast(1)).coerceIn(0f, 1f)
     val met = current >= required
 
+    val primary = MaterialTheme.colorScheme.primary
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -302,7 +311,7 @@ private fun RequirementRow(
             Text(text = label, color = LanternText.copy(alpha = 0.8f), fontSize = 13.sp)
             Text(
                 text = "$current / $required",
-                color = if (met) LanternSuccess else LanternGold,
+                color = if (met) LanternSuccess else primary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -313,7 +322,7 @@ private fun RequirementRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(4.dp),
-            color = if (met) LanternSuccess else LanternGold,
+            color = if (met) LanternSuccess else primary,
             trackColor = LanternBlue.copy(alpha = 0.25f),
         )
     }

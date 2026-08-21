@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.viewmodel.SettingsViewModel
@@ -33,6 +32,7 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
+    val primary = MaterialTheme.colorScheme.primary
     
     var showTimePicker by remember { mutableStateOf(false) }
     val timePickerState = rememberTimePickerState(
@@ -47,10 +47,10 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     viewModel.setWakeTime(LocalTime.of(timePickerState.hour, timePickerState.minute))
                     showTimePicker = false
-                }) { Text("SET", color = LanternGold) }
+                }) { Text("SET", color = primary) }
             },
             dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text("CANCEL", color = LanternGold.copy(alpha = 0.6f)) }
+                TextButton(onClick = { showTimePicker = false }) { Text("CANCEL", color = primary.copy(alpha = 0.6f)) }
             },
             containerColor = LanternNight,
             text = {
@@ -59,13 +59,13 @@ fun SettingsScreen(
                         state = timePickerState,
                         colors = TimePickerDefaults.colors(
                             clockDialColor = LanternNight,
-                            selectorColor = LanternGold,
+                            selectorColor = primary,
                             containerColor = LanternNight,
-                            periodSelectorSelectedContainerColor = LanternGold,
+                            periodSelectorSelectedContainerColor = primary,
                             periodSelectorUnselectedContainerColor = LanternNight,
                             periodSelectorSelectedContentColor = LanternNight,
-                            periodSelectorUnselectedContentColor = LanternGold,
-                            clockDialUnselectedContentColor = LanternGold.copy(alpha = 0.5f),
+                            periodSelectorUnselectedContentColor = primary,
+                            clockDialUnselectedContentColor = primary.copy(alpha = 0.5f),
                             clockDialSelectedContentColor = LanternNight
                         )
                     )
@@ -82,7 +82,7 @@ fun SettingsScreen(
                         "PREFERENCES",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 3.sp,
-                        color = LanternGold
+                        color = primary
                     )
                 },
                 navigationIcon = {
@@ -90,7 +90,7 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -170,8 +170,8 @@ fun SettingsScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = LanternGold.copy(alpha = 0.1f),
-                        contentColor = LanternGold
+                        containerColor = primary.copy(alpha = 0.1f),
+                        contentColor = primary
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -193,7 +193,7 @@ fun SettingsScreen(
             Text(
                 text = "The Lantern v1.0",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.2f),
+                color = primary.copy(alpha = 0.2f),
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
@@ -205,17 +205,18 @@ fun SettingsSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Column {
         Text(
             text = title,
             style = MaterialTheme.typography.labelSmall,
-            color = LanternGold.copy(alpha = 0.5f),
+            color = primary.copy(alpha = 0.5f),
             letterSpacing = 2.sp,
             modifier = Modifier.padding(bottom = 12.dp)
         )
         Card(
             colors = CardDefaults.cardColors(containerColor = LanternNight),
-            border = androidx.compose.foundation.BorderStroke(1.dp, LanternGold.copy(alpha = 0.1f)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.1f)),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
@@ -244,7 +245,7 @@ fun SettingRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = label, color = LanternText)
-            Text(text = value, color = LanternGold, fontWeight = FontWeight.Bold)
+            Text(text = value, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         }
     }
 }

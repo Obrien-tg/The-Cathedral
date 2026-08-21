@@ -1,43 +1,40 @@
-# The Lantern Codex
+# Formation Apps Monorepo
 
-> "I am one of many. But I am the master of my own two hands."
+> "I am still becoming. Today I show up. Tomorrow I show up again."
 
-A daily discipline tracker for Android, built with Kotlin and Jetpack Compose.
+This repository contains two distinct Android applications built on a shared core engine, designed to turn daily actions into sacred rituals.
 
-## What It Does
+## The Apps
 
-The Lantern structures your day into six sacred pillars — from morning ignition to evening sanctuary — and tracks your ritual completion with persistence, real-time awareness, and a monastic aesthetic.
+### 1. The Cathedral (`:app`)
+**Branding:** Monastic Gold & Monastery Black  
+**Focus:** Adult discipline and long-term formation.  
+**Schedule:** Six sacred pillars from Awakening to Sanctuary.  
+**Formation Path:** 17-node constellation spanning months of consistent effort.
 
-This is not a productivity app.  
-It is a digital sanctuary designed to turn daily actions into sacred rituals.
+### 2. The Lantern (`:lantern`)
+**Branding:** Violet, Pink & Night Sky  
+**Focus:** Grade 7 learner formation (South Africa).  
+**Schedule:** Structured for school days (07:30 – 13:30) and study resets.  
+**Formation Path:** 12-node constellation tuned for growth and kindness.
+
+---
+
+## Shared Core (`:core`)
+
+Both apps run on a unified engine providing:
+- **Daily Pillars Engine** — Time-aware scheduling and ritual tracking.
+- **Weekly Intentions** — Dynamic schedule reshaping based on current focus.
+- **Enhanced Focus Mode** — ADHD-friendly Pomodoro (Deep Work) and Mindfulness sessions.
+- **Formation Path Logic** — Lifetime progress calculation and node unlocking.
+- **Shared Persistence** — DataStore Preferences and Room (Journaling).
 
 ## Features
 
-- **Six Daily Pillars** — Awakening, Forge, Archive, Afternoon Grind, Arena, Sanctuary
-- **Real-Time Active Pillar** — Home screen highlights the current pillar based on device time
-- **Task Completion Tracking** — Tap to mark rituals complete; persists across restarts
-- **Daily Score** — Visual progress indicator showing completed rituals vs. total
-- **Focus Mode** — 25-minute Pomodoro timer with rotating philosophical quotes
-- **Journal** — 4-pillar scorecard (Techne, Historia, Gymnos, Sophia) + free reflection
-- **Philosophy Screen** — Purpose, Mantra, Emergency Protocols, Primary Source tracker
-- **Formation Path (Skill Tree)** — Lifetime constellation of 17 nodes that unlock only through consistent ritual practice
-- **Sunflower Charm** — A quiet good-luck symbol woven throughout the app
-
-## The Formation Path
-
-Progress is earned exclusively through **lifetime** ritual consistency (not daily streaks).
-
-| Tier | Theme              | Nodes |
-|------|--------------------|-------|
-| 0    | Foundation         | Ignition |
-| 1    | First Formation    | Deep Work I · The Archive · First Light |
-| 2    | Strengthening      | Deep Work II · Living Sources · Physical Fortitude · Evening Vigil |
-| 3    | Integration        | The Forge Master · The Chronicler · Embodied Discipline · Quiet Mind |
-| 4    | Synthesis          | Builder’s Hand · Scholar’s Compass · Guardian of the Day |
-| 5    | Capstone           | Master of Two Hands → The Lantern Complete |
-
-A node unlocks only when **all** of its parents are fully completed.  
-A node is completed only when every requirement (completions + focus sessions + journal days) reaches 100 %.
+- **Pillar-Aware Focus Mode** — Deep Work prompts automatically seed from your active schedule block.
+- **Lifetime Progress** — No streak shaming; every completion contributes to a durable historical record.
+- **Visual Heatmaps** — Track fidelity over months of formation.
+- **Dual Visual Identities** — Distinct themes (Gold monastic vs. Violet/Pink "Still Becoming") sharing the same high-performance UI components.
 
 ## Tech Stack
 
@@ -45,44 +42,30 @@ A node is completed only when every requirement (completions + focus sessions + 
 |----------------|-------------------------------------------------|
 | **UI**         | Jetpack Compose + Material 3                    |
 | **Navigation** | Type-safe Compose Navigation (Kotlin Serialization) |
-| **State**      | ViewModel + StateFlow                           |
 | **DI**         | Hilt                                            |
-| **Domain**     | Use-case layer (clean separation)               |
-| **Persistence**| DataStore Preferences + Room (journal)          |
-| **Time**       | java.time (desugared for API 24+)               |
-| **Build**      | Gradle Version Catalogs                         |
+| **Persistence**| DataStore Preferences + Room                    |
+| **Architecture**| MVI/MVVM with Clean Domain Use Cases           |
 
-## Architecture (current)
-
-```
-MainActivity
-├── NavHost (type-safe routes)
-│   ├── HomeScreen          ← HomeViewModel
-│   ├── FocusModeScreen     ← FocusViewModel
-│   ├── JournalScreen       ← JournalViewModel
-│   ├── PhilosophyScreen    ← PhilosophyViewModel
-│   ├── SkillTreeScreen     ← SkillTreeViewModel
-│   ├── WeeklyReviewScreen
-│   └── SettingsScreen      ← SettingsViewModel
-│
-Domain Use Cases
-├── GetActivePillarUseCase
-├── GetCurrentPillarsUseCase
-├── GetDailyScoreUseCase
-├── GetNextPillarUseCase
-├── GetSkillProgressUseCase
-└── ToggleRitualUseCase
-│
-ScheduleRepository → DataStoreManager + JournalDatabase
-```
-
-## Build
+## Build & Run
 
 ```bash
-./gradlew assembleDebug
+# To build The Cathedral
+./gradlew :app:assembleDebug
+
+# To build The Lantern
+./gradlew :lantern:assembleDebug
 ```
 
 **Requirements:** Android Studio Ladybug+, JDK 17+, Android SDK 37
+
+## Project Structure
+
+```text
+The-Cathedral/
+├── core/       ← Shared models, focus engine, and data repositories
+├── app/        ← The Cathedral app module
+└── lantern/    ← The Lantern app module
+```
 
 ## License
 

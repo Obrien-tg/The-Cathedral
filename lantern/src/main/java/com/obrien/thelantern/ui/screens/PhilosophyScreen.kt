@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.data.ScheduleData
 import com.obrien.thelantern.model.PrimarySource
 import com.obrien.thelantern.model.PrimarySources
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LanternMiss
@@ -45,6 +44,7 @@ fun PhilosophyScreen(
     val uiState by viewModel.uiState.collectAsState()
     val activeIndex = uiState.activeSourceIndex
     val activePage = uiState.activeSourcePage
+    val primary = MaterialTheme.colorScheme.primary
     
     val activeSource = PrimarySources.curriculum.getOrNull(activeIndex)
         ?: PrimarySources.curriculum.first()
@@ -64,7 +64,7 @@ fun PhilosophyScreen(
                         "THE SANCTUARY",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 3.sp,
-                        color = LanternGold
+                        color = primary
                     )
                 },
                 navigationIcon = {
@@ -72,7 +72,7 @@ fun PhilosophyScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -104,7 +104,7 @@ fun PhilosophyScreen(
                 Text(
                     text = ScheduleData.MANTRA,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = LanternGold.copy(alpha = 0.85f),
+                    color = primary.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.Serif,
                     fontStyle = FontStyle.Italic,
@@ -131,8 +131,8 @@ fun PhilosophyScreen(
                 OutlinedButton(
                     onClick = onWeeklyReview,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = LanternGold),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, LanternGold.copy(alpha = 0.3f))
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = primary),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.3f))
                 ) {
                     Text("START REVIEW", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                 }
@@ -148,12 +148,12 @@ fun PhilosophyScreen(
                         Text(
                             text = "CURRENTLY READING",
                             style = MaterialTheme.typography.labelSmall,
-                            color = LanternGold.copy(alpha = 0.6f)
+                            color = primary.copy(alpha = 0.6f)
                         )
                         Text(
                             text = activeSource.book,
                             style = MaterialTheme.typography.titleSmall,
-                            color = LanternGold,
+                            color = primary,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Serif
                         )
@@ -175,8 +175,8 @@ fun PhilosophyScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(6.dp),
-                    color = LanternGold,
-                    trackColor = LanternGold.copy(alpha = 0.1f)
+                    color = primary,
+                    trackColor = primary.copy(alpha = 0.1f)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -194,7 +194,7 @@ fun PhilosophyScreen(
                     Text(
                         text = "${(progress * 100).toInt()}%",
                         style = MaterialTheme.typography.labelSmall,
-                        color = LanternGold
+                        color = primary
                     )
                 }
 
@@ -207,7 +207,7 @@ fun PhilosophyScreen(
                     OutlinedTextField(
                         value = pageInput,
                         onValueChange = { pageInput = it.filter { c -> c.isDigit() } },
-                        label = { Text("Page", color = LanternGold.copy(alpha = 0.6f)) },
+                        label = { Text("Page", color = primary.copy(alpha = 0.6f)) },
                         isError = showError,
                         supportingText = {
                             if (showError) {
@@ -216,8 +216,8 @@ fun PhilosophyScreen(
                         },
                         modifier = Modifier.width(100.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = LanternGold,
-                            unfocusedBorderColor = LanternGold.copy(alpha = 0.3f),
+                            focusedBorderColor = primary,
+                            unfocusedBorderColor = primary.copy(alpha = 0.3f),
                             focusedTextColor = LanternText,
                             unfocusedTextColor = LanternText,
                             errorBorderColor = LanternMiss
@@ -234,7 +234,7 @@ fun PhilosophyScreen(
                         },
                         enabled = isPageValid,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = LanternGold,
+                            containerColor = primary,
                             contentColor = LanternNight
                         )
                     ) {
@@ -253,7 +253,7 @@ fun PhilosophyScreen(
                     )
                     if (index < PrimarySources.curriculum.lastIndex) {
                         HorizontalDivider(
-                            color = LanternGold.copy(alpha = 0.1f),
+                            color = primary.copy(alpha = 0.1f),
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
@@ -275,7 +275,7 @@ fun PhilosophyScreen(
                         Text(
                             text = day,
                             modifier = Modifier.width(80.dp),
-                            color = LanternGold.copy(alpha = 0.7f),
+                            color = primary.copy(alpha = 0.7f),
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp
                         )
@@ -296,11 +296,12 @@ fun SacredCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Card(
         colors = CardDefaults.cardColors(containerColor = LanternNight),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            LanternGold.copy(alpha = 0.2f)
+            primary.copy(alpha = 0.2f)
         ),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
@@ -309,7 +310,7 @@ fun SacredCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
-                color = LanternGold.copy(alpha = 0.6f),
+                color = primary.copy(alpha = 0.6f),
                 letterSpacing = 3.sp,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
@@ -323,7 +324,7 @@ fun ProtocolItem(title: String, description: String) {
     Column {
         Text(
             text = title,
-            color = LanternGold,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             fontFamily = FontFamily.Serif
@@ -345,6 +346,7 @@ fun SourceRow(
     isActive: Boolean,
     onSelect: () -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -358,14 +360,14 @@ fun SourceRow(
             else
                 Icons.Outlined.RadioButtonUnchecked,
             contentDescription = null,
-            tint = if (isActive) LanternSuccess else LanternGold.copy(alpha = 0.3f),
+            tint = if (isActive) LanternSuccess else primary.copy(alpha = 0.3f),
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = source.book,
-                color = if (isActive) LanternGold else LanternText.copy(alpha = 0.7f),
+                color = if (isActive) primary else LanternText.copy(alpha = 0.7f),
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                 fontFamily = FontFamily.Serif,
                 fontSize = 14.sp

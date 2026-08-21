@@ -18,7 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.model.WeeklyReview
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.viewmodel.PhilosophyViewModel
@@ -34,6 +33,7 @@ fun WeeklyReviewScreen(
     var victory by remember { mutableStateOf("") }
     var failure by remember { mutableStateOf("") }
     var adjustment by remember { mutableStateOf("") }
+    val primary = MaterialTheme.colorScheme.primary
 
     Scaffold(
         topBar = {
@@ -43,7 +43,7 @@ fun WeeklyReviewScreen(
                         "WEEKLY REVIEW",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 3.sp,
-                        color = LanternGold
+                        color = primary
                     )
                 },
                 navigationIcon = {
@@ -51,7 +51,7 @@ fun WeeklyReviewScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -72,7 +72,7 @@ fun WeeklyReviewScreen(
             Text(
                 text = "WEEKLY LIGHT CHECK",
                 style = MaterialTheme.typography.labelMedium,
-                color = LanternGold,
+                color = primary,
                 letterSpacing = 2.sp
             )
 
@@ -126,7 +126,7 @@ fun WeeklyReviewScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LanternGold,
+                    containerColor = primary,
                     contentColor = LanternNight
                 )
             ) {
@@ -143,11 +143,12 @@ fun ReviewQuestion(
     value: String,
     onValueChange: (String) -> Unit
 ) {
+    val primary = MaterialTheme.colorScheme.primary
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = question,
             style = MaterialTheme.typography.titleSmall,
-            color = LanternGold.copy(alpha = 0.8f),
+            color = primary.copy(alpha = 0.8f),
             fontFamily = FontFamily.Serif
         )
         OutlinedTextField(
@@ -158,8 +159,8 @@ fun ReviewQuestion(
                 .fillMaxWidth()
                 .heightIn(min = 100.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = LanternGold,
-                unfocusedBorderColor = LanternGold.copy(alpha = 0.3f),
+                focusedBorderColor = primary,
+                unfocusedBorderColor = primary.copy(alpha = 0.3f),
                 focusedTextColor = LanternText,
                 unfocusedTextColor = LanternText
             )

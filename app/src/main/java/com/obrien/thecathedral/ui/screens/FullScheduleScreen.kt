@@ -37,7 +37,6 @@ import com.obrien.thecathedral.data.ScheduleData
 import com.obrien.core.model.Alarm
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.PillarStatus
-import com.obrien.core.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.RitualMiss
@@ -92,16 +91,6 @@ fun FullScheduleScreen(
         containerColor = MonasteryBlack
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Subtle sunflower in corner (Bug #4)
-            SunflowerParticle(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 24.dp, end = 20.dp),
-                size = 16f,
-                drift = false,
-                color = CathedralGold
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -226,19 +215,6 @@ fun AlarmDetail(
     }
 
     Box(contentAlignment = Alignment.Center) {
-        // Blessing Burst (Bug #4)
-        if (showBlessing || blessingAlpha > 0f) {
-            SunflowerParticle(
-                modifier = Modifier
-                    .size(48.dp)
-                    .scale(blessingScale)
-                    .alpha(blessingAlpha),
-                size = 40f,
-                drift = false,
-                color = RitualSuccess
-            )
-        }
-
         Column(
             modifier = Modifier.alpha(if (isSkipped) 0.5f else 1f)
         ) {

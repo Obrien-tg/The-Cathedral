@@ -30,8 +30,6 @@ import com.obrien.thecathedral.domain.usecase.DailyScore
 import com.obrien.thecathedral.model.DailyCounsel
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.WeeklyIntention
-import com.obrien.thecathedral.ui.components.FidelityHeatmap
-import com.obrien.core.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.AmbientDust
 import com.obrien.thecathedral.ui.theme.Bronze
 import com.obrien.thecathedral.ui.theme.CathedralGold
@@ -172,14 +170,6 @@ fun HomeScreenContent(
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()
 
-            SunflowerParticle(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 12.dp),
-                size = 18f,
-                color = CathedralGold
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -199,15 +189,6 @@ fun HomeScreenContent(
                 }
 
                 item { DailyCounselCard(counsel = uiState.todayCounsel) }
-
-                item {
-                    FidelityHeatmap(
-                        completionHistory = uiState.completionHistory,
-                        totalRituals = uiState.score.totalCount.coerceAtLeast(1),
-                        modifier = Modifier.fillMaxWidth(),
-                        weeksToShow = 8
-                    )
-                }
 
                 item {
                     val isSunday = java.time.LocalDate.now().dayOfWeek == java.time.DayOfWeek.SUNDAY

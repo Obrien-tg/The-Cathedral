@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.R
 import com.obrien.thelantern.data.ScheduleData
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.TheLanternTheme
@@ -52,6 +51,8 @@ fun SplashScreen(
         onSplashFinished()
     }
 
+    val primary = MaterialTheme.colorScheme.primary
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -66,7 +67,7 @@ fun SplashScreen(
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            LanternGold.copy(alpha = 0.4f),
+                            primary.copy(alpha = 0.4f),
                             Color.Transparent
                         )
                     ),
@@ -94,7 +95,7 @@ fun SplashScreen(
             Text(
                 text = "THE LANTERN",
                 style = MaterialTheme.typography.headlineLarge,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,
                 letterSpacing = 4.sp,

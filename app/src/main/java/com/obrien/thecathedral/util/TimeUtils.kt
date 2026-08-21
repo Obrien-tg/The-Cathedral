@@ -21,6 +21,14 @@ fun Pillar.parseTimeRange(): Pair<LocalTime, LocalTime>? {
     }
 }
 
+fun Pillar.shiftTimeRange(offset: java.time.Duration): String {
+    val (start, end) = parseTimeRange() ?: return timeRange
+    val shiftedStart = start.plus(offset)
+    val shiftedEnd = end.plus(offset)
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+    return "${shiftedStart.format(formatter)} - ${shiftedEnd.format(formatter)}"
+}
+
 fun Alarm.computeStatus(
     completed: Boolean,
     skipped: Boolean,

@@ -37,8 +37,6 @@ import com.obrien.thelantern.data.ScheduleData
 import com.obrien.core.model.Alarm
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.PillarStatus
-import com.obrien.core.ui.components.LanternParticle
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LanternSuccess
@@ -53,6 +51,7 @@ fun FullScheduleScreen(
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val primary = MaterialTheme.colorScheme.primary
 
     Scaffold(
         topBar = {
@@ -62,7 +61,7 @@ fun FullScheduleScreen(
                         "THE LANTERN CODEX",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 2.sp,
-                        color = LanternGold
+                        color = primary
                     )
                 },
                 navigationIcon = {
@@ -70,7 +69,7 @@ fun FullScheduleScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternGold
+                            tint = primary
                         )
                     }
                 },
@@ -82,15 +81,6 @@ fun FullScheduleScreen(
         containerColor = LanternNight
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Subtle sunflower in corner (Bug #4)
-            LanternParticle(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 24.dp, end = 20.dp),
-                size = 16f,
-                drift = false
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -116,6 +106,7 @@ fun PillarItem(
     viewModel: CodexViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val primary = MaterialTheme.colorScheme.primary
 
     Card(
         modifier = Modifier
@@ -123,7 +114,7 @@ fun PillarItem(
             .clickable { expanded = !expanded }
             .border(
                 width = 1.dp,
-                color = LanternGold.copy(alpha = 0.3f),
+                color = primary.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(8.dp)
             ),
         colors = CardDefaults.cardColors(containerColor = LanternNight)
@@ -138,13 +129,13 @@ fun PillarItem(
                     Text(
                         text = pillar.timeRange,
                         style = MaterialTheme.typography.labelSmall,
-                        color = LanternGold.copy(alpha = 0.7f),
+                        color = primary.copy(alpha = 0.7f),
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
                         text = pillar.name,
                         style = MaterialTheme.typography.titleMedium,
-                        color = LanternGold,
+                        color = primary,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Serif
                     )
@@ -153,7 +144,7 @@ fun PillarItem(
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                     contentDescription = if (expanded) "Show Less" else "Show More",
-                    tint = LanternGold
+                    tint = primary
                 )
             }
 
@@ -205,29 +196,17 @@ fun AlarmDetail(
         label = "alpha"
     )
 
+    val primary = MaterialTheme.colorScheme.primary
     val statusColor = when (status) {
         PillarStatus.COMPLETE -> LanternSuccess
         PillarStatus.SKIPPED -> Color.Gray.copy(alpha = 0.6f)
         PillarStatus.MISSED -> LanternMiss
-        PillarStatus.ACTIVE -> LanternGold
+        PillarStatus.ACTIVE -> primary
         PillarStatus.PENDING -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         else -> MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
     }
 
     Box(contentAlignment = Alignment.Center) {
-        // Blessing Burst (Bug #4)
-        if (showBlessing || blessingAlpha > 0f) {
-            LanternParticle(
-                modifier = Modifier
-                    .size(48.dp)
-                    .scale(blessingScale)
-                    .alpha(blessingAlpha),
-                size = 40f,
-                drift = false,
-                color = LanternSuccess
-            )
-        }
-
         Column(
             modifier = Modifier.alpha(if (isSkipped) 0.5f else 1f)
         ) {
@@ -264,7 +243,7 @@ fun AlarmDetail(
                             Text(
                                 text = if (isSkipped) "RESTORE" else "SKIP",
                                 fontSize = 10.sp,
-                                color = LanternGold.copy(alpha = 0.6f)
+                                color = primary.copy(alpha = 0.6f)
                             )
                         }
                     }
@@ -286,7 +265,7 @@ fun AlarmDetail(
                             else
                                 Icons.Outlined.RadioButtonUnchecked,
                             contentDescription = if (isCompleted) "Mark incomplete" else "Mark complete",
-                            tint = if (isCompleted) LanternSuccess else LanternGold.copy(alpha = 0.4f)
+                            tint = if (isCompleted) LanternSuccess else primary.copy(alpha = 0.4f)
                         )
                     }
                 }
@@ -320,7 +299,7 @@ fun FullScheduleScreenPreview() {
                             "THE LANTERN CODEX",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 2.sp,
-                            color = LanternGold
+                            color = MaterialTheme.colorScheme.primary
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
@@ -342,7 +321,7 @@ fun FullScheduleScreenPreview() {
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = LanternGold.copy(alpha = 0.3f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                                 shape = RoundedCornerShape(8.dp)
                             ),
                         colors = CardDefaults.cardColors(containerColor = LanternNight)
@@ -351,13 +330,13 @@ fun FullScheduleScreenPreview() {
                             Text(
                                 text = pillar.timeRange,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = LanternGold.copy(alpha = 0.7f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                                 fontFamily = FontFamily.Monospace
                             )
                             Text(
                                 text = pillar.name,
                                 style = MaterialTheme.typography.titleMedium,
-                                color = LanternGold,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.Serif
                             )

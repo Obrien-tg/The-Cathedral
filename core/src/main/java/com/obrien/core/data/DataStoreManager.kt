@@ -1,6 +1,7 @@
 package com.obrien.core.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
@@ -19,6 +20,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class DataStoreManager(private val context: Context) {
 
     companion object {
+        private const val TAG = "DataStoreManager"
         val COMPLETED_ALARMS = stringSetPreferencesKey("completed_alarms")
         val SKIPPED_ALARMS = stringSetPreferencesKey("skipped_alarms")
         val LAST_RESET_DATE = stringPreferencesKey("last_reset_date")
@@ -43,7 +45,9 @@ class DataStoreManager(private val context: Context) {
         try {
             val today = LocalDate.now().toString()
             context.dataStore.edit { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] = today }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to acknowledge accountability", e)
+        }
     }
 
     val notificationLeadTime: Flow<Int> = context.dataStore.data
@@ -81,31 +85,41 @@ class DataStoreManager(private val context: Context) {
     suspend fun setNotificationLeadTime(minutes: Int) {
         try {
             context.dataStore.edit { it[NOTIFICATION_LEAD_TIME] = minutes }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set notification lead time", e)
+        }
     }
 
     suspend fun setTheme(theme: String) {
         try {
             context.dataStore.edit { it[THEME] = theme }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set theme", e)
+        }
     }
 
     suspend fun setFontSize(size: String) {
         try {
             context.dataStore.edit { it[FONT_SIZE] = size }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set font size", e)
+        }
     }
 
     suspend fun saveWeeklyIntention(intention: WeeklyIntention) {
         try {
             context.dataStore.edit { it[WEEKLY_INTENTION] = Json.encodeToString(intention) }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save weekly intention", e)
+        }
     }
 
     suspend fun clearWeeklyIntention() {
         try {
             context.dataStore.edit { it.remove(WEEKLY_INTENTION) }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to clear weekly intention", e)
+        }
     }
 
     val wakeTime: Flow<String?> = context.dataStore.data
@@ -184,7 +198,7 @@ class DataStoreManager(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to mark complete: $id", e)
         }
     }
 
@@ -209,7 +223,7 @@ class DataStoreManager(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to mark incomplete: $id", e)
         }
     }
 
@@ -219,7 +233,9 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[SKIPPED_ALARMS] ?: emptySet()
                 prefs[SKIPPED_ALARMS] = current + id
             }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to mark skipped: $id", e)
+        }
     }
 
     suspend fun markUnskipped(id: String) {
@@ -228,7 +244,9 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[SKIPPED_ALARMS] ?: emptySet()
                 prefs[SKIPPED_ALARMS] = current - id
             }
-        } catch (e: Exception) { e.printStackTrace() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to mark unskipped: $id", e)
+        }
     }
 
     suspend fun incrementHistoricalCompletion(alarmId: String) {
@@ -244,7 +262,7 @@ class DataStoreManager(private val context: Context) {
                 prefs[HISTORICAL_COMPLETIONS] = Json.encodeToString(updated)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to increment historical completion: $alarmId", e)
         }
     }
 
@@ -255,7 +273,7 @@ class DataStoreManager(private val context: Context) {
                 prefs[TOTAL_FOCUS_SESSIONS] = current + 1
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to increment focus sessions", e)
         }
     }
 
@@ -263,7 +281,7 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { it[LAST_RESET_DATE] = date }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to set last reset date", e)
         }
     }
 
@@ -271,7 +289,7 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { it.remove(COMPLETED_ALARMS) }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to clear alarm completions", e)
         }
     }
 
@@ -287,7 +305,7 @@ class DataStoreManager(private val context: Context) {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to reset daily", e)
         }
     }
 
@@ -295,7 +313,7 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { it[ACTIVE_SOURCE_INDEX] = index }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to set active source", e)
         }
     }
 
@@ -303,7 +321,7 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { it[ACTIVE_SOURCE_PAGE] = page }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to set active source page", e)
         }
     }
 
@@ -311,7 +329,7 @@ class DataStoreManager(private val context: Context) {
         try {
             context.dataStore.edit { it[WAKE_TIME] = time }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to set wake time", e)
         }
     }
 
@@ -325,7 +343,7 @@ class DataStoreManager(private val context: Context) {
                 // The record of a man’s labour is not to be erased lightly.
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to clear all progress", e)
         }
     }
 }

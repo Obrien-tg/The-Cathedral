@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.TheLanternTheme
 import kotlinx.coroutines.delay
@@ -28,6 +27,7 @@ fun FocusScreen(
 ) {
     var timeLeftMillis by remember { mutableStateOf(TimeUnit.MINUTES.toMillis(durationMinutes.toLong())) }
     val totalTimeMillis = TimeUnit.MINUTES.toMillis(durationMinutes.toLong())
+    val primary = MaterialTheme.colorScheme.primary
     
     val quotes = listOf(
         "Clarity over chaos. One purpose.",
@@ -61,7 +61,7 @@ fun FocusScreen(
             Text(
                 text = "DEEP WORK RITUAL",
                 style = MaterialTheme.typography.labelLarge,
-                color = LanternGold,
+                color = primary,
                 letterSpacing = 4.sp
             )
 
@@ -77,14 +77,14 @@ fun FocusScreen(
                 
                 Canvas(modifier = Modifier.size(280.dp)) {
                     drawArc(
-                        color = LanternGold.copy(alpha = 0.1f),
+                        color = primary.copy(alpha = 0.1f),
                         startAngle = -90f,
                         sweepAngle = 360f,
                         useCenter = false,
                         style = Stroke(width = 8.dp.toPx(), cap = StrokeCap.Round)
                     )
                     drawArc(
-                        color = LanternGold,
+                        color = primary,
                         startAngle = -90f,
                         sweepAngle = 360f * progress,
                         useCenter = false,
@@ -98,14 +98,14 @@ fun FocusScreen(
                     Text(
                         text = String.format("%02d:%02d", minutes, seconds),
                         style = MaterialTheme.typography.displayLarge,
-                        color = LanternGold,
+                        color = primary,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Light
                     )
                     Text(
                         text = "REMAINING",
                         style = MaterialTheme.typography.labelSmall,
-                        color = LanternGold.copy(alpha = 0.5f),
+                        color = primary.copy(alpha = 0.5f),
                         letterSpacing = 2.sp
                     )
                 }
@@ -126,7 +126,7 @@ fun FocusScreen(
             
             OutlinedButton(
                 onClick = { showConfirmDialog = true },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = LanternGold),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = primary),
                 border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
             ) {
                 Text("END SESSION", letterSpacing = 2.sp)
@@ -136,13 +136,13 @@ fun FocusScreen(
                 AlertDialog(
                     onDismissRequest = { showConfirmDialog = false },
                     containerColor = LanternNight,
-                    titleContentColor = LanternGold,
+                    titleContentColor = primary,
                     textContentColor = MaterialTheme.colorScheme.onBackground,
                     title = { Text("BREAK THE RITUAL?", fontFamily = FontFamily.Serif) },
                     text = { Text("Ending now will interrupt your progress. Are you sure you wish to leave the deep?") },
                     confirmButton = {
                         TextButton(onClick = onEndSession) {
-                            Text("I AM DONE", color = LanternGold)
+                            Text("I AM DONE", color = primary)
                         }
                     },
                     dismissButton = {

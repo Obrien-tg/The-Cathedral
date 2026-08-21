@@ -30,11 +30,8 @@ import com.obrien.thelantern.domain.usecase.DailyScore
 import com.obrien.thelantern.model.DailyCounsel
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.WeeklyIntention
-import com.obrien.thelantern.ui.components.FidelityHeatmap
-import com.obrien.core.ui.components.LanternParticle
 import com.obrien.thelantern.ui.theme.AmbientDust
 import com.obrien.thelantern.ui.theme.LanternBlue
-import com.obrien.thelantern.ui.theme.LanternGold
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.TheLanternTheme
@@ -59,9 +56,10 @@ fun HomeScreen(
     var showResetConfirm by remember { mutableStateOf(false) }
 
     if (showResetConfirm) {
+        val primary = MaterialTheme.colorScheme.primary
         AlertDialog(
             onDismissRequest = { showResetConfirm = false },
-            title = { Text("PURGE ALL PROGRESS?", color = LanternGold) },
+            title = { Text("PURGE ALL PROGRESS?", color = primary) },
             text = { Text("This will clear today's rituals and reading progress. The historical record remains untouched.", color = Color.White) },
             confirmButton = {
                 TextButton(onClick = {
@@ -70,7 +68,7 @@ fun HomeScreen(
                 }) { Text("PURGE", color = Color.Red) }
             },
             dismissButton = {
-                TextButton(onClick = { showResetConfirm = false }) { Text("CANCEL", color = LanternGold) }
+                TextButton(onClick = { showResetConfirm = false }) { Text("CANCEL", color = primary) }
             },
             containerColor = LanternNight
         )
@@ -173,13 +171,6 @@ fun HomeScreenContent(
         Box(modifier = Modifier.fillMaxSize()) {
             AmbientDust()
 
-            LanternParticle(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 12.dp),
-                size = 18f
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -201,22 +192,14 @@ fun HomeScreenContent(
                 item { DailyCounselCard(counsel = uiState.todayCounsel) }
 
                 item {
-                    FidelityHeatmap(
-                        completionHistory = uiState.completionHistory,
-                        totalRituals = uiState.score.totalCount.coerceAtLeast(1),
-                        modifier = Modifier.fillMaxWidth(),
-                        weeksToShow = 8
-                    )
-                }
-
-                item {
                     val isSunday = java.time.LocalDate.now().dayOfWeek == java.time.DayOfWeek.SUNDAY
                     if (isSunday) {
+                        val primary = MaterialTheme.colorScheme.primary
                         Button(
                             onClick = onWeeklyReview,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = LanternGold,
+                                containerColor = primary,
                                 contentColor = LanternNight
                             )
                         ) {
@@ -384,6 +367,7 @@ fun PurposeSection() {
 
 @Composable
 fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String? = null, eveningPrompt: String? = null) {
+    val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -396,12 +380,12 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
             Text(
                 text = if (isActive) "CURRENT PILLAR" else "UPCOMING PILLAR",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.7f)
+                color = primary.copy(alpha = 0.7f)
             )
             Text(
                 text = pillar.name,
                 style = MaterialTheme.typography.headlineSmall,
-                color = LanternGold,
+                color = primary,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
             )
@@ -416,12 +400,12 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
             val prompt = if (pillar.id == "morning") morningPrompt else if (pillar.id == "evening") eveningPrompt else null
             if (prompt != null) {
                 Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = LanternGold.copy(alpha = 0.2f), thickness = 0.5.dp)
+                HorizontalDivider(color = primary.copy(alpha = 0.2f), thickness = 0.5.dp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "CONTEMPLATION",
                     style = MaterialTheme.typography.labelSmall,
-                    color = LanternGold.copy(alpha = 0.5f),
+                    color = primary.copy(alpha = 0.5f),
                     letterSpacing = 1.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -440,6 +424,7 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
 
 @Composable
 fun NextPillarSection(pillar: Pillar) {
+    val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -452,12 +437,12 @@ fun NextPillarSection(pillar: Pillar) {
             Text(
                 text = "NEXT PILLAR",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.5f)
+                color = primary.copy(alpha = 0.5f)
             )
             Text(
                 text = pillar.name,
                 style = MaterialTheme.typography.headlineSmall,
-                color = LanternGold.copy(alpha = 0.8f),
+                color = primary.copy(alpha = 0.8f),
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
             )
@@ -474,6 +459,7 @@ fun NextPillarSection(pillar: Pillar) {
 
 @Composable
 fun RestSection() {
+    val primary = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -486,12 +472,12 @@ fun RestSection() {
             Text(
                 text = "THE SANCTUARY",
                 style = MaterialTheme.typography.labelSmall,
-                color = LanternGold.copy(alpha = 0.5f)
+                color = primary.copy(alpha = 0.5f)
             )
             Text(
                 text = "Rest. The day is done.",
                 style = MaterialTheme.typography.headlineSmall,
-                color = LanternGold.copy(alpha = 0.6f),
+                color = primary.copy(alpha = 0.6f),
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
             )

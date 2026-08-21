@@ -22,7 +22,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.focus.FocusKind
-import com.obrien.thelantern.ui.theme.*
+import com.obrien.thelantern.ui.theme.LanternBlue
+import com.obrien.thelantern.ui.theme.LanternNight
+import com.obrien.thelantern.ui.theme.LanternMiss
+import com.obrien.thelantern.ui.theme.TheLanternTheme
 import com.obrien.thelantern.viewmodel.FocusViewModel
 import kotlinx.coroutines.delay
 
@@ -50,14 +53,15 @@ fun FocusSetupContent(
     val suggestedPrompt by viewModel.suggestedPrompt.collectAsState()
     var customTarget by remember(suggestedPrompt) { mutableStateOf(suggestedPrompt) }
     var selectedDuration by remember { mutableIntStateOf(25) }
+    val primary = MaterialTheme.colorScheme.primary
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("FOCUS", letterSpacing = 2.sp, color = LanternGold) },
+                title = { Text("FOCUS", letterSpacing = 2.sp, color = primary) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = LanternGold)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
@@ -76,14 +80,14 @@ fun FocusSetupContent(
                 Text(
                     "Choose your energy:",
                     style = MaterialTheme.typography.labelMedium,
-                    color = LanternGold.copy(alpha = 0.6f)
+                    color = primary.copy(alpha = 0.6f)
                 )
                 
                 LocalFocusModeCard(
                     title = "Deep Study",
                     description = "Focus on your hard subject or homework.",
                     icon = Icons.Default.Edit,
-                    color = LanternGold,
+                    color = primary,
                     onClick = { selectedKind = FocusKind.DEEP_WORK }
                 )
 
@@ -101,7 +105,7 @@ fun FocusSetupContent(
                 Text(
                     text = if (selectedKind == FocusKind.DEEP_WORK) "STUDY FORGE" else "QUIET LIGHT",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = LanternGold,
+                    color = primary,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -109,11 +113,11 @@ fun FocusSetupContent(
                     OutlinedTextField(
                         value = customTarget,
                         onValueChange = { customTarget = it },
-                        label = { Text("Focusing on:", color = LanternGold.copy(alpha = 0.6f)) },
+                        label = { Text("Focusing on:", color = primary.copy(alpha = 0.6f)) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = LanternGold,
-                            unfocusedBorderColor = LanternGold.copy(alpha = 0.3f),
+                            focusedBorderColor = primary,
+                            unfocusedBorderColor = primary.copy(alpha = 0.3f),
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White
                         )
@@ -127,7 +131,7 @@ fun FocusSetupContent(
                             LocalDurationOption(
                                 minutes = mins,
                                 selected = selectedDuration == mins,
-                                color = LanternGold,
+                                color = primary,
                                 onClick = { selectedDuration = mins }
                             )
                         }
@@ -160,7 +164,7 @@ fun FocusSetupContent(
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedKind == FocusKind.DEEP_WORK) LanternGold else LanternBlue,
+                        containerColor = if (selectedKind == FocusKind.DEEP_WORK) primary else LanternBlue,
                         contentColor = LanternNight
                     )
                 ) {
@@ -171,7 +175,7 @@ fun FocusSetupContent(
                     onClick = { selectedKind = null },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text("Change Mode", color = LanternGold.copy(alpha = 0.5f))
+                    Text("Change Mode", color = primary.copy(alpha = 0.5f))
                 }
             }
         }
@@ -259,7 +263,8 @@ fun FocusSessionContent(
     
     val minutes = timeRemaining / 60
     val seconds = timeRemaining % 60
-    val themeColor = if (currentKind == FocusKind.DEEP_WORK) LanternGold else LanternBlue
+    val primary = MaterialTheme.colorScheme.primary
+    val themeColor = if (currentKind == FocusKind.DEEP_WORK) primary else LanternBlue
 
     Scaffold(
         containerColor = LanternNight
