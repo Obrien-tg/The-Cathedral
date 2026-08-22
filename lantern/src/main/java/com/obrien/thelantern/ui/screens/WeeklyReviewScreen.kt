@@ -70,7 +70,7 @@ fun WeeklyReviewScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Text(
-                text = "WEEKLY LIGHT CHECK",
+                text = "MY WEEKLY REVIEW",
                 style = MaterialTheme.typography.labelMedium,
                 color = primary,
                 letterSpacing = 2.sp
@@ -96,8 +96,8 @@ fun WeeklyReviewScreen(
             )
 
             ReviewQuestion(
-                question = "Where did I struggle to keep my word?",
-                placeholder = "Where could the light have shone brighter?...",
+                question = "Where did I struggle to keep my promise?",
+                placeholder = "Where could it have gone better?...",
                 value = failure,
                 onValueChange = { failure = it }
             )
@@ -130,7 +130,7 @@ fun WeeklyReviewScreen(
                     contentColor = LanternNight
                 )
             ) {
-                Text("SEAL THE WEEK", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text("DONE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
         }
     }

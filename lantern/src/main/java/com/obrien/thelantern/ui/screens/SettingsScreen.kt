@@ -107,7 +107,7 @@ fun SettingsScreen(
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SettingsSection(title = "CHRONOS") {
+            SettingsSection(title = "TIME") {
                 SettingRow(
                     label = "Wake Time",
                     value = uiState.wakeTime.format(DateTimeFormatter.ofPattern("HH:mm")),
@@ -121,7 +121,7 @@ fun SettingsScreen(
                 )
 
                 SettingRow(
-                    label = "Week’s Rule",
+                    label = "Today's Focus",
                     value = "EDIT",
                     onClick = onWeeklyIntention
                 )
@@ -154,7 +154,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "THE ARCHIVE") {
+            SettingsSection(title = "MY WORK") {
                 val context = LocalContext.current
                 Button(
                     onClick = { 
@@ -162,7 +162,7 @@ fun SettingsScreen(
                             val json = viewModel.getExportData()
                             val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                                 type = "text/plain"
-                                putExtra(android.content.Intent.EXTRA_SUBJECT, "Lumi Codex - Data Export")
+                                putExtra(android.content.Intent.EXTRA_SUBJECT, "Lumi - Data Export")
                                 putExtra(android.content.Intent.EXTRA_TEXT, json)
                             }
                             context.startActivity(android.content.Intent.createChooser(intent, "Export Data"))
@@ -177,7 +177,7 @@ fun SettingsScreen(
                 ) {
                     Icon(Icons.Default.Download, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("EXPORT HISTORY", fontWeight = FontWeight.Bold)
+                    Text("SAVE MY HISTORY", fontWeight = FontWeight.Bold)
                 }
                 
                 Text(

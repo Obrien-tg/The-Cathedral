@@ -35,6 +35,74 @@ class DataStoreManager(private val context: Context) {
         val FONT_SIZE = stringPreferencesKey("font_size")
         val LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE = stringPreferencesKey("last_accountability_acknowledge_date")
         val WEEKLY_INTENTION = stringPreferencesKey("weekly_intention")
+        
+        // Tutorial & Day Personalization
+        val HAS_SEEN_TUTORIAL = booleanPreferencesKey("has_seen_tutorial")
+        val MONDAY_COLOR = stringPreferencesKey("monday_color")
+        val TUESDAY_COLOR = stringPreferencesKey("tuesday_color")
+        val WEDNESDAY_COLOR = stringPreferencesKey("wednesday_color")
+        val THURSDAY_COLOR = stringPreferencesKey("thursday_color")
+        val FRIDAY_COLOR = stringPreferencesKey("friday_color")
+        val SATURDAY_COLOR = stringPreferencesKey("saturday_color")
+        val SUNDAY_COLOR = stringPreferencesKey("sunday_color")
+    }
+
+    val hasSeenTutorial: Flow<Boolean> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[HAS_SEEN_TUTORIAL] ?: false }
+
+    suspend fun setTutorialSeen() {
+        try {
+            context.dataStore.edit { it[HAS_SEEN_TUTORIAL] = true }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set tutorial seen", e)
+        }
+    }
+
+    fun getTodayColor(): Flow<String> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs ->
+            val today = java.time.LocalDate.now().dayOfWeek.name
+            val key = when (today) {
+                "MONDAY" -> MONDAY_COLOR
+                "TUESDAY" -> TUESDAY_COLOR
+                "WEDNESDAY" -> WEDNESDAY_COLOR
+                "THURSDAY" -> THURSDAY_COLOR
+                "FRIDAY" -> FRIDAY_COLOR
+                "SATURDAY" -> SATURDAY_COLOR
+                "SUNDAY" -> SUNDAY_COLOR
+                else -> MONDAY_COLOR
+            }
+            prefs[key] ?: getDefaultColorForDay(today)
+        }
+
+    suspend fun saveDayColor(day: String, colorHex: String) {
+        try {
+            val key = when (day.uppercase()) {
+                "MONDAY" -> MONDAY_COLOR
+                "TUESDAY" -> TUESDAY_COLOR
+                "WEDNESDAY" -> WEDNESDAY_COLOR
+                "THURSDAY" -> THURSDAY_COLOR
+                "FRIDAY" -> FRIDAY_COLOR
+                "SATURDAY" -> SATURDAY_COLOR
+                "SUNDAY" -> SUNDAY_COLOR
+                else -> MONDAY_COLOR
+            }
+            context.dataStore.edit { it[key] = colorHex }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save day color for $day", e)
+        }
+    }
+
+    private fun getDefaultColorForDay(day: String): String = when (day.uppercase()) {
+        "MONDAY" -> "FFB3C6"
+        "TUESDAY" -> "C4B5FD"
+        "WEDNESDAY" -> "A5D8FF"
+        "THURSDAY" -> "B5EAD7"
+        "FRIDAY" -> "FFD6A5"
+        "SATURDAY" -> "FFF3B0"
+        "SUNDAY" -> "D8B4FE"
+        else -> "FFB3C6"
     }
 
     val lastAccountabilityAcknowledgeDate: Flow<String> = context.dataStore.data

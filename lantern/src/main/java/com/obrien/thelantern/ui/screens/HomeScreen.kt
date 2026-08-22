@@ -4,6 +4,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -50,7 +51,8 @@ fun HomeScreen(
     onSkillTree: () -> Unit = {},
     onWeeklyReview: () -> Unit = {},
     onWeeklyIntention: () -> Unit = {},
-    onSettings: () -> Unit = {}
+    onSettings: () -> Unit = {},
+    onHomework: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showResetConfirm by remember { mutableStateOf(false) }
@@ -85,6 +87,7 @@ fun HomeScreen(
         onWeeklyReview = onWeeklyReview,
         onWeeklyIntention = onWeeklyIntention,
         onSettings = onSettings,
+        onHomework = onHomework,
         onDismissAccountability = { viewModel.acknowledgeAccountability() },
         onResetDay = { showResetConfirm = true }
     )
@@ -103,6 +106,7 @@ fun HomeScreenContent(
     onWeeklyReview: () -> Unit = {},
     onWeeklyIntention: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onHomework: () -> Unit = {},
     onDismissAccountability: () -> Unit = {},
     onResetDay: () -> Unit = {}
 ) {
@@ -120,7 +124,7 @@ fun HomeScreenContent(
             text = {
                 Column {
                     Text(
-                        text = "The light has flickered, but the light can be lit again today.",
+                        text = "Yesterday was a rest day. That's okay. Today is new.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
@@ -133,7 +137,7 @@ fun HomeScreenContent(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Shall we begin again?",
+                        text = "Are you here?",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -142,7 +146,7 @@ fun HomeScreenContent(
             },
             confirmButton = {
                 TextButton(onClick = onDismissAccountability) {
-                    Text("I AM READY", color = primary)
+                    Text("I'M HERE", color = primary)
                 }
             },
             containerColor = LanternNight
@@ -190,6 +194,12 @@ fun HomeScreenContent(
                 }
 
                 item { DailyCounselCard(counsel = uiState.todayCounsel) }
+
+                if (uiState.activePillar?.id == "reset" || uiState.activePillar?.id == "study") {
+                    item {
+                        HomeworkPromptCard(onClick = onHomework)
+                    }
+                }
 
                 item {
                     val isSunday = java.time.LocalDate.now().dayOfWeek == java.time.DayOfWeek.SUNDAY
@@ -265,13 +275,13 @@ fun HomeScreenContent(
                     ) {
                         QuickActionButton(
                             icon = Icons.AutoMirrored.Filled.MenuBook,
-                            label = "SCHEDULE",
+                            label = "MY DAY",
                             onClick = onViewFullSchedule,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionButton(
                             icon = Icons.Default.AutoStories,
-                            label = "PHILOSOPHY",
+                            label = "MY WORDS",
                             onClick = onPhilosophy,
                             modifier = Modifier.weight(1f)
                         )
@@ -281,7 +291,7 @@ fun HomeScreenContent(
                 item {
                     QuickActionButton(
                         icon = Icons.Default.AccountTree,
-                        label = "SKILL TREE",
+                        label = "MY PATH",
                         onClick = onSkillTree,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -378,7 +388,7 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (isActive) "CURRENT PILLAR" else "UPCOMING PILLAR",
+                text = if (isActive) "RIGHT NOW" else "UPCOMING",
                 style = MaterialTheme.typography.labelSmall,
                 color = primary.copy(alpha = 0.7f)
             )
@@ -403,7 +413,7 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
                 HorizontalDivider(color = primary.copy(alpha = 0.2f), thickness = 0.5.dp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "CONTEMPLATION",
+                    text = "THINKING ABOUT",
                     style = MaterialTheme.typography.labelSmall,
                     color = primary.copy(alpha = 0.5f),
                     letterSpacing = 1.sp
@@ -435,7 +445,7 @@ fun NextPillarSection(pillar: Pillar) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "NEXT PILLAR",
+                text = "NEXT",
                 style = MaterialTheme.typography.labelSmall,
                 color = primary.copy(alpha = 0.5f)
             )
@@ -470,7 +480,7 @@ fun RestSection() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "THE SANCTUARY",
+                text = "SOFT REST",
                 style = MaterialTheme.typography.labelSmall,
                 color = primary.copy(alpha = 0.5f)
             )
@@ -498,7 +508,7 @@ fun ProgressSection(completed: Int, total: Int) {
     val primary = MaterialTheme.colorScheme.primary
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "DAILY SCORE: $completed OF $total",
+            text = "TODAY'S STEPS: $completed OF $total",
             style = MaterialTheme.typography.labelMedium,
             color = primary
         )
@@ -527,7 +537,7 @@ fun DailyCounselCard(counsel: DailyCounsel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "DAILY COUNSEL — ${counsel.theme.uppercase()}",
+                text = counsel.theme.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 color = primary.copy(alpha = 0.6f),
                 letterSpacing = 2.sp
@@ -617,6 +627,48 @@ private fun WeekRuleCard(
                 color = primary.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall
             )
+        }
+    }
+}
+
+@Composable
+fun HomeworkPromptCard(onClick: () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = primary.copy(alpha = 0.1f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.3f))
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = CircleShape,
+                color = primary.copy(alpha = 0.2f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.AutoStories, contentDescription = null, tint = primary)
+                }
+            }
+            Column {
+                Text(
+                    "Any homework today?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Tap to plan your study forge",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LanternText.copy(alpha = 0.7f)
+                )
+            }
         }
     }
 }

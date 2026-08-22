@@ -57,7 +57,7 @@ object ScheduleShaper {
             "journal_line" -> {
                 if (i.characterAim.isNotBlank()) {
                     listOf(
-                        "One journal line",
+                        "One line",
                         "Reflect on: ${i.characterAim.trim()}"
                     )
                 } else base

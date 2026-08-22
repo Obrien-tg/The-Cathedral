@@ -58,7 +58,7 @@ fun FullScheduleScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "LUMI CODEX",
+                        "MY FULL DAY",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 2.sp,
                         color = primary

@@ -22,9 +22,9 @@ object DailyCounselData {
             theme = "Becoming",
             quote = "I am still becoming. Today I show up. Tomorrow I show up again. That is how greatness begins.",
             author = "Lumi",
-            source = "Mantra",
+            source = "My words",
             reflection = "Great things aren't built in a day. They are built by showing up, one day at a time.",
-            morningPrompt = "How will I show up for myself today?",
+            morningPrompt = "What do I want to get done today?",
             eveningPrompt = "What is one way I showed up today?"
         ),
         DailyCounsel(
@@ -32,10 +32,10 @@ object DailyCounselData {
             theme = "Habit",
             quote = "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
             author = "Aristotle",
-            source = "Philosophy",
+            source = "Thinking about it",
             reflection = "What you do every day defines who you are. Your small habits build your future.",
-            morningPrompt = "What good habit will I practice today?",
-            eveningPrompt = "Did my habits today help me become better?"
+            morningPrompt = "What good thing will I do today?",
+            eveningPrompt = "Did my choices today help me become better?"
         ),
         DailyCounsel(
             id = 3,

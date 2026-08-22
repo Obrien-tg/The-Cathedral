@@ -28,3 +28,6 @@ object SettingsRoute
 
 @Serializable
 object WeeklyIntentionRoute
+
+@Serializable
+object HomeworkRoute

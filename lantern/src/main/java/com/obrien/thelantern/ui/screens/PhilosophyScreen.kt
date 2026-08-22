@@ -61,7 +61,7 @@ fun PhilosophyScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "THE SANCTUARY",
+                        "MY WORDS",
                         style = MaterialTheme.typography.titleMedium,
                         letterSpacing = 3.sp,
                         color = primary
@@ -100,7 +100,7 @@ fun PhilosophyScreen(
                 )
             }
 
-            SacredCard(title = "THE MANTRA") {
+            SacredCard(title = "MY WORDS") {
                 Text(
                     text = ScheduleData.MANTRA,
                     style = MaterialTheme.typography.bodyMedium,
@@ -112,7 +112,7 @@ fun PhilosophyScreen(
                 )
             }
 
-            SacredCard(title = "EMERGENCY PROTOCOLS") {
+            SacredCard(title = "WHEN IT'S HARD") {
                 ProtocolItem(
                     title = "The 2-Day Rule",
                     description = "Miss one day: fine. Miss two days: the light has flickered. Read your purpose aloud and take the smallest possible action to light it again."

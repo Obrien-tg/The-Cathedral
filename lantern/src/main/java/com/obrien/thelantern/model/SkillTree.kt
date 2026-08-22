@@ -4,7 +4,7 @@ import com.obrien.core.model.SkillNode
 import com.obrien.core.model.SkillEdge
 
 /**
- * Lumi Formation Path – Grade 7 lifetime skill tree.
+ * Lumi Path – Things I'm Learning.
  */
 object SkillTreeData {
 
@@ -20,11 +20,11 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "present",
-            title = "Present",
+            title = "Showing Up",
             pillar = "SCHOOL",
             requiredCompletions = 10,
             requiredAlarmIds = listOf("present"),
-            description = "Showing up matters. Ten marks of presence in class.",
+            description = "Showing up matters. Ten times being fully there.",
             tier = 1
         ),
         SkillNode(
@@ -33,12 +33,12 @@ object SkillTreeData {
             pillar = "STUDY",
             requiredCompletions = 8,
             requiredAlarmIds = listOf("deep_study_1", "deep_study_2"),
-            description = "Beginning the forge. Eight blocks of focused study.",
+            description = "Beginning the work. Eight blocks of focused study.",
             tier = 1
         ),
         SkillNode(
             id = "reader",
-            title = "Reader",
+            title = "Book Worm",
             pillar = "EVENING",
             requiredCompletions = 7,
             requiredAlarmIds = listOf("read"),
@@ -47,16 +47,16 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "hard_courage",
-            title = "Hard Subject Courage",
+            title = "Courage",
             pillar = "STUDY",
             requiredCompletions = 15,
             requiredAlarmIds = listOf("deep_study_1"),
-            description = "Tackling the hard things first. Fifteen deep study blocks.",
+            description = "Tackling the hard things first. Fifteen study blocks.",
             tier = 2
         ),
         SkillNode(
             id = "body_steady",
-            title = "Body Steady",
+            title = "Steady Body",
             pillar = "BODY",
             requiredCompletions = 12,
             requiredAlarmIds = listOf("move"),
@@ -65,7 +65,7 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "clean_evening",
-            title = "Clean Evenings",
+            title = "Soft Evenings",
             pillar = "EVENING",
             requiredCompletions = 14,
             requiredAlarmIds = listOf("screens_down", "sleep"),
@@ -74,11 +74,11 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "full_week",
-            title = "Full School Week",
+            title = "A Solid Week",
             pillar = "SCHOOL",
             requiredCompletions = 20,
             requiredAlarmIds = listOf("present", "learned", "bag_tomorrow"),
-            description = "The balanced week. Consistent school and preparation.",
+            description = "A balanced week. Consistent effort and preparation.",
             tier = 3
         ),
         SkillNode(
@@ -92,11 +92,11 @@ object SkillTreeData {
         ),
         SkillNode(
             id = "kind_strength",
-            title = "Kind Strength",
+            title = "Kindness",
             pillar = "BODY",
             requiredCompletions = 15,
             requiredAlarmIds = listOf("courage_kind", "belong"),
-            description = "Character in action. Fifteen moments of kindness and belonging.",
+            description = "Character in action. Fifteen moments of kindness.",
             tier = 3
         ),
         SkillNode(
@@ -105,7 +105,7 @@ object SkillTreeData {
             pillar = "EVENING",
             requiredCompletions = 30,
             requiredAlarmIds = listOf("deep_study_1", "screens_down", "sleep"),
-            description = "Keeping promises to yourself. Sustained study and rest.",
+            description = "Keeping promises to yourself.",
             tier = 4
         ),
         SkillNode(
@@ -114,7 +114,7 @@ object SkillTreeData {
             pillar = "EVENING",
             requiredCompletions = 50,
             requiredJournalDays = 30,
-            description = "The capstone of balance. Lighting the way to your own greatness.",
+            description = "The capstone of balance. Lighting your own way.",
             tier = 5
         )
     )

@@ -3,6 +3,7 @@ package com.obrien.core.di
 import android.content.Context
 import androidx.room.Room
 import com.obrien.core.data.DataStoreManager
+import com.obrien.core.data.HomeworkDao
 import com.obrien.core.data.JournalDao
 import com.obrien.core.data.JournalDatabase
 import dagger.Module
@@ -31,4 +32,7 @@ object AppModule {
 
     @Provides
     fun provideJournalDao(db: JournalDatabase): JournalDao = db.journalDao()
+
+    @Provides
+    fun provideHomeworkDao(db: JournalDatabase): HomeworkDao = db.homeworkDao()
 }

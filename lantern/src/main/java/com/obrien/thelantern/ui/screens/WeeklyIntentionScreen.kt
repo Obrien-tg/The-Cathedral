@@ -43,7 +43,7 @@ fun WeeklyIntentionScreen(
                 title = {
                     Column {
                         Text(
-                            "WEEK’S LIGHT",
+                            "MY WEEKLY FOCUS",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 3.sp,
                             color = primary
@@ -90,7 +90,7 @@ fun WeeklyIntentionScreen(
                 IntentionPreview(uiState)
             }
 
-            IntentionSection(title = "ACADEMIC FOCUS") {
+            IntentionSection(title = "SCHOOL") {
                 SubjectDropdown(
                     selectedSubject = uiState.subjectFocus,
                     onSubjectSelected = { viewModel.updateSubjectFocus(it) }
@@ -146,11 +146,11 @@ fun WeeklyIntentionScreen(
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("SET THIS WEEK'S LIGHT", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text("SET MY FOCUS", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
             
             Text(
-                text = "These intentions will light up your schedule for the current week.",
+                text = "These choices will update your schedule for the week.",
                 style = MaterialTheme.typography.bodySmall,
                 color = LanternText.copy(alpha = 0.4f),
                 fontStyle = FontStyle.Italic,
@@ -235,7 +235,7 @@ fun IntentionPreview(uiState: WeeklyIntentionUiState) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "THIS WEEK'S LIGHT",
+                "MY WEEKLY FOCUS",
                 style = MaterialTheme.typography.labelSmall,
                 color = primary,
                 letterSpacing = 2.sp

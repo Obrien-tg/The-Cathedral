@@ -19,7 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.obrien.thelantern.navigation.*
 import com.obrien.thelantern.ui.screens.*
-import com.obrien.thelantern.ui.theme.LumiTheme
+import com.obrien.thelantern.ui.theme.DynamicLumiTheme
+import com.obrien.core.data.DataStoreManager
 import com.obrien.core.util.AlarmScheduler
 import com.obrien.core.util.NotificationHelper
 import com.obrien.thelantern.notifications.PillarReceiver
@@ -35,6 +36,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
+
+    @Inject
+    lateinit var dataStoreManager: DataStoreManager
 
     private val timeChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -84,11 +88,19 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            LumiTheme {
+            DynamicLumiTheme(dataStoreManager = dataStoreManager) {
+                val hasSeenTutorial by dataStoreManager.hasSeenTutorial.collectAsState(initial = true)
                 var showSplash by remember { mutableStateOf(true) }
 
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
+                } else if (!hasSeenTutorial) {
+                    TutorialScreen(
+                        dataStoreManager = dataStoreManager,
+                        onComplete = {
+                            // Tutorial seen is handled inside TutorialScreen
+                        }
+                    )
                 } else {
                     val navController = rememberNavController()
                     
@@ -120,7 +132,8 @@ class MainActivity : ComponentActivity() {
                                 onSkillTree = { navController.navigate(SkillTreeRoute) },
                                 onWeeklyReview = { navController.navigate(WeeklyReviewRoute) },
                                 onSettings = { navController.navigate(SettingsRoute) },
-                                onWeeklyIntention = { navController.navigate(WeeklyIntentionRoute) }
+                                onWeeklyIntention = { navController.navigate(WeeklyIntentionRoute) },
+                                onHomework = { navController.navigate(HomeworkRoute) }
                             )
                         }
                         composable<ScheduleRoute>(
@@ -173,6 +186,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<WeeklyIntentionRoute> {
                             WeeklyIntentionScreen(
+                                viewModel = hiltViewModel(),
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable<HomeworkRoute> {
+                            HomeworkScreen(
                                 viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )

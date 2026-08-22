@@ -60,7 +60,7 @@ class ScheduleRepository @Inject constructor(
     suspend fun setTheme(theme: String) = dataStoreManager.setTheme(theme)
     suspend fun setFontSize(size: String) = dataStoreManager.setFontSize(size)
     suspend fun acknowledgeAccountability() = dataStoreManager.acknowledgeAccountability()
-    
+
     suspend fun saveWeeklyIntention(intention: WeeklyIntention) = dataStoreManager.saveWeeklyIntention(intention)
     suspend fun clearWeeklyIntention() = dataStoreManager.clearWeeklyIntention()
     fun currentWeekStart() = dataStoreManager.currentWeekStart()
