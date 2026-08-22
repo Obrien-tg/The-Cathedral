@@ -37,7 +37,7 @@ fun HomeworkScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("HOMEWORK", letterSpacing = 2.sp) },
+                title = { Text("Today's homework", letterSpacing = 1.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")

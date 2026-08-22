@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DynamicLumiTheme(dataStoreManager = dataStoreManager) {
-                val hasSeenTutorial by dataStoreManager.hasSeenTutorial.collectAsState(initial = true)
+                val hasSeenTutorial by dataStoreManager.hasSeenTutorial.collectAsState(initial = false)
                 var showSplash by remember { mutableStateOf(true) }
 
                 if (showSplash) {
@@ -108,8 +108,10 @@ class MainActivity : ComponentActivity() {
                     val settingsState by settingsViewModel.uiState.collectAsState()
                     
                     LaunchedEffect(settingsState.wakeTime) {
+                        val today = java.time.LocalDate.now().dayOfWeek
+                        val pillars = ScheduleData.getPillarsForDay(today)
                         alarmScheduler.scheduleRitualAlarms(
-                            pillars = ScheduleData.pillars,
+                            pillars = pillars,
                             receiverClass = PillarReceiver::class.java,
                             wakeTime = settingsState.wakeTime,
                             baseWake = java.time.LocalTime.of(6, 30)

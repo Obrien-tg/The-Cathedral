@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -76,10 +77,10 @@ fun PhilosophyScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -114,17 +115,17 @@ fun PhilosophyScreen(
 
             SacredCard(title = "WHEN IT'S HARD") {
                 ProtocolItem(
-                    title = "The 2-Day Rule",
-                    description = "Miss one day: fine. Miss two days: the light has flickered. Read your purpose aloud and take the smallest possible action to light it again."
+                    title = "It's okay to rest",
+                    description = "Yesterday was tough. That's okay. Read your purpose aloud and take the smallest possible action to start fresh."
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ProtocolItem(
-                    title = "The 5-Minute Rescue",
+                    title = "The 5-minute rescue",
                     description = "Feel resistance? Commit to just 5 minutes. After 5 minutes, you are free to stop. Most of the time, you will want to keep going."
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ProtocolItem(
-                    title = "The Weekly Review",
+                    title = "The weekly check-in",
                     description = "Every Sunday, ask: 'Am I growing into the person I want to be?' Then adjust one thing for next week."
                 )
                 Spacer(modifier = Modifier.height(12.dp))
@@ -134,11 +135,11 @@ fun PhilosophyScreen(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = primary),
                     border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.3f))
                 ) {
-                    Text("START REVIEW", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                    Text("Start review", fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                 }
             }
 
-            SacredCard(title = "CURRENT READING LIST") {
+            SacredCard(title = "MY READING") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -235,7 +236,7 @@ fun PhilosophyScreen(
                         enabled = isPageValid,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = primary,
-                            contentColor = LanternNight
+                            contentColor = Color.White
                         )
                     ) {
                         Text("UPDATE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
@@ -243,7 +244,7 @@ fun PhilosophyScreen(
                 }
             }
 
-            SacredCard(title = "THE READING PATH") {
+            SacredCard(title = "MY READING LIST") {
                 PrimarySources.curriculum.forEachIndexed { index, source ->
                     val isActive = index == activeIndex
                     SourceRow(
@@ -260,7 +261,7 @@ fun PhilosophyScreen(
                 }
             }
 
-            SacredCard(title = "THE WEEKLY SUBJECTS") {
+            SacredCard(title = "THIS WEEK'S SUBJECTS") {
                 val days = listOf(
                     "Mathematics" to "Numbers, patterns, and logic",
                     "Languages" to "English & Afrikaans stories and words",
@@ -298,7 +299,7 @@ fun SacredCard(
 ) {
     val primary = MaterialTheme.colorScheme.primary
     Card(
-        colors = CardDefaults.cardColors(containerColor = LanternNight),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
             primary.copy(alpha = 0.2f)
@@ -393,8 +394,8 @@ fun SourceRow(
 @Preview
 @Composable
 fun PhilosophyScreenPreview() {
-    LumiTheme(darkTheme = true) {
-        Scaffold(containerColor = LanternNight) { padding ->
+    LumiTheme(darkTheme = false) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
             Column(
                 modifier = Modifier
                     .padding(padding)
