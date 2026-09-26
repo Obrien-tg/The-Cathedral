@@ -8,6 +8,7 @@ import com.obrien.thecathedral.domain.usecase.ToggleRitualUseCase
 import com.obrien.thecathedral.model.Alarm
 import com.obrien.thecathedral.model.Pillar
 import com.obrien.thecathedral.model.PillarStatus
+import com.obrien.thecathedral.model.WeeklyIntention
 import com.obrien.thecathedral.util.computeStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -21,7 +22,8 @@ data class CodexUiState(
     val currentTime: LocalTime = LocalTime.now(),
     val pillars: List<Pillar> = emptyList(),
     val completedIds: Set<String> = emptySet(),
-    val skippedIds: Set<String> = emptySet()
+    val skippedIds: Set<String> = emptySet(),
+    val weeklyIntention: WeeklyIntention = WeeklyIntention()
 )
 
 @HiltViewModel
@@ -46,9 +48,10 @@ class CodexViewModel @Inject constructor(
         _currentTime,
         getPersonalizedSchedule(),
         repository.completedAlarms,
-        repository.skippedAlarms
-    ) { time, pillars, completed, skipped ->
-        CodexUiState(time, pillars, completed, skipped)
+        repository.skippedAlarms,
+        repository.weeklyIntention
+    ) { time, pillars, completed, skipped, intention ->
+        CodexUiState(time, pillars, completed, skipped, intention)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

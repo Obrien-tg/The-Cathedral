@@ -143,7 +143,9 @@ fun JournalScreen(
                 value = freeText,
                 onValueChange = { freeText = it },
                 label = "What did you build today?",
-                placeholder = "Describe your labour..."
+                placeholder = if (uiState.weeklyIntention?.weeklyAim?.isNotBlank() == true) {
+                    "Intention: ${uiState.weeklyIntention?.weeklyAim}"
+                } else "Describe your labour..."
             )
 
             JournalField(

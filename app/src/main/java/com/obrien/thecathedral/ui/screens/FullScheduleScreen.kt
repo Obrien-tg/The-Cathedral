@@ -58,12 +58,22 @@ fun FullScheduleScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "THE CATHEDRAL CODEX",
-                        style = MaterialTheme.typography.titleMedium,
-                        letterSpacing = 2.sp,
-                        color = CathedralGold
-                    )
+                    Column {
+                        Text(
+                            "THE CATHEDRAL CODEX",
+                            style = MaterialTheme.typography.titleMedium,
+                            letterSpacing = 2.sp,
+                            color = CathedralGold
+                        )
+                        if (uiState.weeklyIntention.weeklyAim.isNotBlank()) {
+                            Text(
+                                text = uiState.weeklyIntention.weeklyAim.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = CathedralGold.copy(alpha = 0.5f),
+                                letterSpacing = 1.sp
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

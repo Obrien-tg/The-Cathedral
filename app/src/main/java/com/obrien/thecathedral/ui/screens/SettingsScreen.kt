@@ -132,7 +132,8 @@ fun SettingsScreen(
                     label = "Theme",
                     value = uiState.theme.uppercase(),
                     onClick = { 
-                        val next = if (uiState.theme == "dark") "light" else "dark"
+                        val modes = listOf("system", "dark", "light")
+                        val next = modes[(modes.indexOf(uiState.theme) + 1) % modes.size]
                         viewModel.setTheme(next)
                     }
                 )

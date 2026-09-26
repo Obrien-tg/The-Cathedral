@@ -27,7 +27,7 @@ class ScheduleRepository @Inject constructor(
     val theme: Flow<String> = dataStoreManager.theme
     val fontSize: Flow<String> = dataStoreManager.fontSize
     val lastAccountabilityAcknowledgeDate: Flow<String> = dataStoreManager.lastAccountabilityAcknowledgeDate
-    val weeklyIntention: Flow<WeeklyIntention?> = dataStoreManager.weeklyIntention
+    val weeklyIntention: Flow<WeeklyIntention> = dataStoreManager.weeklyIntention
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)

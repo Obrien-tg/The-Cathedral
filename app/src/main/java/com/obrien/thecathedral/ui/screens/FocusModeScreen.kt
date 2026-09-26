@@ -38,6 +38,7 @@ fun FocusModeScreen(
     val timeRemaining by viewModel.timeRemaining.collectAsState()
     val isRunning by viewModel.isRunning.collectAsState()
     val sessionCount by viewModel.sessionCount.collectAsState()
+    val weeklyAim by viewModel.weeklyAim.collectAsState()
     
     var quoteIndex by remember { mutableIntStateOf(0) }
     var showCompletion by remember { mutableStateOf(false) }
@@ -68,12 +69,22 @@ fun FocusModeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "THE FORGE",
-                        style = MaterialTheme.typography.titleMedium,
-                        letterSpacing = 3.sp,
-                        color = CathedralGold
-                    )
+                    Column {
+                        Text(
+                            "THE FORGE",
+                            style = MaterialTheme.typography.titleMedium,
+                            letterSpacing = 3.sp,
+                            color = CathedralGold
+                        )
+                        if (weeklyAim.isNotBlank()) {
+                            Text(
+                                text = weeklyAim.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = CathedralGold.copy(alpha = 0.5f),
+                                letterSpacing = 1.sp
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

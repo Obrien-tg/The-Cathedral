@@ -9,17 +9,18 @@ import android.os.Build
 import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.thecathedral.model.WeeklyIntention
 import com.obrien.thecathedral.service.ForgeService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FocusViewModel @Inject constructor(
-    private val application: Application
+    private val application: Application,
+    private val repository: ScheduleRepository
 ) : ViewModel() {
 
     private val _timeRemaining = MutableStateFlow(25 * 60)
@@ -30,6 +31,10 @@ class FocusViewModel @Inject constructor(
 
     private val _sessionCount = MutableStateFlow(0)
     val sessionCount: StateFlow<Int> = _sessionCount.asStateFlow()
+
+    val weeklyAim: StateFlow<String> = repository.weeklyIntention
+        .map { it.weeklyAim }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     private var forgeService: ForgeService? = null
     private val serviceConnection = object : ServiceConnection {

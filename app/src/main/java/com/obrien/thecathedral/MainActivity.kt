@@ -18,6 +18,7 @@ import androidx.navigation.navDeepLink
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.ui.screens.*
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
+import com.obrien.thecathedral.ui.theme.ThemeMode
 import com.obrien.thecathedral.util.AlarmScheduler
 import com.obrien.thecathedral.util.NotificationHelper
 import com.obrien.thecathedral.viewmodel.*
@@ -78,18 +79,22 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            TheCathedralTheme {
+            settingsViewModel = hiltViewModel()
+            val settingsState by settingsViewModel.uiState.collectAsState()
+            val themeMode = when (settingsState.theme) {
+                "dark" -> ThemeMode.DARK
+                "light" -> ThemeMode.LIGHT
+                else -> ThemeMode.SYSTEM
+            }
+
+            TheCathedralTheme(themeMode = themeMode) {
                 var showSplash by remember { mutableStateOf(true) }
 
                 if (showSplash) {
                     SplashScreen(onSplashFinished = { showSplash = false })
                 } else {
                     val navController = rememberNavController()
-                    
-                    // Root ViewModel for global state (like wakeTime for alarms)
-                    settingsViewModel = hiltViewModel()
-                    val settingsState by settingsViewModel.uiState.collectAsState()
-                    
+
                     LaunchedEffect(settingsState.wakeTime) {
                         alarmScheduler.scheduleRitualAlarms(settingsState.wakeTime)
                     }

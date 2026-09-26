@@ -58,15 +58,18 @@ class DataStoreManager(private val context: Context) {
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[FONT_SIZE] ?: "medium" }
 
-    val weeklyIntention: Flow<WeeklyIntention?> = context.dataStore.data
+    val weeklyIntention: Flow<com.obrien.thecathedral.model.WeeklyIntention> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { prefs ->
-            val json = prefs[WEEKLY_INTENTION] ?: return@map null
+            val json = prefs[WEEKLY_INTENTION]
+                ?: return@map com.obrien.thecathedral.model.WeeklyIntention.emptyForCurrentWeek()
             try {
-                val intention = Json.decodeFromString<WeeklyIntention>(json)
-                if (intention.weekStart == currentWeekStart()) intention else null
+                val decoded = Json.decodeFromString<com.obrien.thecathedral.model.WeeklyIntention>(json)
+                // Expired weeks do not shape the schedule — treat as empty for current week
+                if (decoded.isActiveForCurrentWeek()) decoded
+                else com.obrien.thecathedral.model.WeeklyIntention.emptyForCurrentWeek()
             } catch (_: Exception) {
-                null
+                com.obrien.thecathedral.model.WeeklyIntention.emptyForCurrentWeek()
             }
         }
 
