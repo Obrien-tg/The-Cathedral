@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Ring Segment: Top-Right (Pink) -->
+    <path
+        android:strokeColor="#FFB3C6"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M54,20 A34,34 0 0,1 88,54" />
+
+    <!-- Ring Segment: Bottom-Right (Lavender/Blue) -->
+    <path
+        android:strokeColor="#C4B5FD"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M88,54 A34,34 0 0,1 54,88" />
+
+    <!-- Ring Segment: Bottom-Left (Blue/Mint) -->
+    <path
+        android:strokeColor="#A5D8FF"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M54,88 A34,34 0 0,1 20,54" />
+
+    <!-- Ring Segment: Top-Left (Mint - with gap for star) -->
+    <path
+        android:strokeColor="#B5EAD7"
+        android:strokeWidth="3.5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"
+        android:pathData="M20,54 A34,34 0 0,1 42,22" />
+
+    <!-- Clock Hands (Centered above text) -->
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M54,42 L54,30" />
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M54,42 L64,36" />
+    <path
+        android:fillColor="#9B8EC7"
+        android:pathData="M52,42 A2,2 0 0,0 56,42 A2,2 0 0,0 52,42" />
+
+    <!-- "Lumi" Text Approximation -->
+    <!-- L -->
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M30,50 L30,68 L40,68" />
+    <!-- u -->
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M46,58 L46,64 A3,3 0 0,0 52,64 L52,58 M52,62 L52,68" />
+    <!-- m -->
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M58,68 L58,58 A3,3 0 0,1 64,58 L64,68 M64,58 A3,3 0 0,1 70,58 L70,68" />
+    <!-- i -->
+    <path
+        android:strokeColor="#9B8EC7"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M78,58 L78,68" />
+    <path
+        android:fillColor="#9B8EC7"
+        android:pathData="M77,52 A1,1 0 0,0 79,52 A1,1 0 0,0 77,52" />
+
+    <!-- Sparkles & Dots -->
+    <!-- Large Star Top-Left -->
+    <path
+        android:fillColor="#FFD166"
+        android:pathData="M24,20 L26,24 L30,26 L26,28 L24,32 L22,28 L18,26 L22,24 Z" />
+    <!-- Small Pink Sparkle Right -->
+    <path
+        android:fillColor="#FFB3C6"
+        android:pathData="M84,42 L85,44 L87,45 L85,46 L84,48 L83,46 L81,45 L83,44 Z" />
+    <!-- Triple Dots Left -->
+    <path
+        android:fillColor="#C4B5FD"
+        android:pathData="M16,42 A1.5,1.5 0 0,0 19,42 A1.5,1.5 0 0,0 16,42" />
+    <path
+        android:fillColor="#FFB3C6"
+        android:pathData="M16,36 A1.5,1.5 0 0,0 19,36 A1.5,1.5 0 0,0 16,36" />
+    <path
+        android:fillColor="#B5EAD7"
+        android:pathData="M16,48 A1.5,1.5 0 0,0 19,48 A1.5,1.5 0 0,0 16,48" />
+
+    <!-- Sprout at bottom -->
+    <path
+        android:fillColor="#B5EAD7"
+        android:pathData="M48,92 Q46,84 52,82 Q55,88 48,92" />
+    <path
+        android:fillColor="#A5D8FF"
+        android:pathData="M60,92 Q62,84 56,82 Q53,88 60,92" />
+
+</vector>

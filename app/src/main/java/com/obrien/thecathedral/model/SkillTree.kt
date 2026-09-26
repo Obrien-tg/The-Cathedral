@@ -1,46 +1,10 @@
 package com.obrien.thecathedral.model
 
-/**
- * A node in the formation path.
- *
- * Progress is earned only through lifetime ritual consistency.
- * A node is completed when every requirement reaches 1.0 (minOf ratios).
- * A node is unlocked only when all of its parents are completed.
- */
-data class SkillNode(
-    val id: String,
-    val title: String,
-    val pillar: String,                         // AWAKENING | TECHNE | HISTORIA | GYMNOS | SOPHIA
-    val requiredCompletions: Int = 1,
-    val requiredFocusSessions: Int = 0,
-    val requiredJournalDays: Int = 0,
-    /** Optional explicit alarm IDs. When empty the use-case falls back to pillar defaults. */
-    val requiredAlarmIds: List<String> = emptyList(),
-    val description: String = "",
-    val tier: Int = 0
-)
-
-data class SkillEdge(
-    val from: String,
-    val to: String
-)
-
-data class SkillProgress(
-    val nodeId: String,
-    val unlocked: Boolean,
-    val completed: Boolean,
-    val progress: Float                         // 0f..1f
-)
+import com.obrien.core.model.SkillNode
+import com.obrien.core.model.SkillEdge
 
 /**
  * The Cathedral Formation Path – expanded lifetime skill tree.
- *
- * Design principles:
- * - Lifetime counters only (no daily streaks)
- * - Strict prerequisites (all parents must be complete)
- * - Balanced formation across Techne / Historia / Gymnos / Sophia
- * - Progressive difficulty that rewards months of consistency
- * - Culminates in the app’s own mantra: “Master of Two Hands”
  */
 object SkillTreeData {
 
@@ -234,7 +198,7 @@ object SkillTreeData {
         SkillEdge("2", "5"),
         SkillEdge("3", "6"),
         SkillEdge("4", "7"),
-        SkillEdge("1", "8"),          // Evening Vigil can open relatively early
+        SkillEdge("1", "8"),
 
         // Tier 2 → Tier 3
         SkillEdge("5", "9"),
@@ -244,9 +208,9 @@ object SkillTreeData {
 
         // Tier 3 → Tier 4 (synthesis requires multiple parents)
         SkillEdge("9", "13"),
-        SkillEdge("11", "13"),        // Builder’s Hand needs both craft + body
+        SkillEdge("11", "13"),
         SkillEdge("10", "14"),
-        SkillEdge("12", "14"),        // Scholar’s Compass needs study + wisdom
+        SkillEdge("12", "14"),
 
         // Guardian of the Day demands broad excellence
         SkillEdge("9", "15"),

@@ -1,30 +1,39 @@
 package com.obrien.thecathedral
 
+import android.Manifest
 import android.app.AlarmManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
+import com.obrien.core.util.AlarmScheduler
+import com.obrien.core.util.NotificationHelper
+import com.obrien.thecathedral.data.ScheduleData
 import com.obrien.thecathedral.navigation.*
+import com.obrien.thecathedral.notifications.PillarReceiver
 import com.obrien.thecathedral.ui.screens.*
 import com.obrien.thecathedral.ui.theme.TheCathedralTheme
 import com.obrien.thecathedral.ui.theme.ThemeMode
-import com.obrien.thecathedral.util.AlarmScheduler
-import com.obrien.thecathedral.util.NotificationHelper
-import com.obrien.thecathedral.viewmodel.*
+import com.obrien.thecathedral.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,48 +44,21 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var settingsViewModel: SettingsViewModel
 
-    private val timeChangeReceiver = object : android.content.BroadcastReceiver() {
-        override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
-            if (::settingsViewModel.isInitialized) {
-                alarmScheduler.scheduleRitualAlarms(settingsViewModel.uiState.value.wakeTime)
-            }
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            checkExactAlarmPermission()
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean -> }
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
 
-        NotificationHelper.createNotificationChannel(this)
-
-        val filter = android.content.IntentFilter().apply {
-            addAction(android.content.Intent.ACTION_TIME_CHANGED)
-            addAction(android.content.Intent.ACTION_TIMEZONE_CHANGED)
-        }
-        registerReceiver(timeChangeReceiver, filter)
-
-        // Request notification permission for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
-                android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-
-        // Request exact alarm permission for Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(AlarmManager::class.java)
-            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                try {
-                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
-                } catch (_: Exception) { }
-            }
-        }
+        NotificationHelper.createNotificationChannel(this, "Cathedral Reminders")
 
         setContent {
             settingsViewModel = hiltViewModel()
@@ -88,24 +70,26 @@ class MainActivity : ComponentActivity() {
             }
 
             TheCathedralTheme(themeMode = themeMode) {
-                var showSplash by remember { mutableStateOf(true) }
-
-                if (showSplash) {
-                    SplashScreen(onSplashFinished = { showSplash = false })
-                } else {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     val navController = rememberNavController()
 
                     LaunchedEffect(settingsState.wakeTime) {
-                        alarmScheduler.scheduleRitualAlarms(settingsState.wakeTime)
+                        alarmScheduler.scheduleRitualAlarms(
+                            pillars = ScheduleData.pillars,
+                            receiverClass = PillarReceiver::class.java,
+                            wakeTime = settingsState.wakeTime,
+                            baseWake = java.time.LocalTime.of(7, 0)
+                        )
                     }
 
                     NavHost(
                         navController = navController,
                         startDestination = HomeRoute
                     ) {
-                        composable<HomeRoute>(
-                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://home" })
-                        ) {
+                        composable<HomeRoute> {
                             HomeScreen(
                                 viewModel = hiltViewModel(),
                                 onViewFullSchedule = { navController.navigate(ScheduleRoute) },
@@ -118,17 +102,13 @@ class MainActivity : ComponentActivity() {
                                 onWeeklyIntention = { navController.navigate(WeeklyIntentionRoute) }
                             )
                         }
-                        composable<ScheduleRoute>(
-                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://schedule" })
-                        ) {
+                        composable<ScheduleRoute> {
                             FullScheduleScreen(
                                 viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
                             )
                         }
-                        composable<FocusModeRoute>(
-                            deepLinks = listOf(navDeepLink { uriPattern = "cathedral://focus" })
-                        ) {
+                        composable<FocusModeRoute> {
                             FocusModeScreen(
                                 viewModel = hiltViewModel(),
                                 onBack = { navController.popBackStack() }
@@ -176,10 +156,41 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        requestNotificationPermission()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(timeChangeReceiver)
+    private fun requestNotificationPermission() {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                when {
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        checkExactAlarmPermission()
+                    }
+                    else -> {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+            else -> {
+                checkExactAlarmPermission()
+            }
+        }
+    }
+
+    private fun checkExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                        data = Uri.parse("package:$packageName")
+                    })
+                } catch (_: Exception) { }
+            }
+        }
     }
 }

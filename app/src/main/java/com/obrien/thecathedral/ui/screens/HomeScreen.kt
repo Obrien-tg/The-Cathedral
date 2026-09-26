@@ -24,14 +24,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
+import com.obrien.core.ui.components.SunflowerParticle
 import com.obrien.thecathedral.data.ScheduleData
 import com.obrien.thecathedral.data.ScheduleShaper
 import com.obrien.thecathedral.domain.usecase.DailyScore
 import com.obrien.thecathedral.model.DailyCounsel
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.WeeklyIntention
 import com.obrien.thecathedral.ui.components.FidelityHeatmap
-import com.obrien.thecathedral.ui.components.SunflowerParticle
 import com.obrien.thecathedral.ui.theme.AmbientDust
 import com.obrien.thecathedral.ui.theme.Bronze
 import com.obrien.thecathedral.ui.theme.CathedralGold
@@ -176,7 +176,9 @@ fun HomeScreenContent(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 12.dp),
-                size = 18f
+                size = 18f,
+                color = CathedralGold,
+                drift = true
             )
 
             LazyColumn(

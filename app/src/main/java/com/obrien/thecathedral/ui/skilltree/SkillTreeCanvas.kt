@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,9 @@ fun SkillTreeGraph(
         modifier = Modifier
             .fillMaxSize()
             .background(MonasteryBlack)
+            .semantics {
+                contentDescription = "Formation Path. Tap nodes to see requirements."
+            }
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, zoom, _ ->
                     scale = (scale * zoom).coerceIn(0.55f, 2.2f)

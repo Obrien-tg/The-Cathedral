@@ -1,8 +1,8 @@
 package com.obrien.thecathedral.domain.usecase
 
-import com.obrien.thecathedral.data.ScheduleRepository
-import com.obrien.thecathedral.model.SkillNode
-import com.obrien.thecathedral.model.SkillProgress
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.SkillNode
+import com.obrien.core.model.SkillProgress
 import com.obrien.thecathedral.model.SkillTreeData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

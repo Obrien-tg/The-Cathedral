@@ -1,6 +1,6 @@
 package com.obrien.thecathedral.domain.usecase
 
-import com.obrien.thecathedral.model.Pillar
+import com.obrien.core.model.Pillar
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import java.time.LocalTime

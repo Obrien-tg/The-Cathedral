@@ -22,5 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "The Cathedral"
+rootProject.name = "Formation Apps"
 include(":app")
+include(":lantern")
+include(":core")

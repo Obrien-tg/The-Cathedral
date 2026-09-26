@@ -2,12 +2,12 @@ package com.obrien.thecathedral.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
 import com.obrien.thecathedral.domain.usecase.*
 import com.obrien.thecathedral.model.DailyCounsel
 import com.obrien.thecathedral.model.DailyCounselData
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.WeeklyIntention
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -59,10 +59,10 @@ class HomeViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<HomeUiState> = combine(
-        combine(_currentTime, getActivePillar(_currentTime), getNextPillar(_currentTime)) { t, a, n -> Triple(t, a, n) },
-        combine(getDailyScore(), repository.completionHistory, _lastAccountabilityAcknowledgeDate) { s, h, l -> Triple(s, h, l) },
+        combine(_currentTime, getActivePillar(_currentTime), getNextPillar(_currentTime)) { t: LocalTime, a: Pillar?, n: Pillar? -> Triple(t, a, n) },
+        combine(getDailyScore(), repository.completionHistory, _lastAccountabilityAcknowledgeDate) { s: DailyScore, h: Map<String, Int>, l: String -> Triple(s, h, l) },
         repository.weeklyIntention
-    ) { part1, part2, intention ->
+    ) { part1: Triple<LocalTime, Pillar?, Pillar?>, part2: Triple<DailyScore, Map<String, Int>, String>, intention: WeeklyIntention ->
         val (time, active, next) = part1
         val (score, history, lastAcknowledge) = part2
 
@@ -72,7 +72,8 @@ class HomeViewModel @Inject constructor(
         val dayBefore = java.time.LocalDate.now().minusDays(2).toString()
         val missedYesterday = (history[yesterday] ?: 0) == 0
         val missedDayBefore = (history[dayBefore] ?: 0) == 0
-        val showAccountability = missedYesterday && missedDayBefore && lastAcknowledge != todayStr
+        val hasAnyHistory = history.isNotEmpty()
+        val showAccountability = hasAnyHistory && missedYesterday && missedDayBefore && lastAcknowledge != todayStr
 
         val activeIntention = if (intention.isActiveForCurrentWeek()) intention else WeeklyIntention.emptyForCurrentWeek()
 

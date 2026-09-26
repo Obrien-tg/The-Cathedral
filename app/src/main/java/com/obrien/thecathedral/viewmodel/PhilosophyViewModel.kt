@@ -2,8 +2,8 @@ package com.obrien.thecathedral.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.data.ScheduleRepository
-import com.obrien.thecathedral.model.WeeklyReview
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.WeeklyReview
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

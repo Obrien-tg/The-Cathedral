@@ -3,7 +3,7 @@ package com.obrien.thecathedral.notifications
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.obrien.thecathedral.util.NotificationHelper
+import com.obrien.core.util.NotificationHelper
 
 class PillarReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

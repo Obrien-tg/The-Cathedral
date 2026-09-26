@@ -1,8 +1,8 @@
 package com.obrien.thecathedral.util
 
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.PillarStatus
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.PillarStatus
 import java.time.LocalTime
 
 fun Pillar.isActiveAt(time: LocalTime): Boolean {
@@ -19,6 +19,14 @@ fun Pillar.parseTimeRange(): Pair<LocalTime, LocalTime>? {
     } catch (_: Exception) {
         null
     }
+}
+
+fun Pillar.shiftTimeRange(offset: java.time.Duration): String {
+    val (start, end) = parseTimeRange() ?: return timeRange
+    val shiftedStart = start.plus(offset)
+    val shiftedEnd = end.plus(offset)
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+    return "${shiftedStart.format(formatter)} - ${shiftedEnd.format(formatter)}"
 }
 
 fun Alarm.computeStatus(

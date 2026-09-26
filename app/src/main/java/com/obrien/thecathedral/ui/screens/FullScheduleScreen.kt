@@ -34,10 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thecathedral.data.ScheduleData
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.PillarStatus
-import com.obrien.thecathedral.ui.components.SunflowerParticle
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.PillarStatus
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.RitualMiss
@@ -92,15 +91,6 @@ fun FullScheduleScreen(
         containerColor = MonasteryBlack
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Subtle sunflower in corner (Bug #4)
-            SunflowerParticle(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 24.dp, end = 20.dp),
-                size = 16f,
-                drift = false
-            )
-
             LazyColumn(
                 modifier = Modifier
                     .padding(padding)
@@ -225,19 +215,6 @@ fun AlarmDetail(
     }
 
     Box(contentAlignment = Alignment.Center) {
-        // Blessing Burst (Bug #4)
-        if (showBlessing || blessingAlpha > 0f) {
-            SunflowerParticle(
-                modifier = Modifier
-                    .size(48.dp)
-                    .scale(blessingScale)
-                    .alpha(blessingAlpha),
-                size = 40f,
-                drift = false,
-                color = RitualSuccess
-            )
-        }
-
         Column(
             modifier = Modifier.alpha(if (isSkipped) 0.5f else 1f)
         ) {
@@ -281,7 +258,7 @@ fun AlarmDetail(
                     
                     IconButton(
                         onClick = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) 
                         },
                         modifier = Modifier

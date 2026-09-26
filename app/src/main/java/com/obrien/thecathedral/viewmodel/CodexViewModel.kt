@@ -2,13 +2,13 @@ package com.obrien.thecathedral.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.PillarStatus
+import com.obrien.core.model.WeeklyIntention
 import com.obrien.thecathedral.domain.usecase.GetPersonalizedScheduleUseCase
 import com.obrien.thecathedral.domain.usecase.ToggleRitualUseCase
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.PillarStatus
-import com.obrien.thecathedral.model.WeeklyIntention
 import com.obrien.thecathedral.util.computeStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -50,7 +50,7 @@ class CodexViewModel @Inject constructor(
         repository.completedAlarms,
         repository.skippedAlarms,
         repository.weeklyIntention
-    ) { time, pillars, completed, skipped, intention ->
+    ) { time: LocalTime, pillars: List<Pillar>, completed: Set<String>, skipped: Set<String>, intention: WeeklyIntention ->
         CodexUiState(time, pillars, completed, skipped, intention)
     }.stateIn(
         scope = viewModelScope,

@@ -1,9 +1,10 @@
 package com.obrien.thecathedral.domain.usecase
 
-import com.obrien.thecathedral.data.ScheduleRepository
+import com.obrien.core.data.ScheduleRepository
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
 import com.obrien.thecathedral.data.ScheduleShaper
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.WeeklyIntention
+import com.obrien.thecathedral.util.shiftTimeRange
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import java.time.Duration
@@ -16,7 +17,7 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
     operator fun invoke(): Flow<List<Pillar>> = combine(
         repository.wakeTime,
         repository.weeklyIntention
-    ) { wakeTimeStr, intention ->
+    ) { wakeTimeStr: String?, intention: WeeklyIntention ->
         val wakeTime = try {
             LocalTime.parse(wakeTimeStr)
         } catch (_: Exception) {
@@ -34,7 +35,10 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
             val shiftedAlarms = pillar.alarms.map { alarm ->
                 alarm.copy(time = alarm.time.plus(offset))
             }
-            pillar.copy(alarms = shiftedAlarms)
+            pillar.copy(
+                alarms = shiftedAlarms,
+                timeRange = pillar.shiftTimeRange(offset)
+            )
         }
     }
 }

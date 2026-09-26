@@ -1,8 +1,8 @@
 package com.obrien.thecathedral.data
 
-import com.obrien.thecathedral.model.Alarm
-import com.obrien.thecathedral.model.Pillar
-import com.obrien.thecathedral.model.WeeklyIntention
+import com.obrien.core.model.Alarm
+import com.obrien.core.model.Pillar
+import com.obrien.core.model.WeeklyIntention
 
 /**
  * Takes the fixed Rule of Life and overlays this week's living context
@@ -90,13 +90,20 @@ object ScheduleShaper {
 
             "peripatetic" -> {
                 val focus = i.historiaResearch.ifBlank { i.historiaBook }.trim()
-                if (focus.isNotBlank()) {
-                    listOf(
+                val exploration = i.explorations.trim()
+                when {
+                    focus.isNotBlank() -> listOf(
                         "Walk without headphones",
                         "Turn over: $focus",
                         "Return with one clearer question"
                     )
-                } else base
+                    exploration.isNotBlank() -> listOf(
+                        "Walk without headphones",
+                        "Take one experiment with you: $exploration",
+                        "Return with one honest verdict"
+                    )
+                    else -> base
+                }
             }
 
             "physical" -> {
@@ -176,6 +183,7 @@ object ScheduleShaper {
         if (intention.historiaResearch.isNotBlank()) rows += "RESEARCH" to intention.historiaResearch.trim()
         if (intention.gymnosFocus.isNotBlank()) rows += "GYMNOS" to intention.gymnosFocus.trim()
         if (intention.sophiaTheme.isNotBlank()) rows += "SOPHIA" to intention.sophiaTheme.trim()
+        if (intention.explorations.isNotBlank()) rows += "EXPLORATIONS" to intention.explorations.trim()
         return rows
     }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="splash_background">#FFFBF7</color>
+    <color name="lantern_night">#FFFBF7</color>
+    <color name="lantern_surface">#FFF5F0</color>
+    <color name="lantern_gold">#9B8EC7</color>
+    <color name="lantern_blue">#A5D8FF</color>
+    <color name="lantern_pink">#FFB3C6</color>
+    <color name="lantern_text">#5A5470</color>
+    <color name="lantern_muted">#9A8FB0</color>
+    <color name="lantern_success">#B5EAD7</color>
+    <color name="lantern_miss">#FFADAD</color>
+
+    <color name="ic_lumi_background">#FFFBF7</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
