@@ -71,6 +71,7 @@ fun HomeworkScreen(
             ) {
                 items(subjects) { subject ->
                     val isSelected = subject in selectedSubjects
+                    val primary = MaterialTheme.colorScheme.primary
                     FilterChip(
                         selected = isSelected,
                         onClick = {
@@ -79,7 +80,21 @@ fun HomeworkScreen(
                         },
                         label = { Text(subject, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.heightIn(min = 48.dp)
+                        modifier = Modifier.heightIn(min = 48.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = primary,
+                            selectedLabelColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = isSelected,
+                            borderColor = primary.copy(alpha = 0.3f),
+                            selectedBorderColor = primary,
+                            borderWidth = 1.5.dp,
+                            selectedBorderWidth = 1.5.dp
+                        )
                     )
                 }
             }

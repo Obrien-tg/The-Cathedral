@@ -22,8 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.R
 import com.obrien.thelantern.data.ScheduleData
-import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LumiTheme
 import kotlinx.coroutines.delay
 
@@ -56,7 +54,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LanternNight),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         // Subtle radial glow behind the icon
@@ -106,7 +104,7 @@ fun SplashScreen(
             Text(
                 text = ScheduleData.PURPOSE_STATEMENT,
                 style = MaterialTheme.typography.bodyLarge,
-                color = LanternText.copy(alpha = 0.8f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif,
                 lineHeight = 26.sp

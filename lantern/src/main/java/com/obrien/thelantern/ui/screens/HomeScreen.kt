@@ -33,7 +33,6 @@ import com.obrien.core.model.Pillar
 import com.obrien.core.model.WeeklyIntention
 import com.obrien.thelantern.ui.theme.AmbientDust
 import com.obrien.thelantern.ui.theme.LanternBlue
-import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.ui.theme.glassCard
@@ -62,7 +61,7 @@ fun HomeScreen(
         AlertDialog(
             onDismissRequest = { showResetConfirm = false },
             title = { Text("PURGE ALL PROGRESS?", color = primary) },
-            text = { Text("This will clear today's rituals and reading progress. The historical record remains untouched.", color = Color.White) },
+            text = { Text("This will clear today's rituals and reading progress. The historical record remains untouched.", color = MaterialTheme.colorScheme.onSurface) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.clearAllProgress()
@@ -72,7 +71,7 @@ fun HomeScreen(
             dismissButton = {
                 TextButton(onClick = { showResetConfirm = false }) { Text("CANCEL", color = primary) }
             },
-            containerColor = LanternNight
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
@@ -126,7 +125,7 @@ fun HomeScreenContent(
                     Text(
                         text = "Yesterday was a rest day. That's okay. Today is new.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -140,7 +139,7 @@ fun HomeScreenContent(
                         text = "Are you here?",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             },
@@ -149,13 +148,13 @@ fun HomeScreenContent(
                     Text("I'M HERE", color = primary)
                 }
             },
-            containerColor = LanternNight
+            containerColor = MaterialTheme.colorScheme.surface
         )
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = LanternNight,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {},
@@ -210,7 +209,7 @@ fun HomeScreenContent(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = primary,
-                                contentColor = LanternNight
+                                contentColor = Color.White
                             )
                         ) {
                             Icon(Icons.Default.AutoStories, contentDescription = null)
@@ -304,7 +303,7 @@ fun HomeScreenContent(
                     ) {
                         Text(
                             "Reset Day",
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                             fontSize = 12.sp,
                             letterSpacing = 1.sp
                         )
@@ -371,7 +370,7 @@ fun PurposeSection() {
             lineHeight = 28.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(color = primary.copy(alpha = 0.3f), thickness = 1.dp)
+        HorizontalDivider(color = primary.copy(alpha = 0.5f), thickness = 1.dp)
     }
 }
 
@@ -390,7 +389,8 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
             Text(
                 text = if (isActive) "RIGHT NOW" else "UPCOMING",
                 style = MaterialTheme.typography.labelSmall,
-                color = primary.copy(alpha = 0.7f)
+                color = primary,
+                letterSpacing = 1.sp
             )
             Text(
                 text = pillar.name,
@@ -415,14 +415,14 @@ fun ActivePillarSection(pillar: Pillar, isActive: Boolean, morningPrompt: String
                 Text(
                     text = "THINKING ABOUT",
                     style = MaterialTheme.typography.labelSmall,
-                    color = primary.copy(alpha = 0.5f),
+                    color = primary.copy(alpha = 0.8f),
                     letterSpacing = 1.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = prompt,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                     textAlign = TextAlign.Center,
                     fontStyle = FontStyle.Italic,
                     fontFamily = FontFamily.Serif
@@ -495,7 +495,7 @@ fun RestSection() {
             Text(
                 text = ScheduleData.MANTRA,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif
             )
@@ -546,7 +546,7 @@ fun DailyCounselCard(counsel: DailyCounsel) {
             Text(
                 text = """"${counsel.quote}"""",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif,
                 fontStyle = FontStyle.Italic,
@@ -574,7 +574,7 @@ private fun WeekRuleCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, if (hasWeekRule) primary.copy(alpha = 0.35f) else LanternBlue.copy(alpha = 0.45f), shape)
+            .border(1.5.dp, if (hasWeekRule) primary.copy(alpha = 0.6f) else LanternBlue.copy(alpha = 0.6f), shape)
             .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
@@ -589,14 +589,14 @@ private fun WeekRuleCard(
         if (!hasWeekRule) {
             Text(
                 text = "Name what you are building, reading, and researching. The schedule will speak those names.",
-                color = LanternText.copy(alpha = 0.75f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 20.sp
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Tap to set →",
-                color = primary.copy(alpha = 0.8f),
+                color = primary.copy(alpha = 0.9f),
                 style = MaterialTheme.typography.labelMedium
             )
         } else {
@@ -616,7 +616,7 @@ private fun WeekRuleCard(
                     )
                     Text(
                         text = value,
-                        color = LanternText.copy(alpha = 0.9f),
+                        color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -624,7 +624,7 @@ private fun WeekRuleCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Tap to revise →",
-                color = primary.copy(alpha = 0.7f),
+                color = primary.copy(alpha = 0.8f),
                 style = MaterialTheme.typography.labelSmall
             )
         }
@@ -639,8 +639,8 @@ fun HomeworkPromptCard(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = primary.copy(alpha = 0.1f)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.3f))
+        colors = CardDefaults.cardColors(containerColor = primary.copy(alpha = 0.15f)),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, primary.copy(alpha = 0.6f))
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -650,7 +650,7 @@ fun HomeworkPromptCard(onClick: () -> Unit) {
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                color = primary.copy(alpha = 0.2f)
+                color = primary.copy(alpha = 0.25f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(Icons.Default.AutoStories, contentDescription = null, tint = primary)
@@ -666,7 +666,7 @@ fun HomeworkPromptCard(onClick: () -> Unit) {
                 Text(
                     "Tap to plan your study forge",
                     style = MaterialTheme.typography.bodySmall,
-                    color = LanternText.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
             }
         }

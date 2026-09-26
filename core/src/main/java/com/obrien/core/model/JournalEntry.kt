@@ -1,7 +1,6 @@
 package com.obrien.core.model
 
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
@@ -23,13 +22,4 @@ data class JournalEntry(
     val hardPart: String = "",
     val gratitude: String = "",
     val timestamp: Long = System.currentTimeMillis()
-) {
-    @Ignore
-    val score: Int = listOf(
-        morningCompleted, schoolCompleted, resetCompleted,
-        studyCompleted, bodyCompleted, eveningCompleted
-    ).count { it }
-    
-    @Ignore
-    val totalScore: Int = 6
-}
+)

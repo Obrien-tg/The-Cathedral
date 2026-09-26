@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.focus.FocusKind
 import com.obrien.thelantern.ui.theme.LanternBlue
-import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LumiTheme
 import com.obrien.thelantern.viewmodel.FocusViewModel
@@ -64,10 +63,10 @@ fun FocusSetupContent(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = primary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -80,7 +79,7 @@ fun FocusSetupContent(
                 Text(
                     "Choose your energy:",
                     style = MaterialTheme.typography.labelMedium,
-                    color = primary.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
                 
                 LocalFocusModeCard(
@@ -165,7 +164,7 @@ fun FocusSetupContent(
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedKind == FocusKind.DEEP_WORK) primary else LanternBlue,
-                        contentColor = LanternNight
+                        contentColor = Color.White
                     )
                 ) {
                     Text("START", fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
@@ -195,8 +194,8 @@ fun LocalFocusModeCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.3f))
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.15f)),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, color.copy(alpha = 0.6f))
     ) {
         Row(
             modifier = Modifier.padding(24.dp),
@@ -243,7 +242,7 @@ fun LocalDurationOption(
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = minutes.toString(),
-                color = if (selected) LanternNight else color,
+                color = if (selected) Color.White else color,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
@@ -267,7 +266,7 @@ fun FocusSessionContent(
     val themeColor = if (currentKind == FocusKind.DEEP_WORK) primary else LanternBlue
 
     Scaffold(
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -281,7 +280,7 @@ fun FocusSessionContent(
                 Text(
                     text = if (currentKind == FocusKind.DEEP_WORK) "STUDYING" else "RESTING",
                     style = MaterialTheme.typography.labelLarge,
-                    color = themeColor.copy(alpha = 0.6f),
+                    color = themeColor.copy(alpha = 0.9f),
                     letterSpacing = 4.sp
                 )
                 if (currentTarget.isNotBlank()) {
@@ -309,11 +308,11 @@ fun FocusSessionContent(
                     onClick = { viewModel.pauseFocus() },
                     modifier = Modifier.size(72.dp).background(themeColor, CircleShape)
                 ) {
-                    Icon(Icons.Default.Pause, contentDescription = "Pause", tint = LanternNight, modifier = Modifier.size(32.dp))
+                    Icon(Icons.Default.Pause, contentDescription = "Pause", tint = Color.White, modifier = Modifier.size(32.dp))
                 }
                 
                 TextButton(onClick = { viewModel.resetFocus() }) {
-                    Text("END SESSION", color = themeColor.copy(alpha = 0.5f), letterSpacing = 1.sp)
+                    Text("END SESSION", color = themeColor.copy(alpha = 0.8f), letterSpacing = 1.sp)
                 }
             }
         }

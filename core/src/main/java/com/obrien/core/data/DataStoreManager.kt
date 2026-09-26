@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.obrien.core.model.JournalEntry
 import com.obrien.core.model.WeeklyIntention
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,6 +13,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeParseException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "formation_prefs")
 
@@ -35,7 +36,8 @@ class DataStoreManager(private val context: Context) {
         val FONT_SIZE = stringPreferencesKey("font_size")
         val LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE = stringPreferencesKey("last_accountability_acknowledge_date")
         val WEEKLY_INTENTION = stringPreferencesKey("weekly_intention")
-        
+        val PILLAR_SCHEDULE = stringPreferencesKey("pillar_schedule")
+
         // Tutorial & Day Personalization
         val HAS_SEEN_TUTORIAL = booleanPreferencesKey("has_seen_tutorial")
         val MONDAY_COLOR = stringPreferencesKey("monday_color")
@@ -54,7 +56,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun setTutorialSeen() {
         try {
             context.dataStore.edit { it[HAS_SEEN_TUTORIAL] = true }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set tutorial seen", e)
         }
     }
@@ -62,7 +64,7 @@ class DataStoreManager(private val context: Context) {
     fun getTodayColor(): Flow<String> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { prefs ->
-            val today = java.time.LocalDate.now().dayOfWeek.name
+            val today = LocalDate.now().dayOfWeek.name
             val key = when (today) {
                 "MONDAY" -> MONDAY_COLOR
                 "TUESDAY" -> TUESDAY_COLOR
@@ -89,7 +91,7 @@ class DataStoreManager(private val context: Context) {
                 else -> MONDAY_COLOR
             }
             context.dataStore.edit { it[key] = colorHex }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to save day color for $day", e)
         }
     }
@@ -113,7 +115,7 @@ class DataStoreManager(private val context: Context) {
         try {
             val today = LocalDate.now().toString()
             context.dataStore.edit { it[LAST_ACCOUNTABILITY_ACKNOWLEDGE_DATE] = today }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to acknowledge accountability", e)
         }
     }
@@ -124,11 +126,29 @@ class DataStoreManager(private val context: Context) {
 
     val theme: Flow<String> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
-        .map { it[THEME] ?: "dark" }
+        .map { it[THEME] ?: "system" } // "system", "dark", "light"
 
     val fontSize: Flow<String> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[FONT_SIZE] ?: "medium" }
+
+    /**
+     * Raw decoded intention, regardless of week. Used by the Quest of the Week
+     * planning screen, which must see both the current week's quests and the
+     * upcoming week's quests saved on Sunday. Schedule shaping must NOT use
+     * this flow — use [weeklyIntention], which filters to the active week.
+     */
+    val weeklyIntentionRaw: Flow<WeeklyIntention> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { prefs ->
+            val json = prefs[WEEKLY_INTENTION]
+                ?: return@map WeeklyIntention.emptyForCurrentWeek()
+            try {
+                Json.decodeFromString<WeeklyIntention>(json)
+            } catch (_: Exception) {
+                WeeklyIntention.emptyForCurrentWeek()
+            }
+        }
 
     val weeklyIntention: Flow<WeeklyIntention> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
@@ -147,29 +167,31 @@ class DataStoreManager(private val context: Context) {
     fun currentWeekStart(): String {
         val today = LocalDate.now()
         val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-        return monday.toString() // yyyy-MM-dd
+        return monday.toString()
     }
 
     suspend fun setNotificationLeadTime(minutes: Int) {
         try {
             context.dataStore.edit { it[NOTIFICATION_LEAD_TIME] = minutes }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set notification lead time", e)
         }
     }
 
     suspend fun setTheme(theme: String) {
+        require(theme in setOf("system", "dark", "light")) { "Invalid theme: $theme" }
         try {
             context.dataStore.edit { it[THEME] = theme }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set theme", e)
         }
     }
 
     suspend fun setFontSize(size: String) {
+        require(size in setOf("small", "medium", "large")) { "Invalid font size: $size" }
         try {
             context.dataStore.edit { it[FONT_SIZE] = size }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set font size", e)
         }
     }
@@ -177,7 +199,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveWeeklyIntention(intention: WeeklyIntention) {
         try {
             context.dataStore.edit { it[WEEKLY_INTENTION] = Json.encodeToString(intention) }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to save weekly intention", e)
         }
     }
@@ -185,7 +207,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun clearWeeklyIntention() {
         try {
             context.dataStore.edit { it.remove(WEEKLY_INTENTION) }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to clear weekly intention", e)
         }
     }
@@ -218,7 +240,7 @@ class DataStoreManager(private val context: Context) {
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[ACTIVE_SOURCE_PAGE] ?: 0 }
 
-    // Lifetime record of every ritual completed — the true measure of ascent
+    // Lifetime record of every ritual completed
     val historicalCompletions: Flow<Map<String, Int>> = context.dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { prefs ->
@@ -253,7 +275,7 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[COMPLETED_ALARMS] ?: emptySet()
                 if (id !in current) {
                     prefs[COMPLETED_ALARMS] = current + id
-                    
+
                     // Update daily completion count for heatmap
                     val historyJson = prefs[COMPLETION_HISTORY] ?: "{}"
                     val history = try {
@@ -265,7 +287,7 @@ class DataStoreManager(private val context: Context) {
                     prefs[COMPLETION_HISTORY] = Json.encodeToString(history)
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to mark complete: $id", e)
         }
     }
@@ -277,7 +299,7 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[COMPLETED_ALARMS] ?: emptySet()
                 if (id in current) {
                     prefs[COMPLETED_ALARMS] = current - id
-                    
+
                     // Decrement daily completion count
                     val historyJson = prefs[COMPLETION_HISTORY] ?: "{}"
                     val history = try {
@@ -290,7 +312,7 @@ class DataStoreManager(private val context: Context) {
                     prefs[COMPLETION_HISTORY] = Json.encodeToString(history)
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to mark incomplete: $id", e)
         }
     }
@@ -301,7 +323,7 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[SKIPPED_ALARMS] ?: emptySet()
                 prefs[SKIPPED_ALARMS] = current + id
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to mark skipped: $id", e)
         }
     }
@@ -312,7 +334,7 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[SKIPPED_ALARMS] ?: emptySet()
                 prefs[SKIPPED_ALARMS] = current - id
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to mark unskipped: $id", e)
         }
     }
@@ -329,7 +351,7 @@ class DataStoreManager(private val context: Context) {
                 updated[alarmId] = (updated[alarmId] ?: 0) + 1
                 prefs[HISTORICAL_COMPLETIONS] = Json.encodeToString(updated)
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to increment historical completion: $alarmId", e)
         }
     }
@@ -340,7 +362,7 @@ class DataStoreManager(private val context: Context) {
                 val current = prefs[TOTAL_FOCUS_SESSIONS] ?: 0
                 prefs[TOTAL_FOCUS_SESSIONS] = current + 1
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to increment focus sessions", e)
         }
     }
@@ -348,7 +370,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun setLastResetDate(date: String) {
         try {
             context.dataStore.edit { it[LAST_RESET_DATE] = date }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set last reset date", e)
         }
     }
@@ -356,7 +378,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun clearAlarmCompletionsOnly() {
         try {
             context.dataStore.edit { it.remove(COMPLETED_ALARMS) }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to clear alarm completions", e)
         }
     }
@@ -372,7 +394,7 @@ class DataStoreManager(private val context: Context) {
                     prefs[LAST_RESET_DATE] = today
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to reset daily", e)
         }
     }
@@ -380,7 +402,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun setActiveSource(index: Int) {
         try {
             context.dataStore.edit { it[ACTIVE_SOURCE_INDEX] = index }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set active source", e)
         }
     }
@@ -388,18 +410,37 @@ class DataStoreManager(private val context: Context) {
     suspend fun setActiveSourcePage(page: Int) {
         try {
             context.dataStore.edit { it[ACTIVE_SOURCE_PAGE] = page }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set active source page", e)
         }
     }
 
     suspend fun setWakeTime(time: String) {
+        // Validate time format (HH:MM)
+        try {
+            LocalTime.parse(time)
+        } catch (e: DateTimeParseException) {
+            Log.e(TAG, "Invalid wake time format: $time. Expected HH:MM")
+            return
+        }
         try {
             context.dataStore.edit { it[WAKE_TIME] = time }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to set wake time", e)
         }
     }
+
+    suspend fun savePillarSchedule(scheduleJson: String) {
+        try {
+            context.dataStore.edit { it[PILLAR_SCHEDULE] = scheduleJson }
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to save pillar schedule", e)
+        }
+    }
+
+    val pillarSchedule: Flow<String?> = context.dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[PILLAR_SCHEDULE] }
 
     suspend fun clearAllProgress() {
         try {
@@ -407,10 +448,9 @@ class DataStoreManager(private val context: Context) {
                 prefs[COMPLETED_ALARMS] = emptySet()
                 prefs[ACTIVE_SOURCE_INDEX] = 0
                 prefs[ACTIVE_SOURCE_PAGE] = 0
-                // We deliberately do NOT clear historicalCompletions or focus sessions.
-                // The record of a man’s labour is not to be erased lightly.
+                // Historical completions and focus sessions are intentionally preserved.
             }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             Log.e(TAG, "Failed to clear all progress", e)
         }
     }

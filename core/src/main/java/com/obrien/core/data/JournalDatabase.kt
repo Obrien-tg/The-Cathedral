@@ -9,7 +9,7 @@ import com.obrien.core.model.HomeworkEntry
 @Database(
     entities = [JournalEntry::class, WeeklyReview::class, HomeworkEntry::class],
     version = 3,
-    exportSchema = false
+    exportSchema = true
 )
 abstract class JournalDatabase : RoomDatabase() {
     abstract fun journalDao(): JournalDao

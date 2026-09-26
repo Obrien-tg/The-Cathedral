@@ -28,6 +28,7 @@ class ScheduleRepository @Inject constructor(
     val fontSize: Flow<String> = dataStoreManager.fontSize
     val lastAccountabilityAcknowledgeDate: Flow<String> = dataStoreManager.lastAccountabilityAcknowledgeDate
     val weeklyIntention: Flow<WeeklyIntention> = dataStoreManager.weeklyIntention
+    val weeklyIntentionRaw: Flow<WeeklyIntention> = dataStoreManager.weeklyIntentionRaw
 
     suspend fun getLastResetDate(): String = dataStoreManager.lastResetDate.first()
     suspend fun setLastResetDate(date: String) = dataStoreManager.setLastResetDate(date)
@@ -67,8 +68,5 @@ class ScheduleRepository @Inject constructor(
 
     suspend fun clearAllProgress() {
         dataStoreManager.clearAllProgress()
-        // Should we clear Room too? User said daily reset should only clear alarm completions.
-        // clearAllProgress is for the manual "Reset Day" button.
-        // I'll keep Room journal entries as they are an "Archive".
     }
 }

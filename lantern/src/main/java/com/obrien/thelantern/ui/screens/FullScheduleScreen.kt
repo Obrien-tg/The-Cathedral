@@ -37,7 +37,6 @@ import com.obrien.thelantern.data.ScheduleData
 import com.obrien.core.model.Alarm
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.PillarStatus
-import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LanternSuccess
 import com.obrien.thelantern.ui.theme.LumiTheme
@@ -74,11 +73,11 @@ fun FullScheduleScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = LanternNight
+                    containerColor = MaterialTheme.colorScheme.background
                 )
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
@@ -114,10 +113,10 @@ fun PillarItem(
             .clickable { expanded = !expanded }
             .border(
                 width = 1.dp,
-                color = primary.copy(alpha = 0.3f),
+                color = primary.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(8.dp)
             ),
-        colors = CardDefaults.cardColors(containerColor = LanternNight)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -129,7 +128,7 @@ fun PillarItem(
                     Text(
                         text = pillar.timeRange,
                         style = MaterialTheme.typography.labelSmall,
-                        color = primary.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         fontFamily = FontFamily.Monospace
                     )
                     Text(
@@ -250,7 +249,7 @@ fun AlarmDetail(
                     
                     IconButton(
                         onClick = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) 
                         },
                         modifier = Modifier
@@ -302,10 +301,10 @@ fun FullScheduleScreenPreview() {
                             color = MaterialTheme.colorScheme.primary
                         )
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
                 )
             },
-            containerColor = LanternNight
+            containerColor = MaterialTheme.colorScheme.background
         ) { padding ->
             LazyColumn(
                 modifier = Modifier
@@ -321,16 +320,16 @@ fun FullScheduleScreenPreview() {
                             .fillMaxWidth()
                             .border(
                                 width = 1.dp,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                                 shape = RoundedCornerShape(8.dp)
                             ),
-                        colors = CardDefaults.cardColors(containerColor = LanternNight)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
                                 text = pillar.timeRange,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                                 fontFamily = FontFamily.Monospace
                             )
                             Text(

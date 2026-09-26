@@ -258,7 +258,7 @@ fun AlarmDetail(
                     
                     IconButton(
                         onClick = { 
-                            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (!isSkipped) viewModel.toggleAlarm(alarm.id) else viewModel.toggleSkip(alarm.id) 
                         },
                         modifier = Modifier

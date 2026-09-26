@@ -3,21 +3,20 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kapt)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.obrien.thelantern"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.obrien.thelantern"
         minSdk = 24
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,10 +62,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Splash screen (Android 12+ backported)
-    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation(libs.androidx.splashscreen)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.room.runtime)

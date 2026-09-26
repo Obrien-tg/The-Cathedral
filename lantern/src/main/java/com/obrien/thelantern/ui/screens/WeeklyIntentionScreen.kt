@@ -22,9 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.data.ScheduleData
-import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.LanternText
-import com.obrien.thelantern.ui.theme.LanternSurface
 import com.obrien.thelantern.viewmodel.WeeklyIntentionViewModel
 import com.obrien.thelantern.viewmodel.WeeklyIntentionUiState
 
@@ -73,10 +70,10 @@ fun WeeklyIntentionScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -141,7 +138,7 @@ fun WeeklyIntentionScreen(
                     .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primary,
-                    contentColor = LanternNight
+                    contentColor = Color.White
                 )
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
@@ -152,7 +149,7 @@ fun WeeklyIntentionScreen(
             Text(
                 text = "These choices will update your schedule for the week.",
                 style = MaterialTheme.typography.bodySmall,
-                color = LanternText.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 fontStyle = FontStyle.Italic,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
@@ -174,14 +171,14 @@ fun SubjectDropdown(
         Text(
             text = "Subject Focus",
             style = MaterialTheme.typography.labelSmall,
-            color = LanternText.copy(alpha = 0.4f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         )
         Box {
             OutlinedTextField(
                 value = selectedSubject,
                 onValueChange = {},
                 readOnly = true,
-                placeholder = { Text("Select a subject", color = LanternText.copy(alpha = 0.2f)) },
+                placeholder = { Text("Select a subject", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { expanded = true },
@@ -190,9 +187,9 @@ fun SubjectDropdown(
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = primary,
-                    unfocusedBorderColor = primary.copy(alpha = 0.2f),
-                    focusedTextColor = LanternText,
-                    unfocusedTextColor = LanternText
+                    unfocusedBorderColor = primary.copy(alpha = 0.4f),
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground
                 ),
                 shape = RoundedCornerShape(8.dp),
                 enabled = false // Disable direct editing
@@ -209,11 +206,11 @@ fun SubjectDropdown(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
-                    .background(LanternSurface)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 subjects.forEach { subject ->
                     DropdownMenuItem(
-                        text = { Text(subject, color = LanternText) },
+                        text = { Text(subject, color = MaterialTheme.colorScheme.onSurface) },
                         onClick = {
                             onSubjectSelected(subject)
                             expanded = false
@@ -265,7 +262,7 @@ fun PreviewLine(ritual: String, text: String) {
         Text(
             "$ritual: ",
             style = MaterialTheme.typography.bodySmall,
-            color = LanternText.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
         )
         Text(
             text,
@@ -284,7 +281,7 @@ fun IntentionSection(title: String, content: @Composable ColumnScope.() -> Unit)
         Text(
             text = title,
             style = MaterialTheme.typography.labelSmall,
-            color = primary.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
             letterSpacing = 2.sp,
             modifier = Modifier.padding(bottom = 12.dp)
         )
@@ -304,18 +301,18 @@ fun IntentionField(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = LanternText.copy(alpha = 0.4f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
         )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = LanternText.copy(alpha = 0.2f)) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)) },
             modifier = Modifier.fillMaxWidth(),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = primary,
-                unfocusedBorderColor = primary.copy(alpha = 0.2f),
-                focusedTextColor = LanternText,
-                unfocusedTextColor = LanternText
+                unfocusedBorderColor = primary.copy(alpha = 0.4f),
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground
             ),
             shape = RoundedCornerShape(8.dp),
             textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily.Serif)

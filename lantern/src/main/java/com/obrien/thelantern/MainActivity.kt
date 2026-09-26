@@ -1,16 +1,24 @@
 package com.obrien.thelantern
 
-import android.content.Context
+import android.Manifest
 import android.app.AlarmManager
-import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
@@ -27,8 +35,6 @@ import com.obrien.thelantern.notifications.PillarReceiver
 import com.obrien.thelantern.data.ScheduleData
 import com.obrien.thelantern.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -40,52 +46,21 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var dataStoreManager: DataStoreManager
 
-    private val timeChangeReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            // System time changed; rescheduling is handled by the app's internal logic 
-            // or can be triggered here if we inject a direct preference reader.
-            // For now, we rely on the app's state persistence.
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            checkExactAlarmPermission()
         }
     }
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean -> }
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
 
         NotificationHelper.createNotificationChannel(this, "Lumi Reminders")
-
-        val filter = android.content.IntentFilter().apply {
-            addAction(android.content.Intent.ACTION_TIME_CHANGED)
-            addAction(android.content.Intent.ACTION_TIMEZONE_CHANGED)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(timeChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(timeChangeReceiver, filter)
-        }
-
-        // Request notification permission for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) !=
-                android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-
-        // Request exact alarm permission for Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val alarmManager = getSystemService(AlarmManager::class.java)
-            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                try {
-                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
-                } catch (_: Exception) { }
-            }
-        }
 
         setContent {
             DynamicLumiTheme(dataStoreManager = dataStoreManager) {
@@ -202,10 +177,41 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        requestNotificationPermission()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(timeChangeReceiver)
+    private fun requestNotificationPermission() {
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                when {
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        checkExactAlarmPermission()
+                    }
+                    else -> {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            }
+            else -> {
+                checkExactAlarmPermission()
+            }
+        }
+    }
+
+    private fun checkExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                        data = Uri.parse("package:$packageName")
+                    })
+                } catch (_: Exception) { }
+            }
+        }
     }
 }

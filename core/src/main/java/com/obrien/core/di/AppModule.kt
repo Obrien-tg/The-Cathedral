@@ -6,6 +6,8 @@ import com.obrien.core.data.DataStoreManager
 import com.obrien.core.data.HomeworkDao
 import com.obrien.core.data.JournalDao
 import com.obrien.core.data.JournalDatabase
+import com.obrien.core.data.MIGRATION_1_2
+import com.obrien.core.data.MIGRATION_2_3
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,7 +17,8 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object CoreModule {
+
     @Provides
     @Singleton
     fun provideDataStoreManager(@ApplicationContext context: Context): DataStoreManager =
@@ -28,7 +31,9 @@ object AppModule {
             context,
             JournalDatabase::class.java,
             "journal_database"
-        ).fallbackToDestructiveMigration().build()
+        )
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .build()
 
     @Provides
     fun provideJournalDao(db: JournalDatabase): JournalDao = db.journalDao()

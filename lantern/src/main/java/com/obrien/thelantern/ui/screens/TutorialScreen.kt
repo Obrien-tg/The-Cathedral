@@ -176,10 +176,10 @@ fun ColorPickerPage(
     val days = listOf("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY")
     var currentDayIndex by remember { mutableIntStateOf(0) }
     val colors = listOf(
-        "FFB3C6", "C4B5FD", "A5D8FF", "B5EAD7",
-        "FFD6A5", "FFF3B0", "D8B4FE", "B9FBC0",
-        "FFC8DD", "BDE0FE", "A2D2FF", "CDB4DB",
-        "F1C0E8", "CFBAF0", "A3C4F3", "90DBF4"
+        "E85D75", "8B5CF6", "3B82F6", "10B981",
+        "F59E0B", "EAB308", "A855F7", "22C55E",
+        "F06292", "4FC3F7", "4DB6AC", "BA68C8",
+        "FF8A65", "A1887F", "90A4AE", "9575CD"
     )
 
     Column(
@@ -291,12 +291,12 @@ fun FinalPage() {
 }
 
 private fun getDefaultColorForDay(day: String): String = when (day.uppercase()) {
-    "MONDAY" -> "FFB3C6"
-    "TUESDAY" -> "C4B5FD"
-    "WEDNESDAY" -> "A5D8FF"
-    "THURSDAY" -> "B5EAD7"
-    "FRIDAY" -> "FFD6A5"
-    "SATURDAY" -> "FFF3B0"
-    "SUNDAY" -> "D8B4FE"
-    else -> "FFB3C6"
+    "MONDAY" -> "E85D75"
+    "TUESDAY" -> "8B5CF6"
+    "WEDNESDAY" -> "3B82F6"
+    "THURSDAY" -> "10B981"
+    "FRIDAY" -> "F59E0B"
+    "SATURDAY" -> "EAB308"
+    "SUNDAY" -> "A855F7"
+    else -> "E85D75"
 }

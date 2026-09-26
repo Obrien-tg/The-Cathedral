@@ -16,8 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -52,21 +50,21 @@ fun SettingsScreen(
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) { Text("CANCEL", color = primary.copy(alpha = 0.6f)) }
             },
-            containerColor = LanternNight,
+            containerColor = MaterialTheme.colorScheme.surface,
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     TimePicker(
                         state = timePickerState,
                         colors = TimePickerDefaults.colors(
-                            clockDialColor = LanternNight,
+                            clockDialColor = MaterialTheme.colorScheme.background,
                             selectorColor = primary,
-                            containerColor = LanternNight,
+                            containerColor = MaterialTheme.colorScheme.surface,
                             periodSelectorSelectedContainerColor = primary,
-                            periodSelectorUnselectedContainerColor = LanternNight,
-                            periodSelectorSelectedContentColor = LanternNight,
+                            periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.background,
+                            periodSelectorSelectedContentColor = MaterialTheme.colorScheme.background,
                             periodSelectorUnselectedContentColor = primary,
                             clockDialUnselectedContentColor = primary.copy(alpha = 0.5f),
-                            clockDialSelectedContentColor = LanternNight
+                            clockDialSelectedContentColor = MaterialTheme.colorScheme.background
                         )
                     )
                 }
@@ -94,10 +92,10 @@ fun SettingsScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -183,7 +181,7 @@ fun SettingsScreen(
                 Text(
                     text = "Export your journal and ritual history as a JSON file for your own records.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = LanternText.copy(alpha = 0.4f),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -215,8 +213,8 @@ fun SettingsSection(
             modifier = Modifier.padding(bottom = 12.dp)
         )
         Card(
-            colors = CardDefaults.cardColors(containerColor = LanternNight),
-            border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.1f)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = androidx.compose.foundation.BorderStroke(1.dp, primary.copy(alpha = 0.2f)),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
@@ -244,7 +242,7 @@ fun SettingRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = label, color = LanternText)
+            Text(text = label, color = MaterialTheme.colorScheme.onSurface)
             Text(text = value, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         }
     }

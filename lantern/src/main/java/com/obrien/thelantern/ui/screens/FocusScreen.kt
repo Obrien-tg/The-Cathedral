@@ -15,7 +15,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LumiTheme
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit
@@ -47,7 +46,7 @@ fun FocusScreen(
     }
 
     Scaffold(
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -59,7 +58,7 @@ fun FocusScreen(
         ) {
             // Title
             Text(
-                text = "DEEP WORK RITUAL",
+                text = "FOCUS TIME",
                 style = MaterialTheme.typography.labelLarge,
                 color = primary,
                 letterSpacing = 4.sp
@@ -77,7 +76,7 @@ fun FocusScreen(
                 
                 Canvas(modifier = Modifier.size(280.dp)) {
                     drawArc(
-                        color = primary.copy(alpha = 0.1f),
+                        color = primary.copy(alpha = 0.2f),
                         startAngle = -90f,
                         sweepAngle = 360f,
                         useCenter = false,
@@ -105,7 +104,7 @@ fun FocusScreen(
                     Text(
                         text = "REMAINING",
                         style = MaterialTheme.typography.labelSmall,
-                        color = primary.copy(alpha = 0.5f),
+                        color = primary,
                         letterSpacing = 2.sp
                     )
                 }
@@ -115,7 +114,7 @@ fun FocusScreen(
             Text(
                 text = "\"${quotes[currentQuoteIndex]}\"",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -127,19 +126,19 @@ fun FocusScreen(
             OutlinedButton(
                 onClick = { showConfirmDialog = true },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = primary),
-                border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, primary.copy(alpha = 0.5f))
             ) {
-                Text("END SESSION", letterSpacing = 2.sp)
+                Text("DONE FOR NOW", letterSpacing = 2.sp)
             }
 
             if (showConfirmDialog) {
                 AlertDialog(
                     onDismissRequest = { showConfirmDialog = false },
-                    containerColor = LanternNight,
+                    containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = primary,
-                    textContentColor = MaterialTheme.colorScheme.onBackground,
-                    title = { Text("BREAK THE RITUAL?", fontFamily = FontFamily.Serif) },
-                    text = { Text("Ending now will interrupt your progress. Are you sure you wish to leave the deep?") },
+                    textContentColor = MaterialTheme.colorScheme.onSurface,
+                    title = { Text("Done with this step?", fontFamily = FontFamily.Serif) },
+                    text = { Text("You've done great work. Are you ready to stop for now?") },
                     confirmButton = {
                         TextButton(onClick = onEndSession) {
                             Text("I AM DONE", color = primary)
@@ -147,7 +146,7 @@ fun FocusScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { showConfirmDialog = false }) {
-                            Text("STAY", color = MaterialTheme.colorScheme.onBackground)
+                            Text("KEEP GOING", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         }
                     }
                 )

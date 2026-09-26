@@ -41,12 +41,12 @@ fun SkillTreeScreen(
     val primary = MaterialTheme.colorScheme.primary
 
     Scaffold(
-        containerColor = LanternNight,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Formation Path",
+                        "My Path",
                         color = primary,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -56,11 +56,11 @@ fun SkillTreeScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = LanternText
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { padding ->
@@ -110,15 +110,15 @@ fun SkillTreeScreen(
             ModalBottomSheet(
                 onDismissRequest = { viewModel.clearSelection() },
                 sheetState = sheetState,
-                containerColor = LanternNight,
-                contentColor = LanternText,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 dragHandle = {
                     Box(
                         modifier = Modifier
                             .padding(vertical = 12.dp)
                             .width(40.dp)
                             .height(4.dp)
-                            .background(LanternBlue.copy(alpha = 0.6f), RoundedCornerShape(2.dp))
+                            .background(primary.copy(alpha = 0.4f), RoundedCornerShape(2.dp))
                     )
                 }
             ) {
@@ -171,7 +171,7 @@ private fun NodeDetailContent(
             )
             Text(
                 text = "Tier ${node.tier} · ${node.pillar}",
-                color = LanternMuted,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontSize = 12.sp
             )
         }
@@ -202,7 +202,7 @@ private fun NodeDetailContent(
         // Overall progress bar
         Text(
             text = "Overall Progress",
-            color = LanternMuted,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium
         )
@@ -213,11 +213,11 @@ private fun NodeDetailContent(
                 .fillMaxWidth()
                 .height(8.dp),
             color = primary,
-            trackColor = LanternBlue.copy(alpha = 0.3f),
+            trackColor = primary.copy(alpha = 0.15f),
         )
         Text(
             text = "${(progressValue * 100).toInt()}%",
-            color = LanternText.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
             fontSize = 12.sp,
             modifier = Modifier.padding(top = 4.dp)
         )
@@ -227,7 +227,7 @@ private fun NodeDetailContent(
         // Requirements breakdown
         Text(
             text = "Requirements",
-            color = LanternMuted,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium
         )

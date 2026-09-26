@@ -40,12 +40,12 @@ class FocusService : Service() {
     companion object {
         private const val CHANNEL_ID = "focus_channel"
         private const val NOTIFICATION_ID = 2002
-        
+
         const val ACTION_START = "START"
         const val ACTION_PAUSE = "PAUSE"
         const val ACTION_RESET = "RESET"
         const val ACTION_SET_DURATION = "SET_DURATION"
-        
+
         const val EXTRA_MINUTES = "MINUTES"
         const val EXTRA_KIND = "KIND"
         const val EXTRA_TARGET = "TARGET"
@@ -79,7 +79,7 @@ class FocusService : Service() {
                 _timeRemaining.value = mins * 60
             }
         }
-        return START_NOT_STICKY
+        return START_REDELIVER_INTENT
     }
 
     private fun startTimer(kind: FocusKind, target: String, mainActivityClass: String?) {
@@ -89,18 +89,20 @@ class FocusService : Service() {
         _currentTarget.value = target
 
         val notification = buildNotification(mainActivityClass)
+        val serviceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            0
+        } else {
+            0
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                NOTIFICATION_ID, 
-                notification, 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) 
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC 
-                else 0
-            )
+            startForeground(NOTIFICATION_ID, notification, serviceType)
         } else {
             startForeground(NOTIFICATION_ID, notification)
         }
-        
+
         timerJob?.cancel()
         timerJob = serviceScope.launch {
             while (_isRunning.value && _timeRemaining.value > 0) {
@@ -114,7 +116,8 @@ class FocusService : Service() {
                     repository.incrementFocusSessions()
                 }
                 updateNotification(mainActivityClass, "Session Complete", "The ritual is sealed.")
-                stopForeground(STOP_FOREGROUND_DETACH)
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                cancelNotification()
             }
         }
     }
@@ -122,14 +125,22 @@ class FocusService : Service() {
     private fun pauseTimer() {
         _isRunning.value = false
         timerJob?.cancel()
-        stopForeground(STOP_FOREGROUND_DETACH)
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        cancelNotification()
     }
 
     private fun resetTimer() {
         _isRunning.value = false
         timerJob?.cancel()
         _timeRemaining.value = 25 * 60
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        cancelNotification()
         stopSelf()
+    }
+
+    private fun cancelNotification() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     private fun updateNotification(mainActivityClass: String?, title: String? = null, content: String? = null) {
@@ -155,7 +166,7 @@ class FocusService : Service() {
         } else null
 
         val defaultTitle = if (_currentKind.value == FocusKind.DEEP_WORK) "Deep Work" else "Mindfulness"
-        val defaultContent = if (_currentKind.value == FocusKind.DEEP_WORK && _currentTarget.value.isNotBlank()) 
+        val defaultContent = if (_currentKind.value == FocusKind.DEEP_WORK && _currentTarget.value.isNotBlank())
             "${_currentTarget.value}: $timeStr" else "$timeStr remaining"
 
         return NotificationCompat.Builder(this, CHANNEL_ID)

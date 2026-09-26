@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,6 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.model.JournalEntry
+import com.obrien.core.model.calculateScore
+import com.obrien.core.model.maxScore
 import com.obrien.thelantern.ui.theme.LanternNight
 import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LanternSuccess
@@ -108,7 +111,7 @@ fun JournalScreen(
             Text(
                 text = today.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)),
                 style = MaterialTheme.typography.labelMedium,
-                color = primary.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                 letterSpacing = 1.sp
             )
 
@@ -202,14 +205,14 @@ fun JournalScreen(
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primary,
-                    contentColor = LanternNight
+                    contentColor = Color.White
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "SEAL ENTRY",
+                    "SAVE ENTRY",
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
+                    letterSpacing = 1.sp
                 )
             }
 
@@ -273,15 +276,17 @@ fun EffortChip(
         modifier = modifier,
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = primary,
-            selectedLabelColor = LanternNight,
-            containerColor = LanternNight,
-            labelColor = primary.copy(alpha = 0.6f)
+            selectedLabelColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
+            labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         ),
         border = FilterChipDefaults.filterChipBorder(
             enabled = true,
             selected = selected,
             borderColor = primary.copy(alpha = 0.3f),
-            selectedBorderColor = primary
+            selectedBorderColor = primary,
+            borderWidth = 1.5.dp,
+            selectedBorderWidth = 1.5.dp
         )
     )
 }
@@ -342,12 +347,12 @@ fun ScoreCardRow(
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                width = 1.dp,
-                color = if (checked) LanternSuccess else primary.copy(alpha = 0.2f),
+                width = 1.5.dp,
+                color = if (checked) LanternSuccess else primary.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(8.dp)
             )
             .background(
-                if (checked) LanternSuccess.copy(alpha = 0.08f) else LanternNight,
+                if (checked) LanternSuccess.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface,
                 RoundedCornerShape(8.dp)
             )
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -358,13 +363,13 @@ fun ScoreCardRow(
             colors = CheckboxDefaults.colors(
                 checkedColor = LanternSuccess,
                 uncheckedColor = primary.copy(alpha = 0.5f),
-                checkmarkColor = LanternNight
+                checkmarkColor = Color.White
             )
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = label,
-            color = if (checked) LanternSuccess else LanternText,
+            color = if (checked) LanternSuccess else MaterialTheme.colorScheme.onSurface,
             fontFamily = FontFamily.Serif,
             fontSize = 14.sp,
             fontWeight = if (checked) FontWeight.Bold else FontWeight.Normal
@@ -381,7 +386,7 @@ fun HistoryCard(entry: JournalEntry) {
         entry.date
     }
 
-    val score = entry.score
+    val score = entry.calculateScore()
     val primary = MaterialTheme.colorScheme.primary
 
     Card(
@@ -405,9 +410,9 @@ fun HistoryCard(entry: JournalEntry) {
                     color = primary.copy(alpha = 0.6f)
                 )
                 Text(
-                    text = "$score / 6",
+                    text = "$score / ${entry.maxScore()}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (score == 6) LanternSuccess else primary,
+                    color = if (score == entry.maxScore()) LanternSuccess else primary,
                     fontWeight = FontWeight.Bold
                 )
             }

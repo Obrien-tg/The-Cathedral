@@ -11,7 +11,7 @@ val LumiLavender = Color(0xFFC4B5FD)
 val LumiBlue = Color(0xFFA5D8FF)
 val LumiMint = Color(0xFFB5EAD7)
 val LumiYellow = Color(0xFFFFD166)
-val LumiCharcoal = Color(0xFF5A5470)
+val LumiCharcoal = Color(0xFF3A3450)
 
 // === Dark Mode (Twilight) ===
 val TwilightIndigo = Color(0xFF1A1625)

@@ -18,8 +18,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.model.WeeklyReview
-import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.viewmodel.PhilosophyViewModel
 import java.time.LocalDate
 
@@ -55,10 +53,10 @@ fun WeeklyReviewScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = LanternNight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = LanternNight
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -79,7 +77,7 @@ fun WeeklyReviewScreen(
             Text(
                 text = "“Am I growing into the person I want to be?”",
                 style = MaterialTheme.typography.headlineSmall,
-                color = LanternText,
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Serif,
                 fontStyle = FontStyle.Italic,
@@ -127,7 +125,7 @@ fun WeeklyReviewScreen(
                     .padding(top = 16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = primary,
-                    contentColor = LanternNight
+                    contentColor = Color.White
                 )
             ) {
                 Text("DONE", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
@@ -148,21 +146,21 @@ fun ReviewQuestion(
         Text(
             text = question,
             style = MaterialTheme.typography.titleSmall,
-            color = primary.copy(alpha = 0.8f),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
             fontFamily = FontFamily.Serif
         )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = LanternText.copy(alpha = 0.3f)) },
+            placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 100.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = primary,
-                unfocusedBorderColor = primary.copy(alpha = 0.3f),
-                focusedTextColor = LanternText,
-                unfocusedTextColor = LanternText
+                unfocusedBorderColor = primary.copy(alpha = 0.4f),
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground
             )
         )
     }

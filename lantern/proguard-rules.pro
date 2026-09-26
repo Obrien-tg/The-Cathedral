@@ -1,21 +1,39 @@
--keepattributes *Annotation*, InnerClasses, Signature, Exceptions, *Annotation*
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.kts.
 
-# Hilt
--keep class dagger.hilt.** { *; }
--keep class javax.inject.** { *; }
--keep class * extends dagger.hilt.internal.GeneratedComponent { *; }
+# Kotlin Serialization
+-keepattributes *Annotation*, InnerClasses, EnclosingMethod, Signature, Exceptions, *Annotation*
+-keepclassmembers class ** {
+    @kotlinx.serialization.Serializable <fields>;
+    @kotlinx.serialization.Transient <fields>;
+}
+-keep class kotlinx.serialization.** { *; }
+-dontwarn kotlinx.serialization.**
+-keep class * implements kotlinx.serialization.KSerializer { *; }
 
 # Room
 -keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
 -dontwarn androidx.room.paging.**
 
-# Kotlin Serialization
--keepclassmembers class * {
-    @kotlinx.serialization.Serializable <fields>;
-}
--keep @kotlinx.serialization.Serializable class * { *; }
--keepclassmembers @kotlinx.serialization.Serializable class * { *; }
+# Hilt / Dagger
+-keep class dagger.hilt.** { *; }
+-dontwarn dagger.hilt.**
+-keep class * extends dagger.hilt.internal.GeneratedComponent { *; }
+-keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$ViewComponentBuilderEntryPoint { *; }
 
-# Keep model classes for serialization
--keep class com.obrien.thelantern.model.** { *; }
+# DataStore / Proto
+-keep class androidx.datastore.** { *; }
+-dontwarn androidx.datastore.**
+
+# Compose
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
+
+# Keep your model classes
 -keep class com.obrien.core.model.** { *; }
+-keep class com.obrien.thelantern.model.** { *; }
+
+# Keep ViewModels
+-keep class * extends androidx.lifecycle.ViewModel { *; }

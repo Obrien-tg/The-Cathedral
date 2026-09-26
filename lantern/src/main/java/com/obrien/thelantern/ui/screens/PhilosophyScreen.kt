@@ -26,8 +26,6 @@ import androidx.compose.ui.unit.sp
 import com.obrien.thelantern.data.ScheduleData
 import com.obrien.thelantern.model.PrimarySource
 import com.obrien.thelantern.model.PrimarySources
-import com.obrien.thelantern.ui.theme.LanternNight
-import com.obrien.thelantern.ui.theme.LanternText
 import com.obrien.thelantern.ui.theme.LanternMiss
 import com.obrien.thelantern.ui.theme.LanternSuccess
 import com.obrien.thelantern.ui.theme.LumiTheme
@@ -94,7 +92,7 @@ fun PhilosophyScreen(
                 Text(
                     text = """"${ScheduleData.PURPOSE_STATEMENT}"""",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = LanternText,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.Serif,
                     lineHeight = 26.sp
@@ -105,7 +103,7 @@ fun PhilosophyScreen(
                 Text(
                     text = ScheduleData.MANTRA,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = primary.copy(alpha = 0.85f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                     textAlign = TextAlign.Center,
                     fontFamily = FontFamily.Serif,
                     fontStyle = FontStyle.Italic,
@@ -161,7 +159,7 @@ fun PhilosophyScreen(
                         Text(
                             text = "by ${activeSource.pioneer}  •  ${activeSource.field}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = LanternText.copy(alpha = 0.6f)
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                         )
                     }
                 }
@@ -190,7 +188,7 @@ fun PhilosophyScreen(
                     Text(
                         text = "$activePage / ${activeSource.totalPages} pages",
                         style = MaterialTheme.typography.labelSmall,
-                        color = LanternText.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
                     Text(
                         text = "${(progress * 100).toInt()}%",
@@ -219,8 +217,8 @@ fun PhilosophyScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = primary,
                             unfocusedBorderColor = primary.copy(alpha = 0.3f),
-                            focusedTextColor = LanternText,
-                            unfocusedTextColor = LanternText,
+                            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
                             errorBorderColor = LanternMiss
                         ),
                         singleLine = true
@@ -282,7 +280,7 @@ fun PhilosophyScreen(
                         )
                         Text(
                             text = topic,
-                            color = LanternText.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                             fontSize = 13.sp
                         )
                     }
@@ -333,7 +331,7 @@ fun ProtocolItem(title: String, description: String) {
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = description,
-            color = LanternText.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             fontSize = 13.sp,
             lineHeight = 18.sp,
             fontFamily = FontFamily.Serif
@@ -368,14 +366,14 @@ fun SourceRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = source.book,
-                color = if (isActive) primary else LanternText.copy(alpha = 0.7f),
+                color = if (isActive) primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
                 fontFamily = FontFamily.Serif,
                 fontSize = 14.sp
             )
             Text(
                 text = "${source.pioneer}  •  ${source.field}",
-                color = LanternText.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                 fontSize = 12.sp
             )
         }
@@ -406,7 +404,7 @@ fun PhilosophyScreenPreview() {
                 SacredCard(title = "THE PURPOSE") {
                     Text(
                         text = ScheduleData.PURPOSE_STATEMENT,
-                        color = LanternText,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontFamily = FontFamily.Serif
                     )
                 }

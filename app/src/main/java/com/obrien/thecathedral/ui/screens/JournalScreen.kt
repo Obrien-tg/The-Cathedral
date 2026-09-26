@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.obrien.core.model.JournalEntry
+import com.obrien.core.model.calculateScore
+import com.obrien.core.model.maxScore
 import com.obrien.thecathedral.ui.theme.*
 import com.obrien.thecathedral.viewmodel.JournalViewModel
 import java.time.LocalDate
@@ -314,7 +316,7 @@ fun HistoryCard(entry: JournalEntry) {
         entry.date
     }
 
-    val score = entry.score
+    val score = entry.calculateScore()
 
     Card(
         colors = CardDefaults.cardColors(containerColor = MonasteryBlack),
@@ -337,9 +339,9 @@ fun HistoryCard(entry: JournalEntry) {
                     color = CathedralGold.copy(alpha = 0.6f)
                 )
                 Text(
-                    text = "$score / 6",
+                    text = "$score / ${entry.maxScore()}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (score == 6) RitualSuccess else CathedralGold,
+                    color = if (score == entry.maxScore()) RitualSuccess else CathedralGold,
                     fontWeight = FontWeight.Bold
                 )
             }

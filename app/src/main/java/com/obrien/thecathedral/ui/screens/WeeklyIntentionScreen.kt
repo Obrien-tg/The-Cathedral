@@ -37,13 +37,16 @@ fun WeeklyIntentionScreen(
                 title = {
                     Column {
                         Text(
-                            "WEEK’S RULE",
+                            "QUEST OF THE WEEK",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 3.sp,
                             color = CathedralGold
                         )
                         Text(
-                            "Week of ${uiState.weekStartDate}",
+                            if (uiState.isUpcomingWeek)
+                                "Week of ${uiState.weekStartDate} — begins tomorrow"
+                            else
+                                "Week of ${uiState.weekStartDate}",
                             style = MaterialTheme.typography.labelSmall,
                             color = CathedralGold.copy(alpha = 0.5f)
                         )
@@ -82,7 +85,7 @@ fun WeeklyIntentionScreen(
 
             IntentionSection(title = "THE FORGE (TECHNE)") {
                 IntentionField(
-                    label = "Active Project / Focus",
+                    label = "Build Quest",
                     value = uiState.techneFocus,
                     onValueChange = { viewModel.updateTechneFocus(it) },
                     placeholder = "e.g. Liberty Timeline – event list"
@@ -91,14 +94,14 @@ fun WeeklyIntentionScreen(
 
             IntentionSection(title = "THE ARCHIVE (HISTORIA)") {
                 IntentionField(
-                    label = "Primary Source / Book",
+                    label = "Book of the Week",
                     value = uiState.historiaBook,
                     onValueChange = { viewModel.updateHistoriaBook(it) },
                     placeholder = "e.g. Thucydides – Book I"
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 IntentionField(
-                    label = "Research Subject",
+                    label = "Idea to Ponder",
                     value = uiState.historiaResearch,
                     onValueChange = { viewModel.updateHistoriaResearch(it) },
                     placeholder = "e.g. Pericles and civic speech"
@@ -107,7 +110,7 @@ fun WeeklyIntentionScreen(
 
             IntentionSection(title = "THE ARENA (GYMNOS)") {
                 IntentionField(
-                    label = "Body Focus",
+                    label = "Body / Play Quest",
                     value = uiState.gymnosFocus,
                     onValueChange = { viewModel.updateGymnosFocus(it) },
                     placeholder = "e.g. Zone 2 walks / Squat form"
@@ -116,10 +119,19 @@ fun WeeklyIntentionScreen(
 
             IntentionSection(title = "THE SANCTUARY (SOPHIA)") {
                 IntentionField(
-                    label = "Evening Reflection Theme",
+                    label = "Theme / Question",
                     value = uiState.sophiaTheme,
                     onValueChange = { viewModel.updateSophiaTheme(it) },
                     placeholder = "e.g. Fewer inputs, longer silence"
+                )
+            }
+
+            IntentionSection(title = "THE WILDS") {
+                IntentionField(
+                    label = "Things to Try",
+                    value = uiState.explorations,
+                    onValueChange = { viewModel.updateExplorations(it) },
+                    placeholder = "e.g. morning pages, fasting till noon, a new route"
                 )
             }
 
@@ -133,7 +145,7 @@ fun WeeklyIntentionScreen(
             }
 
             Button(
-                onClick = { 
+                onClick = {
                     viewModel.save()
                     onBack()
                 },
@@ -147,11 +159,15 @@ fun WeeklyIntentionScreen(
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("APPLY TO THIS WEEK", fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text(
+                    if (uiState.isUpcomingWeek) "SEAL THE WEEK AHEAD" else "SEAL THIS WEEK'S QUESTS",
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
             }
-            
+
             Text(
-                text = "These intentions will reshape the ritual tasks across your schedule for the current week.",
+                text = "These quests will reshape the ritual tasks across your schedule. Leave any blank — a quest unchosen is a quest not yet due.",
                 style = MaterialTheme.typography.bodySmall,
                 color = Parchment.copy(alpha = 0.4f),
                 fontStyle = FontStyle.Italic,
@@ -176,7 +192,7 @@ fun IntentionPreview(uiState: com.obrien.thecathedral.viewmodel.WeeklyIntentionU
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(12.dp))
-            
+
             if (uiState.techneFocus.isNotBlank()) {
                 PreviewLine("Deep Work", "Build: ${uiState.techneFocus}")
             }
@@ -191,6 +207,9 @@ fun IntentionPreview(uiState: com.obrien.thecathedral.viewmodel.WeeklyIntentionU
             }
             if (uiState.sophiaTheme.isNotBlank()) {
                 PreviewLine("Sanctuary", "Evening theme: ${uiState.sophiaTheme}")
+            }
+            if (uiState.explorations.isNotBlank()) {
+                PreviewLine("Walk (no idea set)", "Take one experiment with you: ${uiState.explorations}")
             }
         }
     }
