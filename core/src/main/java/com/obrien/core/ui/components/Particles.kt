@@ -17,10 +17,10 @@ import kotlin.math.sin
 
 @Composable
 fun LanternParticle(
-    modifier: Modifier,
-    size: Float,
-    color: Color,
-    drift: Boolean
+    modifier: Modifier = Modifier,
+    size: Float = 24f,
+    color: Color = Color.Unspecified,
+    drift: Boolean = true
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "lantern")
     
@@ -98,10 +98,10 @@ fun LanternParticle(
 
 @Composable
 fun SunflowerParticle(
-    modifier: Modifier,
-    size: Float,
-    color: Color,
-    drift: Boolean
+    modifier: Modifier = Modifier,
+    size: Float = 24f,
+    color: Color = Color.Unspecified,
+    drift: Boolean = true
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "sunflower")
     
