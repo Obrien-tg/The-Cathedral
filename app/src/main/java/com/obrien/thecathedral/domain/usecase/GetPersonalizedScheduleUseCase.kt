@@ -3,6 +3,7 @@ package com.obrien.thecathedral.domain.usecase
 import com.obrien.core.data.ScheduleRepository
 import com.obrien.core.model.Pillar
 import com.obrien.core.model.WeeklyIntention
+import com.obrien.thecathedral.data.DayScheduler
 import com.obrien.thecathedral.data.ScheduleShaper
 import com.obrien.thecathedral.util.shiftTimeRange
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,22 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
         repository.wakeTime,
         repository.weeklyIntention
     ) { wakeTimeStr: String?, intention: WeeklyIntention ->
+
+        if (DayScheduler.hasStructuralPlan(intention)) {
+            when (val result = DayScheduler.build(intention)) {
+                // Declared envelope + focus hours: compute the day structure.
+                is DayScheduler.Result.Schedule -> result.pillars
+                // Refuse to build an impossible day; fall back to the
+                // classic offset path rather than a broken schedule.
+                is DayScheduler.Result.Invalid -> offsetFromWake(wakeTimeStr, intention)
+            }
+        } else {
+            // No structural vows yet: legacy behaviour (uniform wake offset).
+            offsetFromWake(wakeTimeStr, intention)
+        }
+    }
+
+    private fun offsetFromWake(wakeTimeStr: String?, intention: WeeklyIntention): List<Pillar> {
         val wakeTime = try {
             LocalTime.parse(wakeTimeStr)
         } catch (_: Exception) {
@@ -31,7 +48,7 @@ class GetPersonalizedScheduleUseCase @Inject constructor(
         val shapedPillars = ScheduleShaper.shape(intention)
 
         // 2. Apply time offset based on wake time
-        shapedPillars.map { pillar ->
+        return shapedPillars.map { pillar ->
             val shiftedAlarms = pillar.alarms.map { alarm ->
                 alarm.copy(time = alarm.time.plus(offset))
             }

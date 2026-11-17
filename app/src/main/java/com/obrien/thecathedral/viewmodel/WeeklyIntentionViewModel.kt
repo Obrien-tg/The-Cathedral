@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.obrien.core.data.ScheduleRepository
 import com.obrien.core.model.WeeklyIntention
+import com.obrien.thecathedral.data.DayScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 data class WeeklyIntentionUiState(
     val techneFocus: String = "",
@@ -17,6 +19,9 @@ data class WeeklyIntentionUiState(
     val sophiaTheme: String = "",
     val weeklyAim: String = "",
     val explorations: String = "",
+    val targetWakeTime: String = "",
+    val targetSleepTime: String = "",
+    val dailyFocusHours: Float = 0f,
     // The week this planning session is writing to (upcoming Monday when set on Sunday)
     val weekStartDate: String = WeeklyIntention.weekStartForSave()
 ) {
@@ -30,7 +35,22 @@ data class WeeklyIntentionUiState(
                 gymnosFocus.isNotBlank() ||
                 sophiaTheme.isNotBlank() ||
                 weeklyAim.isNotBlank() ||
-                explorations.isNotBlank()
+                explorations.isNotBlank() ||
+                targetWakeTime.isNotBlank() ||
+                targetSleepTime.isNotBlank() ||
+                dailyFocusHours > 0f
+
+    /** Monastic-voiced reason the declared hours cannot hold, or null if sound. */
+    val structuralError: String?
+        get() = DayScheduler.validate(targetWakeTime, targetSleepTime, dailyFocusHours)
+
+    val focusLabel: String
+        get() = when {
+            dailyFocusHours <= 0f -> "—"
+            dailyFocusHours == dailyFocusHours.toInt().toFloat() ->
+                dailyFocusHours.toInt().toString()
+            else -> String.format("%.1f", dailyFocusHours)
+        }
 }
 
 @HiltViewModel
@@ -45,6 +65,9 @@ class WeeklyIntentionViewModel @Inject constructor(
     private val _sophiaTheme = MutableStateFlow("")
     private val _weeklyAim = MutableStateFlow("")
     private val _explorations = MutableStateFlow("")
+    private val _targetWakeTime = MutableStateFlow("")
+    private val _targetSleepTime = MutableStateFlow("")
+    private val _dailyFocusHours = MutableStateFlow(0f)
 
     init {
         viewModelScope.launch {
@@ -61,22 +84,31 @@ class WeeklyIntentionViewModel @Inject constructor(
                 _sophiaTheme.value = saved.sophiaTheme
                 _weeklyAim.value = saved.weeklyAim
                 _explorations.value = saved.explorations
+                _targetWakeTime.value = saved.targetWakeTime
+                _targetSleepTime.value = saved.targetSleepTime
+                _dailyFocusHours.value = saved.dailyFocusHours
             }
         }
     }
 
     val uiState: StateFlow<WeeklyIntentionUiState> = combine(
-        _techneFocus, _historiaBook, _historiaResearch,
-        _gymnosFocus, _sophiaTheme, _weeklyAim, _explorations
-    ) { flows ->
+        listOf<Flow<Any>>(
+            _techneFocus, _historiaBook, _historiaResearch,
+            _gymnosFocus, _sophiaTheme, _weeklyAim, _explorations,
+            _targetWakeTime, _targetSleepTime, _dailyFocusHours
+        )
+    ) { a ->
         WeeklyIntentionUiState(
-            techneFocus = flows[0],
-            historiaBook = flows[1],
-            historiaResearch = flows[2],
-            gymnosFocus = flows[3],
-            sophiaTheme = flows[4],
-            weeklyAim = flows[5],
-            explorations = flows[6],
+            techneFocus = a[0] as String,
+            historiaBook = a[1] as String,
+            historiaResearch = a[2] as String,
+            gymnosFocus = a[3] as String,
+            sophiaTheme = a[4] as String,
+            weeklyAim = a[5] as String,
+            explorations = a[6] as String,
+            targetWakeTime = a[7] as String,
+            targetSleepTime = a[8] as String,
+            dailyFocusHours = a[9] as Float,
             weekStartDate = WeeklyIntention.weekStartForSave()
         )
     }.stateIn(
@@ -92,8 +124,17 @@ class WeeklyIntentionViewModel @Inject constructor(
     fun updateSophiaTheme(value: String) { _sophiaTheme.value = value }
     fun updateWeeklyAim(value: String) { _weeklyAim.value = value }
     fun updateExplorations(value: String) { _explorations.value = value }
+    fun updateTargetWakeTime(value: String) { _targetWakeTime.value = value }
+    fun updateTargetSleepTime(value: String) { _targetSleepTime.value = value }
+
+    /** Half-hour steps, clamped to 1–6h — honest capacity, never heroics. */
+    fun adjustFocusHours(delta: Float) {
+        val snapped = (((_dailyFocusHours.value + delta) * 2).roundToInt() / 2f)
+        _dailyFocusHours.value = snapped.coerceIn(1f, 6f)
+    }
 
     fun save() {
+        if (uiState.value.structuralError != null) return
         viewModelScope.launch {
             val intention = WeeklyIntention(
                 weekStartDate = WeeklyIntention.weekStartForSave(),
@@ -103,9 +144,15 @@ class WeeklyIntentionViewModel @Inject constructor(
                 gymnosFocus = _gymnosFocus.value,
                 sophiaTheme = _sophiaTheme.value,
                 weeklyAim = _weeklyAim.value,
-                explorations = _explorations.value
+                explorations = _explorations.value,
+                targetWakeTime = _targetWakeTime.value,
+                targetSleepTime = _targetSleepTime.value,
+                dailyFocusHours = _dailyFocusHours.value
             )
             repository.saveWeeklyIntention(intention)
+            if (_targetWakeTime.value.isNotBlank()) {
+                repository.setWakeTime(_targetWakeTime.value)
+            }
         }
     }
 
@@ -117,6 +164,9 @@ class WeeklyIntentionViewModel @Inject constructor(
         _sophiaTheme.value = ""
         _weeklyAim.value = ""
         _explorations.value = ""
+        _targetWakeTime.value = ""
+        _targetSleepTime.value = ""
+        _dailyFocusHours.value = 0f
         viewModelScope.launch {
             repository.clearWeeklyIntention()
         }

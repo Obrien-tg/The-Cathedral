@@ -18,14 +18,19 @@ data class WeeklyIntention(
     val bodyFocus: String = "",
     val characterAim: String = "",
     // Quest of the Week — "things to try", free-text, comma-separated or plain
-    val explorations: String = ""
+    val explorations: String = "",
+    // The Hours — structural vows for the week's day (blank = undeclared).
+    // Old saves deserialize cleanly: kotlinx.serialization fills defaults.
+    val targetWakeTime: String = "",
+    val targetSleepTime: String = "",
+    val dailyFocusHours: Float = 0f
 ) {
     val hasAnyFocus: Boolean
         get() = listOf(
             weeklyAim, techneFocus, historiaBook, historiaResearch,
             gymnosFocus, sophiaTheme, subjectFocus, bodyFocus, characterAim,
-            explorations
-        ).any { it.isNotBlank() }
+            explorations, targetWakeTime, targetSleepTime
+        ).any { it.isNotBlank() } || dailyFocusHours > 0f
 
     fun isActiveForCurrentWeek(): Boolean {
         if (weekStartDate.isBlank() || !hasAnyFocus) return false

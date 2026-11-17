@@ -26,7 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.obrien.core.util.AlarmScheduler
 import com.obrien.core.util.NotificationHelper
-import com.obrien.thecathedral.data.ScheduleData
+import com.obrien.thecathedral.domain.usecase.GetPersonalizedScheduleUseCase
 import com.obrien.thecathedral.navigation.*
 import com.obrien.thecathedral.notifications.PillarReceiver
 import com.obrien.thecathedral.ui.screens.*
@@ -41,6 +41,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var alarmScheduler: AlarmScheduler
+
+    @Inject
+    lateinit var getPersonalizedScheduleUseCase: GetPersonalizedScheduleUseCase
 
     private lateinit var settingsViewModel: SettingsViewModel
 
@@ -76,13 +79,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
 
-                    LaunchedEffect(settingsState.wakeTime) {
-                        alarmScheduler.scheduleRitualAlarms(
-                            pillars = ScheduleData.pillars,
-                            receiverClass = PillarReceiver::class.java,
-                            wakeTime = settingsState.wakeTime,
-                            baseWake = java.time.LocalTime.of(7, 0)
-                        )
+                    val personalizedSchedule by getPersonalizedScheduleUseCase().collectAsState(initial = emptyList())
+                    LaunchedEffect(personalizedSchedule) {
+                        if (personalizedSchedule.isNotEmpty()) {
+                            alarmScheduler.scheduleRitualAlarms(
+                                pillars = personalizedSchedule,
+                                receiverClass = PillarReceiver::class.java,
+                                wakeTime = java.time.LocalTime.of(7, 0),
+                                baseWake = java.time.LocalTime.of(7, 0)
+                            )
+                        }
                     }
 
                     NavHost(

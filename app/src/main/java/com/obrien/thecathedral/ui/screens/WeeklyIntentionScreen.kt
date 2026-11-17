@@ -1,12 +1,15 @@
 package com.obrien.thecathedral.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,10 +21,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.obrien.thecathedral.data.DayScheduler
 import com.obrien.thecathedral.ui.theme.CathedralGold
 import com.obrien.thecathedral.ui.theme.MonasteryBlack
 import com.obrien.thecathedral.ui.theme.Parchment
+import com.obrien.thecathedral.viewmodel.WeeklyIntentionUiState
 import com.obrien.thecathedral.viewmodel.WeeklyIntentionViewModel
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +36,7 @@ fun WeeklyIntentionScreen(
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val structuralError = uiState.structuralError
 
     Scaffold(
         topBar = {
@@ -37,7 +44,7 @@ fun WeeklyIntentionScreen(
                 title = {
                     Column {
                         Text(
-                            "QUEST OF THE WEEK",
+                            "SEAL THE WEEK\u2019S RULE",
                             style = MaterialTheme.typography.titleMedium,
                             letterSpacing = 3.sp,
                             color = CathedralGold
@@ -81,6 +88,84 @@ fun WeeklyIntentionScreen(
         ) {
             if (uiState.isAnythingSet()) {
                 IntentionPreview(uiState)
+            }
+
+            // ---- NEW: the structural vows, asked before the quests ----
+            IntentionSection(title = "THE HOURS") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        TimeVowPicker(
+                            label = "I will rise at",
+                            value = uiState.targetWakeTime,
+                            fallback = LocalTime.of(7, 0),
+                            onChange = { viewModel.updateTargetWakeTime(it) }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        TimeVowPicker(
+                            label = "The day ends at",
+                            value = uiState.targetSleepTime,
+                            fallback = LocalTime.of(22, 0),
+                            onChange = { viewModel.updateTargetSleepTime(it) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "The Forge\u2019s due (deep work per day)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Parchment.copy(alpha = 0.4f)
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    FilledIconButton(
+                        onClick = { viewModel.adjustFocusHours(-0.5f) },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = CathedralGold.copy(alpha = 0.12f),
+                            contentColor = CathedralGold
+                        )
+                    ) {
+                        Icon(Icons.Default.Remove, contentDescription = "Less")
+                    }
+                    Text(
+                        text = "${uiState.focusLabel}h",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = CathedralGold,
+                        fontFamily = FontFamily.Serif
+                    )
+                    FilledIconButton(
+                        onClick = { viewModel.adjustFocusHours(0.5f) },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = CathedralGold.copy(alpha = 0.12f),
+                            contentColor = CathedralGold
+                        )
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "More")
+                    }
+                    Text(
+                        text = "hours, honestly protected",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Parchment.copy(alpha = 0.4f),
+                        fontStyle = FontStyle.Italic
+                    )
+                }
+
+                if (structuralError != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = structuralError,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFCF6A6A),
+                        fontStyle = FontStyle.Italic
+                    )
+                }
             }
 
             IntentionSection(title = "THE FORGE (TECHNE)") {
@@ -149,25 +234,32 @@ fun WeeklyIntentionScreen(
                     viewModel.save()
                     onBack()
                 },
+                enabled = structuralError == null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CathedralGold,
-                    contentColor = MonasteryBlack
+                    contentColor = MonasteryBlack,
+                    disabledContainerColor = CathedralGold.copy(alpha = 0.2f),
+                    disabledContentColor = Parchment.copy(alpha = 0.3f)
                 )
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    if (uiState.isUpcomingWeek) "SEAL THE WEEK AHEAD" else "SEAL THIS WEEK'S QUESTS",
+                    when {
+                        structuralError != null -> "THE HOURS CANNOT HOLD"
+                        uiState.isUpcomingWeek -> "SEAL THE WEEK AHEAD"
+                        else -> "SEAL THIS WEEK\u2019S RULE"
+                    },
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
             }
 
             Text(
-                text = "These quests will reshape the ritual tasks across your schedule. Leave any blank — a quest unchosen is a quest not yet due.",
+                text = "These vows become the architecture of the next seven days: the hours shape the day, and the quests name what fills it. Leave any blank — a vow unspoken is a vow not yet due.",
                 style = MaterialTheme.typography.bodySmall,
                 color = Parchment.copy(alpha = 0.4f),
                 fontStyle = FontStyle.Italic,
@@ -177,12 +269,81 @@ fun WeeklyIntentionScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun IntentionPreview(uiState: com.obrien.thecathedral.viewmodel.WeeklyIntentionUiState) {
+fun TimeVowPicker(
+    label: String,
+    value: String,
+    fallback: LocalTime,
+    onChange: (String) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val parsed = remember(value) {
+        runCatching { LocalTime.parse(value) }.getOrElse { fallback }
+    }
+    val pickerState = rememberTimePickerState(
+        initialHour = parsed.hour,
+        initialMinute = parsed.minute,
+        is24Hour = true
+    )
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = Parchment.copy(alpha = 0.4f)
+        )
+        OutlinedButton(
+            onClick = { showDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, CathedralGold.copy(alpha = 0.2f)),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = CathedralGold)
+        ) {
+            Text(
+                text = value.ifBlank { "— declare —" },
+                fontFamily = FontFamily.Serif,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            containerColor = MonasteryBlack,
+            title = {
+                Text(
+                    label.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = CathedralGold,
+                    letterSpacing = 2.sp
+                )
+            },
+            text = { TimePicker(state = pickerState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onChange(String.format("%02d:%02d", pickerState.hour, pickerState.minute))
+                    showDialog = false
+                }) {
+                    Text("SET", color = CathedralGold, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("CANCEL", color = Parchment.copy(alpha = 0.5f))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun IntentionPreview(uiState: WeeklyIntentionUiState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = CathedralGold.copy(alpha = 0.05f)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, CathedralGold.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, CathedralGold.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -192,6 +353,22 @@ fun IntentionPreview(uiState: com.obrien.thecathedral.viewmodel.WeeklyIntentionU
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Structural vows preview
+            if (uiState.targetWakeTime.isNotBlank() &&
+                uiState.targetSleepTime.isNotBlank() &&
+                uiState.dailyFocusHours > 0f
+            ) {
+                DayScheduler.preview(
+                    uiState.targetWakeTime,
+                    uiState.targetSleepTime,
+                    uiState.dailyFocusHours
+                )?.let { (forge, sanctuaryEnd) ->
+                    PreviewLine("The Forge", forge)
+                    PreviewLine("Sanctuary", sanctuaryEnd)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
 
             if (uiState.techneFocus.isNotBlank()) {
                 PreviewLine("Deep Work", "Build: ${uiState.techneFocus}")
@@ -224,7 +401,7 @@ fun PreviewLine(ritual: String, text: String) {
             color = Parchment.copy(alpha = 0.5f)
         )
         Text(
-            "“$text”",
+            "\u201C$text\u201D",
             style = MaterialTheme.typography.bodySmall,
             color = CathedralGold,
             fontStyle = FontStyle.Italic,
